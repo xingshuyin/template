@@ -1,0 +1,177 @@
+/*
+ * @Filename     : style.scss
+ * @Description  : wjt-前端-全局样式
+ * @Author       : xingshuyin xingshuyin@outlook.com
+ * @Date         : 2022-09-29 14:52:33
+ * @LastEditors  : xingshuyin xingshuyin@outlook.com
+ * @LastEditTime : 2022-12-11 18:19:40
+ * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
+ */
+#app {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
+}
+
+//TODO:加载动画圆圈/字体颜色
+.el-loading-spinner {
+  .path {
+    stroke: black !important;
+  }
+  .el-loading-text {
+    color: black !important;
+  }
+}
+
+// 内容列表样式
+
+:root {
+  --top-height: 50px;
+  --pagger-height: 40px;
+}
+
+.main-top {
+  height: var(--top-height);
+  position: relative;
+
+  // display: flex;
+  // align-items: center;
+  // flex-direction: row;
+  // flex-wrap: nowrap;
+  .search {
+    position: absolute;
+    left: 0;
+    width: calc(100% - 150px);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-wrap: nowrap;
+    padding-left: 3px;
+    > * {
+      margin-right: 5px;
+    }
+
+    .el-input__wrapper {
+      padding-left: 2px;
+
+      text-align: center;
+    }
+
+    .el-input-group__prepend {
+      padding-left: 10px;
+      padding-right: 10px;
+      // background-color: bisque;
+    }
+  }
+
+  .tool {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+.main-table {
+  //TODO:全局table样式
+
+  width: 100%;
+  height: calc(100% - var(--top-height));
+
+  .el-table {
+    // .is-left {
+    //   .cell {
+    //     text-align: left !important;
+    //   }
+    // }
+    .el-table__header {
+      .el-table__cell {
+        background: #0b8765 !important;
+        color: white;
+
+        .cell {
+          display: flex;
+          flex-wrap: nowrap;
+          align-items: center;
+          justify-content: center;
+          font-size: 15px;
+          height: 25px;
+        }
+      }
+
+      .el-input__wrapper {
+        color: black;
+        padding: 0;
+        padding-left: 3px;
+        background: #3d62b6;
+      }
+    }
+
+    .cell {
+      // text-align: center;
+      font-size: 15px;
+    }
+
+    .ei-flow-form .el-card__body {
+      // 解决大图预览其它地方层级穿透问题
+      z-index: initial !important;
+    }
+
+    width: 100%;
+    height: calc(100% - var(--pagger-height));
+
+    .main-table-column-header {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
+
+      .main-table-column-header-label {
+        white-space: nowrap !important;
+        padding: 10px;
+      }
+    }
+    .el-button {
+      // background-color: #2da4dc;
+    }
+  }
+
+  .pager {
+    margin-left: 8px;
+    height: var(--pagger-height);
+    display: flex;
+    align-items: center;
+  }
+}
+.el-dialog__header,
+.el-drawer__header {
+  border-bottom: 1px solid rgb(228, 220, 220);
+  // margin-right: 0;
+}
+// div滚动条样式
+div::-webkit-scrollbar,
+textarea::-webkit-scrollbar {
+  width: 4px;
+}
+
+div::-webkit-scrollbar-track,
+textarea::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+div::-webkit-scrollbar-thumb,
+textarea::-webkit-scrollbar-thumb {
+  background: #16151575;
+  border-radius: 25px;
+}

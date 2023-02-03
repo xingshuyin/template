@@ -1,0 +1,183 @@
+<!--
+ * @Filename     : head.vue
+ * @Description  : wjt-前端-后台管理框架顶部
+ * @Author       : xingshuyin xingshuyin@outlook.com
+ * @Date         : 2022-09-30 18:13:42
+ * @LastEditors  : xingshuyin xingshuyin@outlook.com
+ * @LastEditTime : 2022-12-14 11:19:51
+ * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
+-->
+<script setup>
+import store from "../store/index";
+import { add_menu_tab_ } from '../hooks/table_common'
+import { pinyin } from 'pinyin-pro';
+
+const router = useRouter()
+const logout = () => {
+  // localStorage.clear()
+  localStorage.removeItem('uid')
+  localStorage.removeItem('token')
+  localStorage.removeItem('refresh')
+  router.push('/login')
+}
+const username = ref(localStorage.getItem('username'))
+const centerDialogVisible = ref(false)
+const search = ref(undefined)
+const search_change = (value) => {
+  console.log(value)
+  if (value != undefined) {
+
+    let item = deep_search(store().menu, value)
+    console.log('dddddddddd', item)
+    add_menu_tab_({ label: item.label, name: value })
+    router.push({ name: value })
+    search.value = undefined
+  }
+}
+const deep_search = (list, value) => {
+  console.log('jjinru', value)
+  for (let index = 0; index < list.length; index++) {
+    const i = list[index];
+    if (i.name == value) return i;
+    else if (i?.children?.length > 0) {
+      console.log('children', i.children)
+      let c = deep_search(i.children, value)
+      if (c) return c
+    };
+  }
+  return false
+}
+const filter_method = (node, key) => {
+  console.log(node, key)
+  let p = pinyin(node.label, { toneType: 'none', type: 'array' }).join('');
+  return p.includes(key) || node.label.includes(key)
+}
+const env = import.meta.env
+</script>
+<template>
+  <div class="head">
+
+    <!-- 退出登陆弹窗 -->
+    <el-dialog v-model="centerDialogVisible" title="注销账户" width="300px" align-center center>
+      <div style="width: 100%;text-align: center">确定要注销当前用户吗</div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="centerDialogVisible = false; logout()">确定</el-button>
+          <el-button type="primary" @click="centerDialogVisible = false">取消</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- 左上角logo -->
+    <!-- <div class="logo" :style="{ width: store().toggle_side ? '50px' : '200px' }"> -->
+    <!-- <img src="/src/assets/icon.png" alt="" style="height: 80%;border-radius: 50%" />
+      <span v-if="!store().toggle_side" style="width: 120px;padding-left: 5px;white-space: nowrap;">微镜头(心连心)</span> -->
+    <!-- </div> -->
+
+    <t-time style="margin-left: 15px;"></t-time>
+    <!-- <iframe style="margin-left: 15px;" allowtransparency="true" frameborder="0" width="220" height="28" scrolling="no"
+      src="//tianqi.2345.com/plugin/widget/index.htm?s=3&z=1&t=1&v=0&d=1&bd=0&k=&f=000000&ltf=000000&htf=000000&q=1&e=0&a=1&c=54511&w=220&h=28&align=left"></iframe>
+    &nbsp;&nbsp; -->
+    <!-- 标题 -->
+    <div class="title">
+      {{ env.VITE_TITLE }}
+    </div>
+
+    <!-- 按钮 -->
+    <div class="buttons ">
+      <el-cascader v-model="search" :options="store().menu" @change="search_change" :filter-method="filter_method"
+        placeholder="搜索" :props="{ emitPath: false, value: 'name', label: 'label', }" filterable clearable />
+
+      <el-tooltip content="全屏" placement="bottom" effect="light">
+        <t-fullscreen></t-fullscreen>
+      </el-tooltip>
+
+      &nbsp;&nbsp;
+      <div class="user">
+
+        <span style="font-size: 16px; padding-right: 5px;">
+          您好 <span style="color: yellow ;">{{ username }}</span>
+        </span>
+        <ep:avatar style="font-size: 18px;"></ep:avatar>
+      </div>
+      <iconoir:log-out @click="centerDialogVisible = true"
+        style="font-size: 22px; margin-right: 15px;margin-left: 5px;">
+      </iconoir:log-out>
+    </div>
+  </div>
+</template>
+<style scoped lang='scss'>
+.head {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  background-image: linear-gradient(-225deg, #6c6c6c 0%, #216855 50%, #565604 100%); //绿色渐变
+  // background-image: linear-gradient(-225deg, #82a7e3 0%, #c9e1f4 50%, #00a0f9 100%);
+  // background: #6fd6e5;
+  // background: rgb(31 104 84);
+  display: flex;
+  align-items: center;
+
+  .logo {
+    height: 100%;
+    min-width: 50px;
+    white-space: nowarp;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffedad;
+    font-size: 18px;
+    text-align: center;
+    background: linear-gradient(to right, #b3ffcb 0%, rgb(31, 104, 84) 100%);
+  }
+
+  .title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 100%;
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgb(255, 255, 255);
+    font-family: Kumbh Sans, sans-serif;
+  }
+
+  .buttons {
+    height: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    color: white;
+    gap: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+
+
+
+    .user {
+
+      height: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .username {
+      padding-left: 9px;
+      padding-right: 3px;
+      font-size: 25px;
+      color: white;
+      height: 25px;
+      background-color: #0a274a;
+      border-radius: 10px;
+    }
+  }
+}
+</style>

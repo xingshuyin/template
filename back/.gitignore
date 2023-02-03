@@ -1,0 +1,8 @@
+conf.py
+**/__pycache__
+/static
+*.out
+/media
+*.srctrlbm
+*.srctrldb
+*.srctrlprj
