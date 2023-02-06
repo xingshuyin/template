@@ -24,7 +24,8 @@
                     circle />
                 <f-columns-edit v-if="attrs.columns" v-model="attrs.columns"
                     :base_url="attrs.base_url"></f-columns-edit>
-
+                <el-button icon="Download" circle
+                    @click="export_data_(attrs.base_url, { create_start: special_form.range[0], create_end: special_form.range[1], ...form })" />
             </div>
         </div>
 
@@ -95,7 +96,7 @@
 <script setup>
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { Tree } from '../../utils/data';
-import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_ } from '../../hooks/table_common'
+import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, export_data_ } from '../../hooks/table_common'
 import store from "../../store/index";
 import rest from '../../utils/rest';
 ;
@@ -125,7 +126,7 @@ watch([form, special_form], () => {
     get_data()
 })
 const get_data = () => {
-    get_data_(`/${attrs.base_url}/`, { create_start: special_form.range[0], create_end: special_form.range[1], ...form }, attrs, (a) => { a.data = Tree(a.data) })
+    get_data_(`/${attrs.base_url}/`, { create_start: special_form.range[0], create_end: special_form.range[1], ...form }, attrs)
 }
 get_data()
 rest.list("Area", { page: 1, limit: 99999 }, null, null, res => {
@@ -134,11 +135,11 @@ rest.list("Area", { page: 1, limit: 99999 }, null, null, res => {
 
 
 attrs.columns = [
-    { type: 'text', label: '名称', prop: 'name', size: 'small', align: "left", show: true },
-    { type: 'text', width: 150, label: '行政区域', prop: 'area_name', size: 'small', align: "center", show: true },
-    { type: 'jfile', width: 150, label: '文件', prop: 'file', size: 'small', align: "center", show: true },
-    { type: 'jimage', width: 150, label: '图片', prop: 'image', size: 'small', align: "center", show: true },
-    { type: 'text', width: 160, label: '创建时间', prop: 'createAt', size: 'small', align: "center", show: true },
+    { type: 'text', label: '名称', prop: 'name', align: "left", show: true },
+    { type: 'text', width: 150, label: '行政区域', prop: 'area_name', align: "center", show: true },
+    { type: 'jfile', width: 150, label: '文件', prop: 'file', align: "center", show: true },
+    { type: 'jimage', width: 150, label: '图片', prop: 'image', align: "center", show: true },
+    { type: 'text', width: 160, label: '创建时间', prop: 'createAt', align: "center", show: true },
 ]
 </script>
 

@@ -1,16 +1,10 @@
-<!-- 
-attrs.columns = [
-    { type: 'text', label: '名称', prop: 'name', size: 'small', align: "left", show: true },
-    { type: 'select', width: 180, label: '角色', prop: 'role', size: 'small', align: "center", show: true },
-    { type: 'jimage', width: 150, label: '图片', prop: 'user_image', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-    { type: 'jfile', width: 160, label: '文件', prop: 'file', size: 'small', align: "center", show: true },
-])
- -->
+
 <script setup>
 //TODO:动态列
 const props = defineProps(['modelValue']); // defineProps的参数, 可以直接使用
-//const emits = defineEmits(['update:modelValue']); // emits 触发父组件函数
-
+// modelValue = [
+//     { type: ['text','select','jimage','jfile'], width: 180, label: '名称', prop: 'name', align: "center", show: true , [option]: { false: '否', true: '是' }},
+// ]
 
 </script>
 <template>
@@ -28,6 +22,7 @@ const props = defineProps(['modelValue']); // defineProps的参数, 可以直接
                 </el-tag>
             </template>
         </el-table-column>
+        <!-- 多选 -->
         <el-table-column v-else-if="i.type == 'list' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
             :width="i.width">
             <template #default="scope">

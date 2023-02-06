@@ -207,7 +207,6 @@ class Role(BaseModel):
         (4, "自定数据权限"),
     )
     permission = models.IntegerField(choices=PERMISSION_CHOICES, help_text="数据权限范围", default=0)
-    # dept = models.ManyToManyField(Dept)
     menu = models.ManyToManyField(Menu, blank=True)
     menu_interface = models.ManyToManyField(MenuInterface, blank=True)
     is_admin = models.BooleanField(default=False, help_text='是否为管理员')
@@ -258,9 +257,6 @@ class User(AbstractBaseUser, BaseModel):
         # encode(encoding="UTF-8")  之后 通过索引获取的值为unciode编码值
         super().set_password(hashlib.md5(raw_password.encode(encoding="UTF-8")).hexdigest())
 
-    # def save(self, *args, **kwargs) -> None:
-    #     self.set_password(self.password)
-    #     super().save(*args, **kwargs)
 
     class Meta:
         db_table = "User"

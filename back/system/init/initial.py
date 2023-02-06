@@ -55,6 +55,90 @@ return {*}
 def init_Menu():
     l = [
         {
+            'id': 1,
+            'parent_id': None,
+            'label': '系统管理',
+            'icon': 'Operation',
+            'component': '',
+            'name': 'system',
+            'path': 'system',
+            'sort': 100,
+            'is_link': False,
+            'is_catalog': True
+        },
+        {
+            'id': 2,
+            'parent_id': 1,
+            'label': '用户管理',
+            'icon': 'CameraFilled',
+            'component': 'system/user.vue',
+            'name': 'user',
+            'path': 'user',
+            'sort': 1,
+            'is_link': False,
+            'is_catalog': False
+        },
+        {
+            'id': 3,
+            'parent_id': 1,
+            'label': '角色管理',
+            'icon': 'UserFilled',
+            'component': 'system/role.vue',
+            'name': 'role',
+            'path': 'role',
+            'sort': 2,
+            'is_link': False,
+            'is_catalog': False
+        },
+        {
+            'id': 4,
+            'parent_id': 1,
+            'label': '接口管理',
+            'icon': 'WindPower',
+            'component': 'system/menu_interface.vue',
+            'name': 'menu_interface',
+            'path': 'menu_interface',
+            'sort': 54,
+            'is_link': False,
+            'is_catalog': False
+        },
+        {
+            'id': 5,
+            'parent_id': 1,
+            'label': '部门管理',
+            'icon': 'Guide',
+            'component': 'system/dept.vue',
+            'name': 'dept',
+            'path': 'dept',
+            'sort': 3,
+            'is_link': False,
+            'is_catalog': False
+        },
+        {
+            'id': 6,
+            'parent_id': 1,
+            'label': '菜单管理',
+            'icon': 'Grid',
+            'component': 'system/menu.vue',
+            'name': 'menu',
+            'path': 'menu',
+            'sort': 1,
+            'is_link': False,
+            'is_catalog': False
+        },
+        {
+            'id': 7,
+            'parent_id': None,
+            'label': '企业管理',
+            'icon': 'Grid',
+            'component': 'admin/enterprise.vue',
+            'name': 'enterprise',
+            'path': 'enterprise',
+            'sort': 1,
+            'is_link': False,
+            'is_catalog': False
+        },
+        {
             'id': 8,
             'parent_id': 1,
             'label': '登陆日志',
@@ -71,91 +155,6 @@ def init_Menu():
         print(i)
         Menu.objects.create(**i)
 
-
-#         {
-#             'id': 1,
-#             'parent_id': None,
-#             'label': '系统管理',
-#             'icon': 'Operation',
-#             'component': '',
-#             'name': 'system',
-#             'path': 'system',
-#             'sort': 100,
-#             'is_link': False,
-#             'is_catalog': True
-#         },
-#         {
-#             'id': 2,
-#             'parent_id': 1,
-#             'label': '用户管理',
-#             'icon': 'CameraFilled',
-#             'component': 'system/user.vue',
-#             'name': 'user',
-#             'path': 'user',
-#             'sort': 1,
-#             'is_link': False,
-#             'is_catalog': False
-#         },
-#         {
-#             'id': 3,
-#             'parent_id': 1,
-#             'label': '角色管理',
-#             'icon': 'UserFilled',
-#             'component': 'system/role.vue',
-#             'name': 'role',
-#             'path': 'role',
-#             'sort': 2,
-#             'is_link': False,
-#             'is_catalog': False
-#         },
-#         {
-#             'id': 4,
-#             'parent_id': 1,
-#             'label': '接口管理',
-#             'icon': 'WindPower',
-#             'component': 'system/menu_interface.vue',
-#             'name': 'menu_interface',
-#             'path': 'menu_interface',
-#             'sort': 54,
-#             'is_link': False,
-#             'is_catalog': False
-#         },
-#         {
-#             'id': 5,
-#             'parent_id': 1,
-#             'label': '部门管理',
-#             'icon': 'Guide',
-#             'component': 'system/dept.vue',
-#             'name': 'dept',
-#             'path': 'dept',
-#             'sort': 3,
-#             'is_link': False,
-#             'is_catalog': False
-#         },
-#         {
-#             'id': 6,
-#             'parent_id': 1,
-#             'label': '菜单管理',
-#             'icon': 'Grid',
-#             'component': 'system/menu.vue',
-#             'name': 'menu',
-#             'path': 'menu',
-#             'sort': 1,
-#             'is_link': False,
-#             'is_catalog': False
-#         },
-#         {
-#             'id': 7,
-#             'parent_id': None,
-#             'label': '企业管理',
-#             'icon': 'Grid',
-#             'component': 'admin/enterprise.vue',
-#             'name': 'enterprise',
-#             'path': 'enterprise',
-#             'sort': 1,
-#             'is_link': False,
-#             'is_catalog': False
-#         },
 
 METHOD_CHOICES = (
     (0, "GET"),
@@ -180,11 +179,22 @@ def init_Role():
         r = Role.objects.create(**i)
 
 
+def init_area():
+    from system.init.area import areas
+    from django.db import connection
+    with connection.cursor() as cursor:
+        for i in areas.split(";"):
+            print(i)
+            if i:
+                cursor.execute(i)
+
+
 def init():
     # init_User()
-    init_Menu()
+    # init_Menu()
     # init_MenuInterface()
     # init_Role()
+    init_area()
 
 
 if __name__ == '__main__':

@@ -9,8 +9,10 @@ Description  : 微镜头所有模型的restful规范接口
 
 Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
 '''
+import json
+from pathlib import Path
 import time
-
+import pandas as pd
 from django.db import models
 from django.db.models import QuerySet
 from rest_framework import filters, serializers, status, exceptions
@@ -28,14 +30,9 @@ from itertools import chain
 from ..permission import SuperPermisssion
 from django.utils import timezone
 from django.db.models.query import BaseIterable
-'''
-description: 模型序列化(附加外键序列化)
-param {*} instance
-param {*} deep
-return {*}
-'''
 
 
+# 模型序列化(附加外键序列化)
 def to_dict(instance, deep=2):
     """
     Return a dict containing the data in ``instance`` suitable for passing as
@@ -70,15 +67,7 @@ def to_dict(instance, deep=2):
     return data
 
 
-'''
-description: # 处理特殊搜索参数
-param {HttpRequest} request
-param {QuerySet} queryset
-param {*} filter_dict
-return {*}
-'''
-
-
+# 处理特殊搜索参数
 def deal_special_params(request: HttpRequest, queryset: QuerySet, filter_dict):
     fields = [i.name for i in queryset.model._meta.fields]
     model_name = queryset.model._meta.model_name
@@ -192,28 +181,15 @@ def prefetch_related(queryset: QuerySet):
     return queryset
 
 
-'''
-description: # 通用list方法
-param {*} self
-param {HttpRequest} request
-param {array} args
-return {*}
-'''
-
-
+# 通用list方法
 def list_common(self, request: HttpRequest, *args):
-    user = request.user
-    dept = getattr(user, 'dept_belong_id', None)
     page = int(request.GET.get('page'))
     limit = int(request.GET.get('limit'))
     filter_dict = request.GET.dict()
     temp_dict = request.GET.dict()
     queryset: QuerySet = self.get_queryset()
-    fields = [i.name for i in queryset.model._meta.fields]
-    model_name = queryset.model._meta.model_name  # queryset.model  TODO:获取queryset的model对象
     queryset = deal_permission(request, queryset)
     if (page and limit):
-        # queryset = prefetch_related(queryset)
         for k, v in temp_dict.items():
             if v == '':
                 del filter_dict[k]
@@ -231,16 +207,7 @@ def list_common(self, request: HttpRequest, *args):
     return Response({'detail': '未分页'}, 400)
 
 
-'''
-description: 获取带个对象方法
-param {*} self
-param {*} request
-param {array} args
-param {object} kwargs
-return {*}
-'''
-
-
+# 获取单个对象方法
 def retrieve(self, request, *args, **kwargs):
     instance = self.get_object()
     serializer = self.get_serializer(instance)
@@ -252,16 +219,7 @@ def retrieve(self, request, *args, **kwargs):
     return Response(r)
 
 
-'''
-description: 创建方法
-param {*} self
-param {*} request
-param {array} args
-param {object} kwargs
-return {*}
-'''
-
-
+# 创建方法
 def create(self, request, *args, **kwargs):
     if request.user.is_super:
         serializer = self.get_serializer(data=request.data)
@@ -294,16 +252,7 @@ def create(self, request, *args, **kwargs):
     return Response(serializer.data, status=201, headers=headers)
 
 
-'''
-description: 更新方法
-param {*} self
-param {*} request
-param {array} args
-param {object} kwargs
-return {*}
-'''
-
-
+# 更新方法
 def update(self, request, *args, **kwargs):
     partial = kwargs.pop('partial', False)
     instance = self.get_object()
@@ -331,16 +280,7 @@ def update(self, request, *args, **kwargs):
             return Response({'detail': '没有修改权限'}, 400)
 
 
-'''
-description: 删除方法
-param {*} self
-param {*} request
-param {array} args
-param {object} kwargs
-return {*}
-'''
-
-
+# 删除方法
 def destroy(self, request, *args, **kwargs):
     instance = self.get_object()
     if request.user.is_super:
@@ -361,12 +301,7 @@ def destroy(self, request, *args, **kwargs):
             return Response({'detail': '没有删除权限'}, 400)
 
 
-'''
-description: # 多项更新
-return {*}
-'''
-
-
+# 多项更新
 @action(['PUT'], url_path='mult_update', url_name='mult_update', detail=False)
 def mult_update(self, request: HttpRequest, *args, **kwargs):
     id_list = request.GET.getlist('id[]')
@@ -375,6 +310,33 @@ def mult_update(self, request: HttpRequest, *args, **kwargs):
     queryset = queryset.filter(id__in=id_list)
     r = queryset.update(**querys)  # TODO:queryset 批量更新
     return Response({'msg': '批量修改成功成功', 'data': r}, 200)
+
+
+# TODO:数据导出
+@action(['POST'], url_path='export', url_name='export', detail=False)
+def export(self, request: HttpRequest, *args, **kwargs):
+    filter_dict = request.data
+    temp_dict = request.data
+    columns = [i for i in request.data.get('columns') if i['show']]
+    fields = [i['prop'] for i in columns]
+    for k, v in temp_dict.items():
+        if v == '':
+            del filter_dict[k]
+    for i in ['page', 'limit', 'columns']:
+        if i in filter_dict.keys():
+            del filter_dict[i]
+    queryset: QuerySet = self.get_queryset()
+    queryset = deal_permission(request, queryset)
+    queryset, filter_dict = deal_special_params(request, queryset, filter_dict)
+    queryset = queryset.filter(**filter_dict)
+    queryset = get_extra_value(request, queryset)
+
+    r = queryset.values_list(*fields)
+    d = pd.DataFrame(list(r), columns=[i['label'] for i in columns])
+    p = str(Path(__file__).resolve().parent.parent.parent).replace("\\", "/")
+    filename = queryset.model._meta.model_name + str(int(time.time() * 1000))
+    d.to_excel(f'{p}/media/export/{filename}.xlsx', encoding='gb18030')
+    return Response({'url': f'media/export/{filename}.xlsx'}, status=200)
 
 
 '''
@@ -488,6 +450,7 @@ def model_viewset(m, inherit_viewset, inherit_serializer, **kwargs):
                 # 'permission_classes': [],  //权限管理器
                 # 'authentication_classes': [],  // 认证管理器
                 'mult_update': mult_update,
+                'export': export,
                 'list': list_common,
                 'destroy': destroy,
                 'update': update,

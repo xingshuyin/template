@@ -262,3 +262,12 @@ export const add_menu_tab_ = item => {
   }
   store().current_menu = item.name;
 };
+
+export const export_data_ = (base_url, params) => {
+  r()
+    .post(`/${base_url}/export/`, { columns: JSON.parse(localStorage.getItem(`columns_${base_url}`)), ...params })
+    .then(res => {
+      console.log(res.data.url);
+      window.location.href = res.data.url;
+    });
+};
