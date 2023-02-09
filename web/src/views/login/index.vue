@@ -100,8 +100,8 @@ const env = import.meta.env
 </script>
 <template>
   <div class="login">
-    <div class="login_form pos_a_l5%_t50% trans_x0_y-50%">
-      <div class="left">
+    <div class="login_form ">
+      <!-- <div class="left">
         <img src="../../assets/img/logo.webp" alt="" style="width: 300px;height: 300px;">
         <div class="footer">
           <div class="chinese">
@@ -117,7 +117,7 @@ const env = import.meta.env
 
           </div>
         </div>
-      </div>
+      </div> -->
       <div class="right">
         <div class="title">{{ env.VITE_TITLE }}</div>
         <div class="form">
@@ -144,7 +144,6 @@ const env = import.meta.env
 <style scoped lang='scss'>
 .login {
   background: url('../../assets/img/login_bg.jpg') center no-repeat;
-  // background: url('../../assets/icon/tech.jpeg') center no-repeat;
   background-size: cover;
   position: absolute;
   width: 100%;
@@ -157,6 +156,10 @@ const env = import.meta.env
     display: flex;
     width: 840px;
     height: 500px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 
     .left {
       border-bottom-left-radius: 5px;
@@ -182,7 +185,7 @@ const env = import.meta.env
       border-top-right-radius: 5px;
       flex: 1;
       position: relative;
-      background-color: #fff;
+      background-color: #ffffff56;
       display: flex;
       flex-direction: column;
       justify-content: space-around;
@@ -209,13 +212,29 @@ const env = import.meta.env
 
         :deep(.el-form-item) {
           margin: 15px;
+
+          .el-form-item__label {
+            font-size: 14px;
+          }
+
+          .el-form-item__content {
+            border-radius: 10px;
+            overflow: hidden;
+          }
         }
 
-        :deep(.el-input__inner) {
-          color: #000000;
-          box-shadow: 0 0 0px 1000px #ffffff inset;
-          -webkit-box-shadow: 0 0 0px 1000px #ffffff inset; //TODO:自动填充背景色
-          -webkit-text-fill-color: #000000; //TODO:自动填充文字颜色
+
+
+        :deep(.el-input) {
+
+          --el-input-bg-color: #ffffff;
+
+          .el-input__inner {
+            color: #000000;
+            box-shadow: 0 0 0px 1000px #ffffff00 inset;
+            -webkit-box-shadow: 0 0 0px 1000px #ffffff inset; //TODO:自动填充背景色
+            -webkit-text-fill-color: #070000; //TODO:自动填充文字颜色   
+          }
         }
 
 

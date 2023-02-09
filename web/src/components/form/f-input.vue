@@ -16,10 +16,15 @@ const update_value = () => {
 }
 </script>
 <template>
-    <el-input v-model="temp" placeholder="" clearable style="width: 150px;" @blur="update_value()"
+    <el-form-item :label="label">
+        <el-input v-model="temp" placeholder="" clearable style="width: 100px;" @blur="update_value()"
+            @keyup.enter="update_value()" @clear="temp = undefined ; update_value()">
+        </el-input>
+    </el-form-item>
+    <!-- <el-input v-model="temp" placeholder="" clearable style="width: 150px;" @blur="update_value()"
         @keyup.enter="update_value()" @clear="temp = undefined ; update_value()">
         <template #prepend>{{ label }}</template>
-    </el-input>
+    </el-input> -->
 </template>
 <style scoped lang='scss'>
 

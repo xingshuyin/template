@@ -11,7 +11,7 @@
 import store from "../store/index";
 import { add_menu_tab_ } from '../hooks/table_common'
 import { pinyin } from 'pinyin-pro';
-
+import { deep_search } from "../utils/tools";
 const router = useRouter()
 const logout = () => {
   // localStorage.clear()
@@ -24,29 +24,25 @@ const username = ref(localStorage.getItem('username'))
 const centerDialogVisible = ref(false)
 const search = ref(undefined)
 const search_change = (value) => {
-  console.log(value)
   if (value != undefined) {
 
-    let item = deep_search(store().menu, value)
-    console.log('dddddddddd', item)
+    let item = deep_search(store().menu, 'name', value)
     add_menu_tab_({ label: item.label, name: value })
     router.push({ name: value })
     search.value = undefined
   }
 }
-const deep_search = (list, value) => {
-  console.log('jjinru', value)
-  for (let index = 0; index < list.length; index++) {
-    const i = list[index];
-    if (i.name == value) return i;
-    else if (i?.children?.length > 0) {
-      console.log('children', i.children)
-      let c = deep_search(i.children, value)
-      if (c) return c
-    };
-  }
-  return false
-}
+// const deep_search = (list, value) => {
+//   for (let index = 0; index < list.length; index++) {
+//     const i = list[index];
+//     if (i.name == value) return i;
+//     else if (i?.children?.length > 0) {
+//       let c = deep_search(i.children, value)
+//       if (c) return c
+//     };
+//   }
+//   return false
+// }
 const filter_method = (node, key) => {
   console.log(node, key)
   let p = pinyin(node.label, { toneType: 'none', type: 'array' }).join('');
@@ -74,35 +70,43 @@ const env = import.meta.env
       <span v-if="!store().toggle_side" style="width: 120px;padding-left: 5px;white-space: nowrap;">微镜头(心连心)</span> -->
     <!-- </div> -->
 
-    <t-time style="margin-left: 15px;"></t-time>
+
     <!-- <iframe style="margin-left: 15px;" allowtransparency="true" frameborder="0" width="220" height="28" scrolling="no"
       src="//tianqi.2345.com/plugin/widget/index.htm?s=3&z=1&t=1&v=0&d=1&bd=0&k=&f=000000&ltf=000000&htf=000000&q=1&e=0&a=1&c=54511&w=220&h=28&align=left"></iframe>
     &nbsp;&nbsp; -->
     <!-- 标题 -->
     <div class="title">
+      <div class="title-img">
+        <img src="../assets/img/logo.png" style="height: 80%;">
+      </div>
       {{ env.VITE_TITLE }}
     </div>
 
     <!-- 按钮 -->
     <div class="buttons ">
-      <el-cascader v-model="search" :options="store().menu" @change="search_change" :filter-method="filter_method"
-        placeholder="搜索" :props="{ emitPath: false, value: 'name', label: 'label', }" filterable clearable />
+      <t-time style="margin-left: 15px;"></t-time>
+      <div class="buttons-item">
+        <el-cascader v-model="search" :options="store().menu" @change="search_change" :filter-method="filter_method"
+          placeholder="搜索" :props="{ emitPath: false, value: 'name', label: 'label', }" filterable clearable
+          size="small" />
+
+      </div>
 
       <el-tooltip content="全屏" placement="bottom" effect="light">
-        <t-fullscreen></t-fullscreen>
+        <t-fullscreen class="buttons-item"></t-fullscreen>
       </el-tooltip>
 
       &nbsp;&nbsp;
-      <div class="user">
+      <div class="user buttons-item">
 
         <span style="font-size: 16px; padding-right: 5px;">
-          您好 <span style="color: yellow ;">{{ username }}</span>
+          <span style="color: yellow ;">{{ username }}</span>
         </span>
-        <ep:avatar style="font-size: 18px;"></ep:avatar>
+        <el-avatar class="avatar" size="small" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+          @click="centerDialogVisible = true" />
+
       </div>
-      <iconoir:log-out @click="centerDialogVisible = true"
-        style="font-size: 22px; margin-right: 15px;margin-left: 5px;">
-      </iconoir:log-out>
+
     </div>
   </div>
 </template>
@@ -133,17 +137,24 @@ const env = import.meta.env
   }
 
   .title {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
+    // position: absolute;
+    // left: 0%;
+    // transform: translateX(-50%);
+    width: 200px;
     height: 100%;
-    font-size: 2rem;
+    font-size: 1.3rem;
     display: flex;
     justify-content: center;
     align-items: center;
     color: rgb(255, 255, 255);
     font-family: Kumbh Sans, sans-serif;
+
+    .title-img {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   }
 
   .buttons {
@@ -152,11 +163,15 @@ const env = import.meta.env
     right: 0;
     top: 0;
     color: white;
-    gap: 2px;
+    // gap: 4px;
     display: flex;
     justify-content: center;
     align-items: center;
 
+
+    .buttons-item {
+      margin: 0 3px !important;
+    }
 
 
 
@@ -167,6 +182,8 @@ const env = import.meta.env
       flex-direction: row;
       align-items: center;
       justify-content: center;
+
+      .avatar {}
     }
 
     .username {

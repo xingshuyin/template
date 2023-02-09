@@ -12,3 +12,16 @@ export const get_token = () => {
   let strings = token.split("."); //截取token，获取载体
   return JSON.parse(decodeURIComponent(decodeURI(window.atob(strings[1].replace(/-/g, "+").replace(/_/g, "/"))))); //解析，需要吧‘_’,'-'进行转换否则会无法解析
 };
+// TODO:嵌套字典列表搜索
+// [{ name: a, childern: [{ name: b, childern: [] }] }];   value->name
+export const deep_search = (list, key, value) => {
+  for (let index = 0; index < list.length; index++) {
+    const i = list[index];
+    if (i[key != undefined ? key : "name"] == value) return i;
+    else if (i?.children?.length > 0) {
+      let c = deep_search(i.children, value);
+      if (c) return c;
+    }
+  }
+  return false;
+};

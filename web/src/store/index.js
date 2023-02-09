@@ -4,6 +4,7 @@ export const GlobalStore = defineStore("counter", {
   state: () => ({
     all_menu: null,
     current_menu: "enterprise",
+    menu_width: "200px",
     menu_tab: [],
     menu: [],
     userinfo: null,

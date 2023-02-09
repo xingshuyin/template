@@ -12,7 +12,6 @@
 import MenuTree from './MenuTree.vue';
 // import { useRoute, useRouter } from 'vue-router';
 import store from "../store/index";
-;
 const route = useRoute() //当前路由
 const router = useRouter() //全局路由对象
 // const items = JSON.parse(sessionStorage.getItem('menu'))
@@ -36,7 +35,7 @@ const menu_width = ref('200px')
 
 
             <div class="collapse-btn"
-                @click="store().toggle_side = !store().toggle_side; store().toggle_side ? menu_width = '50px' : menu_width = '250px'">
+                @click="store().toggle_side = !store().toggle_side; store().toggle_side ? menu_width = '50px' : menu_width = '200px'">
                 <ep:arrow-left v-if="!store().toggle_side" style="font-size: 10px;color: black;" />
                 <ep:arrow-right v-else style="font-size: 10px;color: black;" />
             </div>
@@ -53,9 +52,9 @@ const menu_width = ref('200px')
 .side {
     // background-color: burlywood;
     // position: relative;
-    background: linear-gradient(to bottom, rgb(31 104 84) 0%, #8d8678 100%); // 绿色渐变
+    // background: linear-gradient(to bottom, rgb(31 104 84) 0%, #8d8678 100%); // 绿色渐变
     // background: linear-gradient(to bottom, rgb(12 205 255) 0%, #5f57d4 100%);
-    // background: rgb(111 214 229);
+    background: rgb(100 100 100);
     overflow-y: auto;
     overflow-x: hidden;
     width: v-bind(menu_width);

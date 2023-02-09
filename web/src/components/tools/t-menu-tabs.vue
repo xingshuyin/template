@@ -115,16 +115,16 @@ onBeforeMount(() => {
 
         .el-tabs__item {
             //tab样式
-            border-radius: 2px;
-            margin: 1px;
-            background-color: rgba(247, 242, 236, 0.459);
-            border: 1px solid rgb(216, 207, 207);
+            // border-radius: 2px;
+            // margin: 1px;
+            // background-color: rgba(247, 242, 236, 0.459);
+            // border: 1px solid rgb(216, 207, 207);
             box-sizing: border-box;
         }
 
         .is-active {
             // 激活tab颜色
-            background-color: rgba(236, 169, 75, 0.459);
+            background-color: rgba(255, 255, 255, 0.459);
         }
     }
 
