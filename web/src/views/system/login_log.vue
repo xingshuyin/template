@@ -112,7 +112,6 @@ import { Tree } from '../../utils/data';
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_ } from '../../hooks/table_common'
 import store from "../../store/index";
 import rest from '../../utils/rest';
-;
 const attrs = reactive({
     columns: null,
     base_url: 'LoginLog',

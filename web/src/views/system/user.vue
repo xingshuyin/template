@@ -110,7 +110,7 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { onBeforeMount } from 'vue';
 import { get_data_, select_, mult_delete_, update_item_, delete_item_, sort_, submit_, get_all_role_, get_all_role_dict_, get_all_dept_tree_ } from '../../hooks/table_common'
 import store from "../../store/index";
-;
+
 const form_dom = ref()
 const attrs = reactive({
     columns: null,

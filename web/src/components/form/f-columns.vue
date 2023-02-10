@@ -49,10 +49,17 @@ const props = defineProps(['modelValue']); // defineProps的参数, 可以直接
             :width="i.width">
             <template #default="scope">
                 <el-image v-if="scope.row[i.prop][0]" style="width: 70px; height: 70px" fit="cover" :z-index="30"
-                    :src="scope.row[i.prop][0]?.url"
+                    :src="`/api/data/${scope.row[i.prop][0]?.id}/zip_img/`"
                     :preview-src-list="scope.row[i.prop].reduce((pre, cur) => { pre.push(cur.url); return pre; }, [])"
                     preview-teleported hide-on-click-modal />
                 <div v-else></div>
+            </template>
+        </el-table-column>
+        <!-- 图片 -->
+        <el-table-column v-else-if="i.type == 'link' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
+            :width="i.width">
+            <template #default="scope">
+                <a :href="scope.row[i.prop]">{{ scope.row[i.prop] }}</a>
             </template>
         </el-table-column>
     </template>

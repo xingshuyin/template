@@ -119,8 +119,8 @@ route.beforeEach((to, from, next) => {
               if (!store().hasmenu) set_menu(); //判断是否已经添加路由
               // if (to.matched.length === 0) next("/"); //未知页面跳到首页
               if (to.meta.title != undefined) window.document.title = to.meta.title; //TODO:设置标题
-              refresh_token(to, next); // TODO:刷新token
-              // next(); // 进入页面, 其他带参数都是跳转路由
+              // refresh_token(to, next); // TODO:刷新token
+              next(); // 进入页面, 其他带参数都是跳转路由
             } else get_menu(to, next); //没有菜单数据获取数据
           } else {
             // if (to.path === "/login") next("/admin"); //TODO:router-有token登录页跳转首页
@@ -129,7 +129,8 @@ route.beforeEach((to, from, next) => {
           }
         } else {
           if (to.path === "/login") next("/");
-          refresh_token(to, next);
+          // refresh_token(to, next);
+          next();
         }
       });
   } else {

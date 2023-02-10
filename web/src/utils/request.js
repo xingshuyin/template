@@ -1,27 +1,25 @@
-/*
- * @Filename     : request.js
- * @Description  :wjt-前端-全局请求组件
- * @Author       : xingshuyin xingshuyin@outlook.com
- * @Date         : 2022-09-30 18:46:21
- * @LastEditors  : xingshuyin xingshuyin@outlook.com
- * @LastEditTime : 2022-11-21 22:06:16
- * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
- */
 import axios from "axios";
-// const router = useRouter(); //全局路由对象
+import { parse_token } from "./tools";
 const get_token = () => {
   return "Bearer " + localStorage.getItem("token");
 };
-export default () => {
+
+// TODO:axios-自定义请求对象
+const r = () => {
   let r_ = axios.create({
     baseURL: import.meta.env.VITE_BASE_API,
     timeout: 15000,
     headers: {
-      Authorization: get_token(), //业务需要的设备编号 或者可以当成是token来理解
+      Authorization: get_token(),
     },
   });
+  //TODO:axios-拦截器
   r_.interceptors.request.use(
     config => {
+      if (config.url != "/refresh/") {
+        parse_token();
+      }
+
       return config; //必须返回
     },
     error => {
@@ -73,9 +71,4 @@ export default () => {
   return r_;
 };
 
-//TODO:axios-拦截器
-
-// export default r;
-export const r_sync = async (url, query) => {
-  return await r.get(url, query);
-};
+export default r;

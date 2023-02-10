@@ -1,12 +1,3 @@
-<!--
- * @Filename     : MenuTree.vue
- * @Description  : wjt-前端-后管理菜单项
- * @Author       : xingshuyin xingshuyin@outlook.com
- * @Date         : 2022-10-01 08:48:43
- * @LastEditors  : xingshuyin xingshuyin@outlook.com
- * @LastEditTime : 2022-12-02 11:53:03
- * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
--->
 <template>
     <template v-for="(item, index) in data" :key="index">
         <el-sub-menu v-if="item?.children?.length" :index="item.path" popper-class="menu-poper">

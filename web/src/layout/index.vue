@@ -1,19 +1,8 @@
-<!--
- * @Filename     : index.vue
- * @Description  : wjt-前段-后台管理框架
- * @Author       : xingshuyin xingshuyin@outlook.com
- * @Date         : 2022-09-30 18:13:42
- * @LastEditors  : xingshuyin xingshuyin@outlook.com
- * @LastEditTime : 2022-12-02 14:27:13
- * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
--->
 <script setup>
-import { get_token } from '../utils/tools'
 import Side from './side.vue'
 import Head from './head.vue'
 const router = useRouter()
 const route = useRoute()
-console.log('token-----', get_token())
 </script>
 <template>
   <!-- TODO:整体框架 -->

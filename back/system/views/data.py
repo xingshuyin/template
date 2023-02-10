@@ -7,17 +7,18 @@ LastEditors  : xingshuyin xingshuyin@outlook.com
 LastEditTime : 2022-11-30 12:56:18
 Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
 '''
+from pathlib import Path
 from django.forms import CharField, model_to_dict
 from system.models import *
 from django.utils._os import safe_join
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet
 from rest_framework.request import Request
 from rest_framework.response import Response
-from django.db.models import Count, F, Value, CharField
-import datetime
+# from django.db.models import Count, F, Value, CharField
+# import datetime
 from django.db.models.functions import Concat
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
@@ -45,13 +46,7 @@ def ranges():
     return [now, this_week_start, this_month_start, this_year_start]
 
 
-'''
-description: fetch结果转换为键值对形式 
-param {*} cursor
-return {*}
-'''
-
-
+# fetch结果转换为键值对形式
 def dictfetchall(cursor):
     "Return all rows from a cursor as a dict"
     columns = [col[0] for col in cursor.description]
@@ -81,20 +76,7 @@ def get_dept_permission(request, dept_id, permission):
 
 
 class Data(ViewSet):
-
-    def filter(queryset: MyQuerySet, filter_dict: dict):
-        if 'name' in filter_dict.keys():
-            queryset = queryset.filter(name__contains=filter_dict['name'])
-            del filter_dict['name']
-        if 'city' in filter_dict.keys():
-            queryset = queryset.filter(city__contains=filter_dict['city'])
-            del filter_dict['city']
-
-    '''
-    description: 文件上传接口
-    return {*}
-    '''
-
+    # 文件上传接口
     @action(['post'], url_path='upload', url_name='upload', detail=False, permission_classes=[])
     def upload(self, request: Request):  #TODO:文件上传-上传接口
         print(request.FILES['file'].name)  # 上传文件以file为key值
@@ -105,34 +87,25 @@ class Data(ViewSet):
         print(form)
         return JsonResponse({'msg': '格式验证失败', 'data': form.data})
 
-    '''
-    description: 文件删除接口
-    return {*}
-    '''
+    # # 文件删除接口(已使用文件表删除)
+    # @action(['post'], url_path='remove', url_name='remove', detail=False, permission_classes=[])
+    # def remove(self, request: Request):
+    #     file_path = request.data.get('file')
+    #     if file_path.startswith('media'):
+    #         print('删除文件', file_path)
+    #         real_path = safe_join(settings.MEDIA_ROOT, file_path.lstrip(settings.MEDIA_URL.lstrip('/')))
+    #         try:
+    #             if os.path.isdir(real_path):
+    #                 os.rmdir(real_path)
+    #             else:
+    #                 os.remove(real_path)
+    #             return JsonResponse({'msg': '删除文件成功', 'code': 200, 'data': {'path': real_path}})
+    #         except FileNotFoundError:
+    #             # FileNotFoundError is raised if the file or directory was removed
+    #             # concurrently.
+    #             return JsonResponse({'msg': '格式验证失败', 'data': {}})
 
-    @action(['post'], url_path='remove', url_name='remove', detail=False, permission_classes=[])
-    def remove(self, request: Request):  #TODO:文件上传-上传接口
-        file_path = request.data.get('file')
-        if file_path.startswith('media'):
-            print('删除文件', file_path)
-            real_path = safe_join(settings.MEDIA_ROOT, file_path.lstrip(settings.MEDIA_URL.lstrip('/')))
-
-            try:
-                if os.path.isdir(real_path):
-                    os.rmdir(real_path)
-                else:
-                    os.remove(real_path)
-                return JsonResponse({'msg': '删除文件成功', 'code': 200, 'data': {'path': real_path}})
-            except FileNotFoundError:
-                # FileNotFoundError is raised if the file or directory was removed
-                # concurrently.
-                return JsonResponse({'msg': '格式验证失败', 'data': {}})
-
-    '''
-    description: 获取所有菜单 及对应接口
-    return {*}
-    '''
-
+    # 获取所有菜单 及对应接口
     @action(['get'], url_path='GetAllMenu', url_name='GetAllMenu', detail=False, permission_classes=[SuperPermisssion])
     def GetAllMenu(self, request: Request):
         interfaces = MyQuerySet(MenuInterface)
@@ -141,11 +114,7 @@ class Data(ViewSet):
             i['interfaces'] = list(interfaces.filter(menu__id=i['id']).values())
         return JsonResponse(menus, safe=False)
 
-    '''
-    description: 获取角色权限 及接口权限
-    return {*}
-    '''
-
+    # 获取角色权限 及接口权限
     @action(['get'], url_path='GetRolePermision', url_name='GetRolePermision', detail=False, permission_classes=[])
     def GetRolePermision(self, request: Request):
         role_id = request.GET.get('role_id')
@@ -154,33 +123,21 @@ class Data(ViewSet):
         interfaces = [i.id for i in role.menu_interface.all()]
         return JsonResponse({'interfaces': interfaces, 'menus': menus, 'permission': role.permission}, safe=False)
 
-    '''
-    description: # 设置角色权限
-    return {*}
-    '''
-
+    # 设置角色权限
     @action(['post'], url_path='SetRolePermision', url_name='SetRolePermision', detail=False, permission_classes=[SuperPermisssion])
     def SetRolePermision(self, request: Request):
-        # user = request.user
         interfaces = request.data['interfaces']
         permission = request.data['permission']
         menus = request.data['menus']
         role_id = request.data['role_id']
-        # dept = getattr(user, 'dept_belong_id', None)
-        # dept_permission = get_dept_permission(request, dept, permission)
         role = Role.objects.get(id=role_id)
         role.permission = permission
-        # role.dept.set(dept_permission)
         role.menu.set(menus)  # TODO:request-多对多 覆盖值
         role.menu_interface.set(interfaces)
         role.save()
         return JsonResponse({'msg': '设置成功'})
 
-    '''
-    description: # 获取菜单
-    return {*}
-    '''
-
+    # 获取菜单
     @action(['get'], url_path='GetMenu', url_name='GetMenu', detail=False, permission_classes=[])
     def GetMenu(self, request: Request):
         # try:
@@ -191,19 +148,13 @@ class Data(ViewSet):
             menus_set = set()
             menus = []
             for i in user.role:
-                # queryset = MyQuerySet()
-                # queryset.clone(Role.objects.get(id=i).menu.all())
                 for j in list(Role.objects.get(id=i).menu.values()):
                     if j['id'] not in menus_set:
                         menus.append(j)
                         menus_set.add(j['id'])
         return JsonResponse(list(menus), safe=False)
 
-    '''
-    description: 获取角色列表
-    return {*}
-    '''
-
+    # 获取角色列表
     @action(['get'], url_path='GetAllRoleDict', url_name='GetAllRoleDict', detail=False, permission_classes=[])
     def GetAllRoleDict(self, request: Request):
         filter_dict = request.GET.dict()
@@ -213,14 +164,7 @@ class Data(ViewSet):
         )
         return Response({i['id']: i for i in list(roles)}, 200)
 
-    @action(['get'], url_path='init_enterprise', url_name='init_enterprise', detail=False, permission_classes=[])
-    def init_enterprise(self, request: Request):
-        user = request.user
-        enterprise_id = request.GET.get("enterprise_id")
-        user.enterprise_id = enterprise_id
-        user.save()
-        return JsonResponse({}, safe=False)
-
+    # 获取用户信息
     @action(['get'], url_path='get_userinfo', url_name='get_userinfo', detail=False, permission_classes=[])
     def get_userinfo(self, request: Request):
         user = request.user
@@ -229,20 +173,7 @@ class Data(ViewSet):
         del r['role']
         return JsonResponse(r, safe=False)
 
-    @action(['get'], url_path='get_receivers', url_name='get_receivers', detail=False, permission_classes=[])
-    def get_receivers(self, request: Request):
-        user = request.user
-        users = MyQuerySet(User).values('id', 'name', 'username')
-        return JsonResponse(list(users), safe=False)
-
-    @action(['get'], url_path='read_email', url_name='read_email', detail=False, permission_classes=[])
-    def read_email(self, request: Request):
-        email_id = request.GET.get('id')
-        email = Email.objects.get(id=email_id)
-        email.is_readed = True
-        email.save()
-        return JsonResponse({'msg': '邮件已阅读'}, safe=False)
-
+    # 修改密码
     @action(['post'], url_path='change_password', url_name='change_password', detail=False, permission_classes=[])
     def change_password(self, request: Request):
         user = request.user
@@ -256,3 +187,17 @@ class Data(ViewSet):
             return JsonResponse({'code': 200, 'msg': '密码修改成功'}, safe=False)
         else:
             return JsonResponse({'code': 400, 'msg': '旧密码错误'}, safe=False)
+
+    # 获取压缩图片
+    @action(['get'], url_path='zip_img', url_name='zip_img', detail=True, permission_classes=[])
+    def zip_img(self, request: Request, pk):
+        p = str(Path(__file__).resolve().parent.parent.parent).replace("\\", "/")
+        zip_path = f'{p}/media/img_zip/{pk}.jpg'
+        if not os.path.exists(zip_path):
+            f = File.objects.get(id=pk)
+            from PIL import Image
+            path = f.file.path
+            im = Image.open(path)
+            im.save(zip_path, quality=7)  # quality 是压缩比率, 值越小图片越小
+        r = open(zip_path, "rb")
+        return HttpResponse(r.read(), content_type='image/jpg')

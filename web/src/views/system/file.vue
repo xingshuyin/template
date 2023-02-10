@@ -39,9 +39,6 @@
                 <f-columns v-if="attrs.columns" v-model="attrs.columns"></f-columns>
                 <el-table-column label="操作" fixed="right" width="150">
                     <template #default="scope">
-                        <el-button size="small" type="primary"
-                            @click="attrs.adding = true; attrs.add_form = scope.row; attrs.submit_type = 'update' ">编辑
-                        </el-button>
                         <!-- <el-button size="small" type="primary" @click="handleDelete(scope.$index, scope.row)">屏蔽</el-button> -->
                         <el-popconfirm title="确定删除吗?" v-if="scope.row.is_delete != 1"
                             @confirm="delete_item_(`/${attrs.base_url}/${scope.row.id}/`, get_data)">
@@ -67,16 +64,6 @@
                 <el-form-item label="名称">
                     <el-input v-model="attrs.add_form.name" />
                 </el-form-item>
-                <el-form-item label="地址" prop="area">
-                    <el-cascader v-model="attrs.add_form.area" :options="attrs.areas_tree"
-                        :props="{ emitPath: false, value: 'code', label: 'name' }" />
-                </el-form-item>
-                <el-form-item label="文件" prop="file">
-                    <f-jfile v-model="attrs.add_form.file" :limit="10" :size="3" />
-                </el-form-item>
-                <el-form-item label="图片" prop="image">
-                    <f-jimage v-model="attrs.add_form.image" :limit="10" :size="3" />
-                </el-form-item>
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
@@ -99,11 +86,9 @@ import { Tree } from '../../utils/data';
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, export_data_ } from '../../hooks/table_common'
 import store from "../../store/index";
 import rest from '../../utils/rest';
-import { onMounted } from 'vue';
-;
 const attrs = reactive({
     columns: null,
-    base_url: 'Enterprise',
+    base_url: 'File',
     selects: [],
     data: [],
     total: 0,
@@ -131,18 +116,10 @@ const get_data = () => {
 }
 get_data()
 
-onMounted(async () => {
-    attrs.areas_tree = await store().get_areas_tree();
-})
-
-
-
 attrs.columns = [
-    { type: 'text', label: '名称', prop: 'name', align: "left", show: true },
-    { type: 'text', width: 150, label: '行政区域', prop: 'area_name', align: "center", show: true },
-    { type: 'jfile', width: 150, label: '文件', prop: 'file', align: "center", show: true },
-    { type: 'jimage', width: 150, label: '图片', prop: 'image', align: "center", show: true },
-    { type: 'text', width: 160, label: '创建时间', prop: 'createAt', align: "center", show: true },
+    // { type: 'text', label: '名称', prop: 'file', align: "left", show: true },
+    { type: 'text', label: '文件名', prop: 'name', align: "center", show: true },
+    { type: 'link', label: '链接', prop: 'file', align: "center", show: true },
 ]
 </script>
 

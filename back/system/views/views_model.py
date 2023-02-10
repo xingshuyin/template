@@ -9,27 +9,29 @@ Description  : 微镜头所有模型的restful规范接口
 
 Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
 '''
-import json
-from pathlib import Path
-import time
-import pandas as pd
 from django.db import models
+from django.utils import timezone
+from django.forms import model_to_dict
 from django.db.models import QuerySet
+from django.db.models import F
+from django.db.models.query import BaseIterable
+from django.views.decorators.cache import cache_page
+from django.db.models.fields.related import ManyToManyField, ForeignKey
 from rest_framework import filters, serializers, status, exceptions
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.serializers import ModelSerializer
+from rest_framework.decorators import action
 from rest_framework.request import Request, HttpRequest
+from rest_framework.response import Response
+from pathlib import Path
+from itertools import chain
 from tomlkit import datetime
 from ..models import *
-from django.forms import model_to_dict
-from django.db.models import F
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from django.db.models.fields.related import ManyToManyField, ForeignKey
-from itertools import chain
+from ..utils import get_time
 from ..permission import SuperPermisssion
-from django.utils import timezone
-from django.db.models.query import BaseIterable
+import json
+import time
+import pandas as pd
 
 
 # 模型序列化(附加外键序列化)
@@ -182,6 +184,7 @@ def prefetch_related(queryset: QuerySet):
 
 
 # 通用list方法
+@get_time
 def list_common(self, request: HttpRequest, *args):
     page = int(request.GET.get('page'))
     limit = int(request.GET.get('limit'))
@@ -339,13 +342,7 @@ def export(self, request: HttpRequest, *args, **kwargs):
     return Response({'url': f'media/export/{filename}.xlsx'}, status=200)
 
 
-'''
-description: # 字段处理
-param {*} v
-return {*}
-'''
-
-
+# 字段处理
 def deal_value(v):
     if type(v) == datetime.datetime:  #TODO:request- 处理时间
         # v = timezone.localtime(v)  # 获取时区为当前时区的时间; 时间=时间值+时区
@@ -374,12 +371,7 @@ class MyValuesIterable(BaseIterable):
             yield {names[i] if '_id' not in names[i] else names[i].rstrip('_id'): deal_value(row[i]) for i in indexes}  #TODO:request-QuerySet修改values  去掉_id
 
 
-'''
-description: # 自定义queryset
-return {*}
-'''
-
-
+# 自定义queryset
 class MyQuerySet(QuerySet):
 
     def values(self, *fields, **expressions):  #TODO:QuerySet-values实现
@@ -405,16 +397,7 @@ class MyQuerySet(QuerySet):
         self._deferred_filter = queryset._deferred_filter
 
 
-'''
-description: # 序列化器生成器
-param {*} m
-param {*} inherit
-param {array} args
-param {object} kwargs
-return {*}
-'''
-
-
+# 序列化器生成器
 def model_serializer(m, inherit, *args, **kwargs):
 
     class Meta:
@@ -426,17 +409,7 @@ def model_serializer(m, inherit, *args, **kwargs):
     return ser
 
 
-'''
-description: # 模型视图生成器
-param {*} m 对应的django model
-param {*} inherit_viewset 继承的父类视图
-param {*} inherit_serializer 使用的序列化器
-param {*} pager 分页器. Defaults to Pager.
-param {object} kwargs
-return {*} ModelViewSet: 返回视图集
-'''
-
-
+# 模型视图生成器
 def model_viewset(m, inherit_viewset, inherit_serializer, **kwargs):
     viewset = type(
         m._meta.label + "_view",
@@ -461,14 +434,12 @@ def model_viewset(m, inherit_viewset, inherit_serializer, **kwargs):
     return viewset
 
 
-# SuperPermisssion
-
-# 生成所有视图及链接基础
+# 生成所有视图及链接的基础
 view_list = [
     {
-        "url": "Dept",
+        "url": "Dept",  # restful链接基础url
         "label": "部门",
-        "viewset": model_viewset(Dept, (ModelViewSet, ), (ModelSerializer, ))
+        "viewset": model_viewset(Dept, (ModelViewSet, ), (ModelSerializer, ))  # 对应视图集
     },
     {
         "url": "File",

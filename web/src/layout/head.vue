@@ -1,12 +1,3 @@
-<!--
- * @Filename     : head.vue
- * @Description  : wjt-前端-后台管理框架顶部
- * @Author       : xingshuyin xingshuyin@outlook.com
- * @Date         : 2022-09-30 18:13:42
- * @LastEditors  : xingshuyin xingshuyin@outlook.com
- * @LastEditTime : 2022-12-14 11:19:51
- * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
--->
 <script setup>
 import store from "../store/index";
 import { add_menu_tab_ } from '../hooks/table_common'
@@ -75,11 +66,14 @@ const env = import.meta.env
       src="//tianqi.2345.com/plugin/widget/index.htm?s=3&z=1&t=1&v=0&d=1&bd=0&k=&f=000000&ltf=000000&htf=000000&q=1&e=0&a=1&c=54511&w=220&h=28&align=left"></iframe>
     &nbsp;&nbsp; -->
     <!-- 标题 -->
-    <div class="title">
+    <div class="title" :style="{ width: store().menu_width }">
       <div class="title-img">
-        <img src="../assets/img/logo.png" style="height: 80%;">
+        <img src="../assets/img/logo.png" style="height: 80%;" />
       </div>
-      {{ env.VITE_TITLE }}
+      <div class="title-text" v-if="!store().toggle_side">
+        {{ env.VITE_TITLE }}
+      </div>
+
     </div>
 
     <!-- 按钮 -->
@@ -137,10 +131,6 @@ const env = import.meta.env
   }
 
   .title {
-    // position: absolute;
-    // left: 0%;
-    // transform: translateX(-50%);
-    width: 200px;
     height: 100%;
     font-size: 1.3rem;
     display: flex;
@@ -154,6 +144,11 @@ const env = import.meta.env
       display: flex;
       justify-content: center;
       align-items: center;
+    }
+
+    .title-text {
+      margin-left: 10px;
+      transition-duration: 200ms;
     }
   }
 

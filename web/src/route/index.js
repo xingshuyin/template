@@ -1,12 +1,3 @@
-/*
- * @Filename     : index.js
- * @Description  :wjt-前端-全局路由文件
- * @Author       : xingshuyin xingshuyin@outlook.com
- * @Date         : 2022-09-30 17:43:42
- * @LastEditors  : xingshuyin xingshuyin@outlook.com
- * @LastEditTime : 2022-11-20 11:00:15
- * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
- */
 import { createRouter, createWebHashHistory } from "vue-router";
 const router = createRouter({
   // npm install vue-router@4

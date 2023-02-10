@@ -56,10 +56,12 @@
     top: 50%;
     transform: translateY(-50%);
     display: flex;
+    align-items: center;
     flex-wrap: nowrap;
     padding-left: 3px;
     > * {
       margin-right: 5px;
+      margin-bottom: 0;
     }
 
     .el-input__wrapper {

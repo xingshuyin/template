@@ -55,7 +55,6 @@ class MyRefreshToken(RefreshToken):
 # 获取token就相当于登录
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/creating_tokens_manually.html  手动创建令牌
 class MyTokenObtainSerializer(TokenObtainSerializer):
-    # class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     token_class = MyRefreshToken
 
     def __init__(self, *args, **kwargs):
@@ -95,7 +94,7 @@ class MyTokenObtainSerializer(TokenObtainSerializer):
         else:
             # 之所以用hashlib 加密, 是因为在创建用户时也是用了这个加密
             attrs['password'] = hashlib.md5(attrs['password'].encode(encoding="UTF-8")).hexdigest()  # 把密码变成和创建用户时一样的形式, 但是数据库里储存并不是这个, 而是再次用密钥加密后的
-            data = self.my_super_validate(attrs)  # 简单来说,就是对比数据库的用户名和加密后的密码, 通过了返回token和refresh
+            data = self.my_super_validate(attrs)  # 简单来说,就是对比数据库的用户名和加密后的密码, 通过了获取登陆用户并赋值给self.user
         refresh = self.get_token(self.user)
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
@@ -117,8 +116,7 @@ class MyTokenObtainSerializer(TokenObtainSerializer):
             authenticate_kwargs["request"] = self.context["request"]
         except KeyError:
             pass
-        print('authenticate_kwargs', authenticate_kwargs)
-        self.user = authenticate(**authenticate_kwargs)
+        self.user = authenticate(**authenticate_kwargs)  # 这块可以手动比较用户名和密码,然后自己获取用户实例并赋值给self.user
         if not api_settings.USER_AUTHENTICATION_RULE(self.user):
             # TODO:JWT-验证失败时返回的detail信息
             raise exceptions.AuthenticationFailed(

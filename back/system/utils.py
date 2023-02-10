@@ -2,6 +2,7 @@
 Request工具类
 """
 import json
+import time
 
 import requests
 from django.conf import settings
@@ -205,3 +206,15 @@ def save_login_log(request):
     analysis_data['creator_id'] = request.user.id
     analysis_data['dept_belong_id'] = getattr(request.user, 'dept_id', '')
     LoginLog.objects.create(**analysis_data)
+
+
+def get_time(f):
+
+    def inner(*args, **kwargs):
+        start = time.time()
+        r = f(*args, **kwargs)
+        end = time.time()
+        print(end - start)
+        return r
+
+    return inner

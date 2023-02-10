@@ -1,22 +1,16 @@
-'''
-Filename     : initial.py
-Description  : wjt-后端-初始化数据脚本
-Author       : xingshuyin xingshuyin@outlook.com
-Date         : 2022-11-01 09:14:54
-LastEditors  : xingshuyin xingshuyin@outlook.com
-LastEditTime : 2022-12-02 15:03:58
-Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
-'''
+# TODO:初始化数据
 import os
-import random
+from pathlib import Path
 import sys
 
 import django
 import pandas as pd
 from faker import Faker
+# TODO:通过倒推父级目录得到项目目录
+p = str(Path(__file__).resolve().parent.parent.parent).replace("\\", "/")
 
 # sys.path.append(r'/home/voc_python/backend')  # 将项目路径添加到系统搜寻路径当中
-sys.path.append(r'E:\template\back')  # 将项目路径添加到系统搜寻路径当中
+sys.path.append(p)  # 将项目路径添加到系统搜寻路径当中
 os.environ['DJANGO_SETTINGS_MODULE'] = 'root.settings'  # 设置项目的配置文件
 django.setup()  # 加载项目配置
 from system.models import *
@@ -51,7 +45,7 @@ return {*}
 '''
 
 
-# 所有菜单路由都是子路由, 所以path不加/
+# 所有菜单路由都是子路由, 所以path不加/ (element-plus的menu组件)
 def init_Menu():
     l = [
         {
@@ -150,6 +144,18 @@ def init_Menu():
             'is_link': False,
             'is_catalog': False
         },
+        {
+            'id': 9,
+            'parent_id': 1,
+            'label': '文件管理',
+            'icon': 'Folder',
+            'component': 'system/file.vue',
+            'name': 'file',
+            'path': 'file',
+            'sort': 10,
+            'is_link': False,
+            'is_catalog': False
+        },
     ]
     for i in l:
         print(i)
@@ -191,10 +197,10 @@ def init_area():
 
 def init():
     # init_User()
-    # init_Menu()
+    init_Menu()
     # init_MenuInterface()
     # init_Role()
-    init_area()
+    # init_area()
 
 
 if __name__ == '__main__':

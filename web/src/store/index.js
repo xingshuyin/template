@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import r from "../utils/request";
+import rest from "../utils/rest";
 export const GlobalStore = defineStore("counter", {
   state: () => ({
     all_menu: null,
@@ -25,6 +26,23 @@ export const GlobalStore = defineStore("counter", {
         let a = await r().get("/data/get_userinfo/");
         if (a) {
           state.userinfo = a.data;
+          return a.data;
+        } else {
+          localStorage.clear();
+          window.location = "/#/login/";
+        }
+      };
+    },
+    get_areas_tree: state => {
+      return async not_cache => {
+        if (!not_cache) {
+          if (state.areas_tree) {
+            return state.areas_tree;
+          }
+        }
+        let a = await r().get("/Area/", { params: { page: 1, limit: 99999 } });
+        if (a) {
+          state.areas_tree = a.data;
           return a.data;
         } else {
           localStorage.clear();
