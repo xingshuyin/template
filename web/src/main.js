@@ -55,24 +55,6 @@ const RoutesTree = (data, parent) => {
   return d;
 };
 
-const refresh_token = (to, next) => {
-  r()
-    .post("/refresh/", { refresh: localStorage.getItem("refresh") })
-    .then(response => {
-      if (response.status == 200) {
-        localStorage.setItem("token", response.data.access);
-        next();
-      } else {
-        localStorage.clear();
-        next("/login"); // 进入页面, 其他带参数都是跳转路由
-      }
-    })
-    .catch(err => {
-      localStorage.clear();
-      next("/login");
-    });
-};
-
 const set_menu = () => {
   store().menu.forEach(element => {
     route.addRoute("layout", element);
@@ -117,9 +99,8 @@ route.beforeEach((to, from, next) => {
             if (store().menu.length > 0) {
               //判断store中是否有菜单数据
               if (!store().hasmenu) set_menu(); //判断是否已经添加路由
-              // if (to.matched.length === 0) next("/"); //未知页面跳到首页
+              if (to.matched.length === 0) next("/admin/enterprise"); //未知页面跳到首页
               if (to.meta.title != undefined) window.document.title = to.meta.title; //TODO:设置标题
-              // refresh_token(to, next); // TODO:刷新token
               next(); // 进入页面, 其他带参数都是跳转路由
             } else get_menu(to, next); //没有菜单数据获取数据
           } else {

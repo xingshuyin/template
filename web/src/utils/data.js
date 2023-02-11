@@ -15,6 +15,7 @@ export const TreeMenu = (data, parent) => {
   return d;
 };
 export const Tree = (data, key, parent_key, parent) => {
+  // console.log("parent", parent);
   key = key ? key : "id";
   parent_key = parent_key ? parent_key : "parent";
   parent = parent ? parent : null;

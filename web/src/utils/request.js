@@ -16,14 +16,15 @@ const r = () => {
   //TODO:axios-拦截器
   r_.interceptors.request.use(
     config => {
-      if (config.url != "/refresh/") {
+      // console.log("config.url", config.url, ["/refresh/", "/token/"].indexOf(config.url));
+      if (["/refresh/", "/token/"].indexOf(config.url) == -1) {
         parse_token();
       }
 
       return config; //必须返回
     },
     error => {
-      if (error.response.data?.code == "token_not_valid") {
+      if (error?.response?.data?.code == "token_not_valid") {
         localStorage.removeItem("token"); //token无效了必须删除token
         window.location = "/#/login"; //token失效跳转登录页
       }
@@ -38,7 +39,7 @@ const r = () => {
     error => {
       // console.log("interceptors.response.error", error);
 
-      if (error.response.status == 401) {
+      if (error?.response?.status == 401) {
         ElMessage({
           showClose: true,
           message: error.response.data.detail,
@@ -46,22 +47,22 @@ const r = () => {
         });
         localStorage.clear();
         window.location = "/#/login/";
-      } else if (error.response.status == 500) {
+      } else if (error?.response?.status == 500) {
         ElMessage({
           showClose: true,
           message: "服务器错误",
           center: true,
         });
-      } else if (error.response?.data?.detail) {
+      } else if (error?.response?.data?.detail) {
         ElMessage({
           showClose: true,
-          message: error.response.data.detail,
+          message: error?.response?.data?.detail,
           center: true,
         });
       } else {
         ElMessage({
           showClose: true,
-          message: error.response.data,
+          message: error?.response?.data,
           center: true,
         });
       }

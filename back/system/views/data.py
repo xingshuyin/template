@@ -12,7 +12,7 @@ from django.forms import CharField, model_to_dict
 from system.models import *
 from django.utils._os import safe_join
 from django.conf import settings
-from django.http import HttpResponse, JsonResponse
+from django.http import FileResponse, HttpResponse, JsonResponse
 from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet
 from rest_framework.request import Request
@@ -199,5 +199,6 @@ class Data(ViewSet):
             path = f.file.path
             im = Image.open(path)
             im.save(zip_path, quality=7)  # quality 是压缩比率, 值越小图片越小
-        r = open(zip_path, "rb")
-        return HttpResponse(r.read(), content_type='image/jpg')
+        # r = open(zip_path, "rb")
+        return FileResponse(open(zip_path, "rb"))
+        # return HttpResponse(r.read(), content_type='image/jpg')

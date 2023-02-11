@@ -8,7 +8,7 @@ LastEditTime : 2022-11-20 09:00:27
 Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
 '''
 import hashlib
-
+import threading
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer, TokenObtainSerializer, PasswordField
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenViewBase
 from rest_framework_simplejwt.settings import api_settings
@@ -51,6 +51,12 @@ class MyRefreshToken(RefreshToken):
     access_token_class = MyAccessToken
 
 
+def login_log(request):
+    save_login_log(request)
+    request.user.last_login = timezone.now()  # validate之后才能访问self.user
+    request.user.save()
+
+
 # TODO:JWT-获取token的序列化器
 # 获取token就相当于登录
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/creating_tokens_manually.html  手动创建令牌
@@ -73,7 +79,7 @@ class MyTokenObtainSerializer(TokenObtainSerializer):
         # token = super().get_token(user)
         token = MyRefreshToken.for_user(user)  # TODO:手动获取token
         # Add custom claims
-        token['is_super'] = user.is_super
+        # token['is_super'] = user.is_super
         # ...
 
         return token
@@ -98,12 +104,15 @@ class MyTokenObtainSerializer(TokenObtainSerializer):
         refresh = self.get_token(self.user)
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
-        data['user'] = {'username': self.user.username, 'uid': self.user.id}
-        self.user.last_login = timezone.now()  # validate之后才能访问self.user
         request = self.context.get("request")  # 获取请求对象
         request.user = self.user
-        save_login_log(request)
-        self.user.save()
+        t1 = threading.Thread(target=login_log, args=(request, ))
+        t1.start()
+        # data['user'] = {'username': self.user.username, 'uid': self.user.id}
+        # self.user.last_login = timezone.now()  # validate之后才能访问self.user
+
+        # save_login_log(request)
+        # self.user.save()
 
         return data
 

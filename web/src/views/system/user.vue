@@ -32,7 +32,7 @@
                 :expand-row-keys="attrs.expandedRowKeys" :row-key="(row) => { return row.id }"
                 @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }"
                 :cell-style="() => { return { 'text-align': 'center' } }">
-                <f-columns v-if="attrs.columns" v-model="attrs.columns"></f-columns>
+                <f-columns v-model="attrs.columns"></f-columns>
                 <el-table-column label="操作" fixed="right" width="150">
                     <template #default="scope">
                         <el-button size="small" type="primary" @click="edit(scope)">编辑
@@ -113,7 +113,7 @@ import store from "../../store/index";
 
 const form_dom = ref()
 const attrs = reactive({
-    columns: null,
+    columns: [],
     base_url: 'User',
     selects: [],
     data: [],
@@ -176,8 +176,7 @@ const edit = (scope) => {
 
 get_all_role_(attrs)
 get_all_dept_tree_(attrs)
-
-onBeforeMount(async () => {
+const get_columns = async () => {
     attrs.columns = [
         { type: 'text', label: '名称', prop: 'name', size: 'small', align: "left", show: true },
         { type: 'text', label: '账号', prop: 'username', size: 'small', align: "center", show: true },
@@ -187,6 +186,19 @@ onBeforeMount(async () => {
         { type: 'select', width: 150, label: '是否超级用户', prop: 'is_super', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
         { type: 'text', width: 160, label: '创建时间', prop: 'createAt', size: 'small', align: "center", show: true },
     ]
+}
+get_columns()
+onBeforeMount(async () => {
+    // attrs.columns.push({ type: 'list', label: '角色', prop: 'role', option: await get_all_role_dict_(), show: true })
+    // attrs.columns = [
+    //     { type: 'text', label: '名称', prop: 'name', size: 'small', align: "left", show: true },
+    //     { type: 'text', label: '账号', prop: 'username', size: 'small', align: "center", show: true },
+    //     { type: 'list', label: '角色', prop: 'role', option: await get_all_role_dict_(), show: true },
+    //     { type: 'text', width: 150, label: '部门', prop: 'dept_name', size: 'small', align: "center", show: true },
+    //     { type: 'select', label: '用户类型', prop: 'type', option: { 1: '前端用户', 2: '后台用户' }, show: true },
+    //     { type: 'select', width: 150, label: '是否超级用户', prop: 'is_super', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+    //     { type: 'text', width: 160, label: '创建时间', prop: 'createAt', size: 'small', align: "center", show: true },
+    // ]
 })
 
 //动态列

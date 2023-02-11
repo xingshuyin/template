@@ -77,6 +77,9 @@ def deal_special_params(request: HttpRequest, queryset: QuerySet, filter_dict):
     if 'sort' in filter_dict.keys():
         queryset = queryset.order_by(filter_dict['sort'])
         del filter_dict['sort']
+    if 'order' in filter_dict.keys():
+        queryset = queryset.order_by(filter_dict['order'])
+        del filter_dict['order']
     if 'parent_name' in filter_dict.keys():
         queryset = queryset.filter(parent__name=filter_dict['parent_name'])
         del filter_dict['parent_name']

@@ -9,7 +9,7 @@
 -->
 <script setup>
 // 上传文件 ; 返回文件 id列表(modelValue)
-import { reactive } from 'vue';
+import { reactive, watch } from 'vue';
 import { upload_file_, remove_file_, remove_jfile_ } from '../../hooks/table_common'
 //const router = useRouter() //全局路由对象
 const props = defineProps(['modelValue', 'limit', 'size']); // limit数量限制   size大小限制(mb)
@@ -80,6 +80,9 @@ onBeforeMount(() => {
 })
 watch(() => { return attrs.file_list }, () => {
     console.log(attrs.file_list)
+})
+watch(() => { return props.modelValue }, () => {
+    attrs.file_list = props.modelValue
 })
 </script>
 <template>

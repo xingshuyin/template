@@ -37,7 +37,7 @@
                 @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }">
                 <!-- 动态列 -->
                 <f-columns v-if="attrs.columns" v-model="attrs.columns"></f-columns>
-                <el-table-column label="操作" fixed="right" width="150">
+                <el-table-column label="操作" fixed="right" width="150" align="center">
                     <template #default="scope">
                         <el-button size="small" type="primary"
                             @click="attrs.adding = true; attrs.add_form = scope.row; attrs.submit_type = 'update' ">编辑
@@ -55,8 +55,8 @@
             </el-table>
 
             <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit"
-                :background="true" :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper"
-                :total="attrs.total" :pager-count="11">
+                :background="true" :page-sizes="[50, 100, 200, 300, 400]"
+                layout="total, sizes, prev, pager, next, jumper" :total="attrs.total" :pager-count="11">
             </el-pagination>
         </div>
 
@@ -82,7 +82,7 @@
                 <span class="dialog-footer">
                     <el-button @click="attrs.adding = false">取消</el-button>
                     <el-button type="primary"
-                        @click="submit_(attrs.base_url, attrs.add_form, attrs.submit_type, get_data); attrs.adding = false">
+                        @click="submit_(attrs.base_url, attrs.add_form, attrs.submit_type, submit_success); attrs.adding = false">
                         提交
                     </el-button>
                 </span>
@@ -95,12 +95,8 @@
   
 <script setup>
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
-import { Tree } from '../../utils/data';
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, export_data_ } from '../../hooks/table_common'
 import store from "../../store/index";
-import rest from '../../utils/rest';
-import { onMounted } from 'vue';
-;
 const attrs = reactive({
     columns: null,
     base_url: 'Enterprise',
@@ -118,7 +114,7 @@ const special_form = reactive({
 })
 const form = reactive({
     page: 1,
-    limit: 100,
+    limit: 50,
 })
 watch([form, special_form], () => {
     if (special_form.range == null) {
@@ -126,14 +122,16 @@ watch([form, special_form], () => {
     }
     get_data()
 })
-const get_data = () => {
+const get_data = async () => {
+    attrs.areas_tree = await store().get_areas_tree();
     get_data_(`/${attrs.base_url}/`, { create_start: special_form.range[0], create_end: special_form.range[1], ...form }, attrs)
 }
 get_data()
-
-onMounted(async () => {
-    attrs.areas_tree = await store().get_areas_tree();
-})
+const submit_success = (res) => {
+    if (attrs.submit_type == 'add') {
+        attrs.data.shift(res.data)
+    }
+}
 
 
 
@@ -142,7 +140,7 @@ attrs.columns = [
     { type: 'text', width: 150, label: '行政区域', prop: 'area_name', align: "center", show: true },
     { type: 'jfile', width: 150, label: '文件', prop: 'file', align: "center", show: true },
     { type: 'jimage', width: 150, label: '图片', prop: 'image', align: "center", show: true },
-    { type: 'text', width: 160, label: '创建时间', prop: 'createAt', align: "center", show: true },
+    { type: 'text', width: 160, label: '创建时间', prop: 'createAt', align: "center", show: true, sortable: true },
 ]
 </script>
 

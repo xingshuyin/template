@@ -11,7 +11,7 @@ const props = defineProps(['modelValue']); // defineProps的参数, 可以直接
     <template v-for="i in modelValue">
         <!-- 普通文本 -->
         <el-table-column v-if="i.type == 'text' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
-            :width="i.width">
+            :sortable="i.sortable" :width="i.width">
         </el-table-column>
         <!-- 单选用标签 -->
         <el-table-column v-else-if="i.type == 'select' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
@@ -55,11 +55,11 @@ const props = defineProps(['modelValue']); // defineProps的参数, 可以直接
                 <div v-else></div>
             </template>
         </el-table-column>
-        <!-- 图片 -->
+        <!-- 链接 -->
         <el-table-column v-else-if="i.type == 'link' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
             :width="i.width">
             <template #default="scope">
-                <a :href="scope.row[i.prop]">{{ scope.row[i.prop] }}</a>
+                <a :href="scope.row[i.prop]" target="_blank">{{ scope.row[i.prop] }}</a>
             </template>
         </el-table-column>
     </template>
