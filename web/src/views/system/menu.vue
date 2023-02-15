@@ -165,7 +165,7 @@ get_data()
 
 //动态列--------------------------
 attrs.columns = [
-    { type: 'text', width: 180, label: '菜单名称', prop: 'label', size: 'small', align: "left", show: true },
+    { type: 'text', label: '菜单名称', prop: 'label', size: 'small', align: "left", show: true },
     { type: 'text', width: 150, label: '菜单图标', prop: 'icon', size: 'small', align: "center", show: true },
     { type: 'text', width: 130, label: '父级菜单', prop: 'parent_name', size: 'small', align: "center", show: true },
     { type: 'text', width: 100, label: '路由名称', prop: 'name', size: 'small', align: "center", show: true },

@@ -14,24 +14,20 @@ const items = store().menu
 // TODO:系统框架->左侧菜单栏
 </script>
 <template>
-
-    <!-- <div :style="`height: 100%;overflow: visible;width: ${store().menu_width};position: relative;`"> -->
-    <div style="height: 100%;" class="side">
-        <el-menu class="menu" router :collapse="store().toggle_side" background-color="rgba(0,0,0,0)"
-            active-text-color="yellow" :collapse-transition="true" text-color="white" :default-active="route.fullPath"
-            unique-opened>
-            <MenuTree :data="items" :parent_path="'/admin'"></MenuTree>
-        </el-menu>
-        <div class="collapse-btn"
-            @click="store().toggle_side = !store().toggle_side; store().toggle_side ? store().menu_width = '50px' : store().menu_width = '250px'">
-            <ep:arrow-left v-if="!store().toggle_side" style="font-size: 10px;color: black;" />
-            <ep:arrow-right v-else style="font-size: 10px;color: black;" />
+    <div :style="`height: 100%;overflow: visible;width: ${store().menu_width};position: relative;`">
+        <div :style="{ height: '100%', width: store().menu_width }" class="side">
+            <el-menu class="menu" router :collapse="store().toggle_side" background-color="rgba(0,0,0,0)"
+                active-text-color="yellow" :collapse-transition="true" text-color="white"
+                :default-active="route.fullPath" unique-opened>
+                <MenuTree :data="items" :parent_path="'/admin'"></MenuTree>
+            </el-menu>
+            <!-- <div class="collapse-btn"
+                @click="store().toggle_side = !store().toggle_side; store().toggle_side ? store().menu_width = '50px' : store().menu_width = '200px'">
+                <ep:arrow-left v-if="!store().toggle_side" style="font-size: 10px;color: black;" />
+                <ep:arrow-right v-else style="font-size: 10px;color: black;" />
+            </div> -->
         </div>
     </div>
-
-    <!-- </div> -->
-
-
 </template>
  
 

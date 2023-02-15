@@ -257,7 +257,6 @@ class User(AbstractBaseUser, BaseModel):
         # encode(encoding="UTF-8")  之后 通过索引获取的值为unciode编码值
         super().set_password(hashlib.md5(raw_password.encode(encoding="UTF-8")).hexdigest())
 
-
     class Meta:
         db_table = "User"
         verbose_name = "用户表"

@@ -23,17 +23,6 @@ const search_change = (value) => {
     search.value = undefined
   }
 }
-// const deep_search = (list, value) => {
-//   for (let index = 0; index < list.length; index++) {
-//     const i = list[index];
-//     if (i.name == value) return i;
-//     else if (i?.children?.length > 0) {
-//       let c = deep_search(i.children, value)
-//       if (c) return c
-//     };
-//   }
-//   return false
-// }
 const filter_method = (node, key) => {
   console.log(node, key)
   let p = pinyin(node.label, { toneType: 'none', type: 'array' }).join('');
@@ -75,30 +64,29 @@ const env = import.meta.env
       </div>
 
     </div>
+    <Expand style="width: 2em; height: 2em; margin-right: 8px;color: white;" v-if="store().toggle_side"
+      @click="store().toggle_side = !store().toggle_side; store().toggle_side ? store().menu_width = '50px' : store().menu_width = '200px'" />
+    <Fold style="width: 2em; height: 2em; margin-right: 8px;color: white;" v-else
+      @click="store().toggle_side = !store().toggle_side; store().toggle_side ? store().menu_width = '50px' : store().menu_width = '200px'" />
 
     <!-- 按钮 -->
     <div class="buttons ">
+      <el-button icon="Monitor" circle @click="router.push({ name: 'front' })"></el-button>
       <t-time style="margin-left: 15px;"></t-time>
       <div class="buttons-item">
         <el-cascader v-model="search" :options="store().menu" @change="search_change" :filter-method="filter_method"
           placeholder="搜索" :props="{ emitPath: false, value: 'name', label: 'label', }" filterable clearable
           size="small" />
-
       </div>
-
       <el-tooltip content="全屏" placement="bottom" effect="light">
         <t-fullscreen class="buttons-item"></t-fullscreen>
       </el-tooltip>
-
-      &nbsp;&nbsp;
       <div class="user buttons-item">
-
         <span style="font-size: 16px; padding-right: 5px;">
           <span style="color: yellow ;">{{ username }}</span>
         </span>
         <el-avatar class="avatar" size="small" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
           @click="centerDialogVisible = true" />
-
       </div>
 
     </div>
@@ -138,6 +126,7 @@ const env = import.meta.env
     align-items: center;
     color: rgb(255, 255, 255);
     font-family: Kumbh Sans, sans-serif;
+    transition-duration: 600ms;
 
     .title-img {
       height: 100%;
@@ -149,6 +138,8 @@ const env = import.meta.env
     .title-text {
       margin-left: 10px;
       transition-duration: 200ms;
+      white-space: nowrap;
+      overflow: hidden;
     }
   }
 

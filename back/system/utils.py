@@ -135,25 +135,12 @@ def get_browser(request, ):
 
 
 def get_os(request, ):
-    """
-    获取操作系统
-    :param request:
-    :param args:
-    :param kwargs:
-    :return:
-    """
     ua_string = request.META['HTTP_USER_AGENT']
     user_agent = parse(ua_string)
     return user_agent.get_os()
 
 
 def get_verbose_name(queryset=None, view=None, model=None):
-    """
-    获取 verbose_name
-    :param request:
-    :param view:
-    :return:
-    """
     try:
         if queryset is not None and hasattr(queryset, 'model'):
             model = queryset.model
@@ -171,11 +158,6 @@ def get_verbose_name(queryset=None, view=None, model=None):
 
 
 def get_ip_analysis(ip):
-    """
-    获取ip详细概略
-    :param ip: ip地址
-    :return:
-    """
     data = {"continent": "", "country": "", "province": "", "city": "", "district": "", "isp": "", "area_code": "", "country_english": "", "country_code": "", "longitude": "", "latitude": ""}
     if ip != 'unknown' and ip:
         if getattr(settings, 'ENABLE_LOGIN_ANALYSIS_LOG', True):

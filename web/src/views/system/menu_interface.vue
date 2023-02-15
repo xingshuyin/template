@@ -97,12 +97,11 @@
 
 
 </template>
-  
+
 <script setup>
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
-import { get_data_, select_, mult_delete_, update_item_, delete_item_, sort_, submit_, get_all_role_, get_all_menu_tree_, get_all_interface_ } from '../../hooks/table_common'
+import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, get_all_role_, get_all_menu_tree_, get_all_interface_ } from '../../hooks/table_common'
 import store from "../../store/index";
-;
 const form_dom = ref()
 const attrs = reactive({
     columns: null,
@@ -112,7 +111,6 @@ const attrs = reactive({
     total: 0,
     loading: true,
     adding: false,
-
     expandedRowKeys: [],
     add_form: {},
 })

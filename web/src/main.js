@@ -105,8 +105,8 @@ route.beforeEach((to, from, next) => {
             } else get_menu(to, next); //没有菜单数据获取数据
           } else {
             // if (to.path === "/login") next("/admin"); //TODO:router-有token登录页跳转首页
-            next("/admin/enterprise");
-            // next(); //必须要用这个,不然就刷新空白
+            // next("/admin/enterprise");
+            next(); //必须要用这个,不然就刷新空白
           }
         } else {
           if (to.path === "/login") next("/");

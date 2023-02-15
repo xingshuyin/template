@@ -177,7 +177,7 @@ def init_MenuInterface():
         print(m.name)
 
         for i in [['add', '添加', 1, "/" + m.name + "/"], ['delete', '删除', 3, "/" + m.name + "/{id}/"], ['put', '修改', 2, "/" + m.name + "/{id}/"], ['list', '查询', 0, "/" + m.name + "/"]]:
-            MenuInterface.objects.create(name=i[1], key=i[0], method=i[2], path=i[3], menu=m)
+            MenuInterface.objects.create(name=i[1], key=n + '_' + i[0], method=i[2], path=i[3], menu=m)
 
 
 def init_Role():

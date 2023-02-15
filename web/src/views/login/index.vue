@@ -34,8 +34,7 @@ const router = useRouter();
 
 const login = () => { //TODO:登录
   r().post('/token/', { ...toRaw(form) }).then((response) => {
-    console.log('loginresponse', response)
-    if (response.status == 200) {
+    if (response?.status == 200) {
       console.log('set token')
       localStorage.setItem('token', response.data.access)
       localStorage.setItem('refresh', response.data.refresh)
@@ -45,36 +44,11 @@ const login = () => { //TODO:登录
         else localStorage.setItem('username', res.username)
         console.log("login---userinfo", res)
         if (res.is_super || res.type == 2) {
-          router.push('/admin/enterprise')
+          router.push('/admin/enterprise') //TODO:管理员进入后台管理界面
         } else {
-          router.push('/')
-          // ElMessage({
-          //   showClose: true,
-          //   message: '未绑定企业信息',
-          //   center: true,
-          // })
+          router.push('/') //TODO:普通用户进入前台
         }
       })
-
-
-    } else {
-      ElMessage({
-        showClose: true,
-        message: '用户名或密码错误',
-        center: true,
-      })
-    }
-  }).catch((err) => {
-    if (err?.response?.status == 401) {
-      localStorage.setItem('token', '')
-      localStorage.setItem('refresh', '')
-      ElMessage({
-        showClose: true,
-        message: '用户名或密码错误',
-        center: true,
-      })
-    } else {
-      console.log(err)
     }
   })
 }
@@ -85,7 +59,7 @@ const login = () => { //TODO:登录
 const refresh = () => {
   r().post('/refresh/', { refresh: localStorage.getItem('refresh') }).then((response) => {
     console.log('loginresponse', response)
-    if (response.status == 200) {
+    if (response?.status == 200) {
       localStorage.setItem('token', response.data.access)
     }
     else {
@@ -123,10 +97,10 @@ const env = import.meta.env
         <div class="form">
           <el-form :model="form" status-icon :rules="rules" label-width="40px">
             <el-form-item label="账号" prop="checkPass">
-              <el-input v-model="form.username" size="large" autocomplete="off" />
+              <el-input @keyup.enter="login" v-model="form.username" size="large" autocomplete="off" />
             </el-form-item>
             <el-form-item label="密码" prop="pass">
-              <el-input v-model="form.password" type="password" size="large" autocomplete="off" />
+              <el-input @keyup.enter="login" v-model="form.password" type="password" size="large" autocomplete="off" />
             </el-form-item>
           </el-form>
         </div>
