@@ -81,6 +81,9 @@ onBeforeMount(() => {
 watch(() => { return attrs.file_list }, () => {
     console.log(attrs.file_list)
 })
+watch(() => { return props.modelValue }, () => {
+    attrs.file_list = props.modelValue
+})
 </script>
 <template>
     <el-upload v-model:file-list="attrs.file_list" :limit="limit" action="/api/data/upload/" @on-progress="upload_file_"
@@ -90,5 +93,4 @@ watch(() => { return attrs.file_list }, () => {
     </el-upload>
 </template>
 <style scoped lang='scss'>
-
 </style>

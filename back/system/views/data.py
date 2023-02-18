@@ -118,10 +118,10 @@ class Data(ViewSet):
     @action(['get'], url_path='GetRolePermision', url_name='GetRolePermision', detail=False, permission_classes=[])
     def GetRolePermision(self, request: Request):
         role_id = request.GET.get('role_id')
-        role = role.objects.get(id=role_id)
-        menus = [i.id for i in role.menu.all()]
-        interfaces = [i.id for i in role.menu_interface.all()]
-        return JsonResponse({'interfaces': interfaces, 'menus': menus, 'permission': role.permission}, safe=False)
+        ro = role.objects.get(id=role_id)
+        menus = [i.id for i in ro.menu.all()]
+        interfaces = [i.id for i in ro.menu_interface.all()]
+        return JsonResponse({'interfaces': interfaces, 'menus': menus, 'permission': ro.permission}, safe=False)
 
     # 设置角色权限
     @action(['post'], url_path='SetRolePermision', url_name='SetRolePermision', detail=False, permission_classes=[SuperPermisssion])
@@ -130,11 +130,11 @@ class Data(ViewSet):
         permission = request.data['permission']
         menus = request.data['menus']
         role_id = request.data['role_id']
-        role = role.objects.get(id=role_id)
-        role.permission = permission
-        role.menu.set(menus)  # TODO:request-多对多 覆盖值
-        role.menu_interface.set(interfaces)
-        role.save()
+        ro = role.objects.get(id=role_id)
+        ro.permission = permission
+        ro.menu.set(menus)  # TODO:request-多对多 覆盖值
+        ro.menu_interface.set(interfaces)
+        ro.save()
         return JsonResponse({'msg': '设置成功'})
 
     # 获取菜单

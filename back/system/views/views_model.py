@@ -176,7 +176,7 @@ def prefetch_related(queryset: QuerySet):
 
 
 # 通用list方法
-@get_time
+# @get_time
 def list_common(self, request: HttpRequest, *args):
     page = int(request.GET.get('page'))
     limit = int(request.GET.get('limit'))
@@ -423,7 +423,6 @@ def model_viewset(m, inherit_viewset, inherit_serializer, **kwargs):
         inherit_viewset,
         dict(
             {
-                # 'queryset': m.objects.all(),
                 'queryset': MyQuerySet(m),
                 'serializer_class': model_serializer(m, inherit_serializer),
                 'filter_backends': [filters.SearchFilter],

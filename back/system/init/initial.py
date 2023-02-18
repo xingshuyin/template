@@ -181,7 +181,7 @@ def init_area():
     with connection.cursor() as cursor:
         for i in areas.split(";"):
             print(i)
-            if i:
+            if len(i) > 5:
                 cursor.execute(i)
 
 

@@ -2,7 +2,7 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-# nohup gunicorn root.asgi:application --workers 2 --worker-class uvicorn.workers.UvicornWorker -b 127.0.0.1:8001 > ljz.out 2>&1 &
+# nohup gunicorn root.asgi:application --workers 2 --worker-class uvicorn.workers.UvicornWorker -b 127.0.0.1:8000 > template.out 2>&1 &
 
 
 def main():

@@ -145,7 +145,9 @@ const submit_success = (res) => {
     if (attrs.submit_type == 'add') {
         console.log('addddd', res, attrs)
         attrs.data.shift(res.data)
+        attrs.add_form = {};
     }
+
     get_data()
 }
 const get_data = async () => {
