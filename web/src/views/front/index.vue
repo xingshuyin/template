@@ -3,8 +3,7 @@
 //const emits = defineEmits(['update:modelValue']); // emits 触发父组件函数
 </script>
 <template>
-    前端
+    前台
 </template>
 <style scoped lang='scss'>
-
 </style>

@@ -1,12 +1,3 @@
-<!--
- * @Filename     : menu.vue
- * @Description  : wjt-前端-菜单管理
- * @Author       : xingshuyin xingshuyin@outlook.com
- * @Date         : 2022-10-18 09:45:18
- * @LastEditors  : xingshuyin xingshuyin@outlook.com
- * @LastEditTime : 2022-11-30 19:14:14
- * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
--->
 <template>
     <el-config-provider :locale="zhCn">
         <div class="main-top">
@@ -125,19 +116,19 @@ Object.keys(views).forEach(i => {
     components.push(i.slice(11))
 });
 const attrs = reactive({
-    columns: {
-        'label': { type: 'text', label: '菜单名称', size: 'small', align: "left", show: true },
-        'icon': { type: 'text', width: 150, label: '菜单图标', size: 'small', align: "center", show: true },
-        'parent_name': { type: 'text', width: 130, label: '父级菜单', size: 'small', align: "center", show: true },
-        'name': { type: 'text', width: 100, label: '路由名称', size: 'small', align: "center", show: true },
-        'sort': { type: 'text', width: 100, label: '排序', size: 'small', align: "center", show: true },
-        'is_link': { type: 'select', width: 150, label: '是否外链', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-        'is_catalog': { type: 'select', width: 100, label: '是否目录', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-        'component': { type: 'text', width: 100, label: '组件地址', size: 'small', align: "center", show: true },
-        'disable': { type: 'select', width: 100, label: '是否禁用', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-        'cache': { type: 'select', width: 150, label: '是否缓存', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-        'createAt': { type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
-    },
+    columns: [
+        { prop: 'label', type: 'text', label: '菜单名称', size: 'small', align: "left", show: true },
+        { prop: 'icon', type: 'text', width: 150, label: '菜单图标', size: 'small', align: "center", show: true },
+        { prop: 'parent_name', type: 'text', width: 130, label: '父级菜单', size: 'small', align: "center", show: true },
+        { prop: 'name', type: 'text', width: 100, label: '路由名称', size: 'small', align: "center", show: true },
+        { prop: 'sort', type: 'text', width: 100, label: '排序', size: 'small', align: "center", show: true },
+        { prop: 'is_link', type: 'select', width: 150, label: '是否外链', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        { prop: 'is_catalog', type: 'select', width: 100, label: '是否目录', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        { prop: 'component', type: 'text', width: 100, label: '组件地址', size: 'small', align: "center", show: true },
+        { prop: 'disable', type: 'select', width: 100, label: '是否禁用', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        { prop: 'cache', type: 'select', width: 150, label: '是否缓存', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        { prop: 'createAt', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+    ],
     base_url: 'menu',
     selects: [],
     data: [],

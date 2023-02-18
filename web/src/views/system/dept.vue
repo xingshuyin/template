@@ -1,12 +1,3 @@
-<!--
- * @Filename     : menu.vue
- * @Description  : wjt-前端-菜单管理
- * @Author       : xingshuyin xingshuyin@outlook.com
- * @Date         : 2022-10-18 09:45:18
- * @LastEditors  : xingshuyin xingshuyin@outlook.com
- * @LastEditTime : 2022-11-30 19:14:14
- * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
--->
 <template>
     <el-config-provider :locale="zhCn">
         <div class="main-top">
@@ -100,14 +91,14 @@ import { Tree } from '../../utils/data';
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_ } from '../../hooks/table_common'
 import rest from '../../utils/rest';
 const attrs = reactive({
-    columns: {
-        'name': { type: 'text', label: '部门名称', size: 'small', align: "left", show: true },
-        'key': { type: 'text', label: '标识符', size: 'small', align: "left", show: true },
-        'parent_name': { type: 'text', label: '父级部门', size: 'small', align: "center", show: true },
-        'sort': { type: 'text', width: 180, label: '排序', size: 'small', align: "center", show: true },
-        'owner': { type: 'text', width: 150, label: '负责人', size: 'small', align: "center", show: true },
-        'createAt': { type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
-    },
+    columns: [
+        { prop: 'name', type: 'text', label: '部门名称', size: 'small', align: "left", show: true },
+        { prop: 'key', type: 'text', label: '标识符', size: 'small', align: "left", show: true },
+        { prop: 'parent_name', type: 'text', label: '父级部门', size: 'small', align: "center", show: true },
+        { prop: 'sort', type: 'text', width: 180, label: '排序', size: 'small', align: "center", show: true },
+        { prop: 'owner', type: 'text', width: 150, label: '负责人', size: 'small', align: "center", show: true },
+        { prop: 'createAt', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+    ],
     base_url: 'dept',
     selects: [],
     data: [],

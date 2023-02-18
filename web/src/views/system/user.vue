@@ -1,12 +1,3 @@
-<!--
- * @Filename     : backend_user.vue
- * @Description  : wjt-前端-角色管理
- * @Author       : xingshuyin xingshuyin@outlook.com
- * @Date         : 2022-10-18 09:45:18
- * @LastEditors  : xingshuyin xingshuyin@outlook.com
- * @LastEditTime : 2022-11-30 19:10:35
- * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
--->
 <template>
     <el-config-provider :locale="zhCn">
         <div class="main-top">
@@ -102,15 +93,15 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, get_all_role_, get_all_role_dict_, get_all_dept_tree_ } from '../../hooks/table_common'
 const form_dom = ref()
 const attrs = reactive({
-    columns: {
-        name: { type: 'text', label: '名称', size: 'small', align: "left", show: true },
-        username: { type: 'text', label: '账号', size: 'small', align: "center", show: true },
-        role: { type: 'list', label: '角色', option: {}, show: true },
-        dept_name: { type: 'text', width: 150, label: '部门', size: 'small', align: "center", show: true },
-        type: { type: 'select', label: '用户类型', option: { 1: '前端用户', 2: '后台用户' }, show: true },
-        is_super: { type: 'select', width: 150, label: '是否超级用户', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-        createAt: { type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
-    },
+    columns: [
+        { prop: 'name', type: 'text', label: '名称', size: 'small', align: "left", show: true },
+        { prop: 'username', type: 'text', label: '账号', size: 'small', align: "center", show: true },
+        { prop: 'role', type: 'list', label: '角色', option: {}, show: true },
+        { prop: 'dept_name', type: 'text', width: 150, label: '部门', size: 'small', align: "center", show: true },
+        { prop: 'type', type: 'select', label: '用户类型', option: { 1: '前端用户', 2: '后台用户' }, show: true },
+        { prop: 'is_super', type: 'select', width: 150, label: '是否超级用户', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        { prop: 'createAt', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+    ],
     base_url: 'user',
     selects: [],
     data: [],
@@ -167,7 +158,7 @@ const edit = (scope) => {
 get_all_role_(attrs)
 get_all_dept_tree_(attrs)
 get_all_role_dict_().then((res) => {
-    attrs.columns.role.option = res
+    attrs.columns[2].option = res //确保索引对
 })
 
 // attrs.columns = [

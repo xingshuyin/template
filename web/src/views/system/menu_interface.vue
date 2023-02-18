@@ -1,12 +1,3 @@
-<!--
- * @Filename     : menu_interface.vue
- * @Description  : wjt-前端-角色管理
- * @Author       : xingshuyin xingshuyin@outlook.com
- * @Date         : 2022-10-18 09:45:18
- * @LastEditors  : xingshuyin xingshuyin@outlook.com
- * @LastEditTime : 2022-11-19 11:48:42
- * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
--->
 <template>
     <el-config-provider :locale="zhCn">
         <div class="main-top">
@@ -100,10 +91,11 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, get_all_role_, get_all_menu_tree_, get_all_interface_ } from '../../hooks/table_common'
 const form_dom = ref()
 const attrs = reactive({
-    columns: {
-        'name': { type: 'text', label: '接口名称', size: 'small', align: "center", show: true },
-        'key': { type: 'text', label: '标识符', size: 'small', align: "center", show: true },
-        'method': {
+    columns: [
+        { prop: 'name', type: 'text', label: '接口名称', size: 'small', align: "center", show: true },
+        { prop: 'key', type: 'text', label: '标识符', size: 'small', align: "center", show: true },
+        {
+            prop: 'method',
             type: 'select', label: '请求方式', size: 'small', align: "center", show: true, option: {
                 0: "GET",
                 1: "POST",
@@ -111,10 +103,10 @@ const attrs = reactive({
                 3: "DELETE",
             }
         },
-        'path': { type: 'text', width: 180, label: '接口地址', size: 'small', align: "center", show: true },
-        'menu_label': { type: 'text', width: 150, label: '菜单', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-        'createAt': { type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
-    },
+        { prop: 'path', type: 'text', width: 180, label: '接口地址', size: 'small', align: "center", show: true },
+        { prop: 'menu_label', type: 'text', width: 150, label: '菜单', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        { prop: 'createAt', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+    ],
     base_url: 'menu_interface',
     selects: [],
     data: [],

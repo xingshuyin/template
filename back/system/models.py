@@ -117,6 +117,7 @@ class file(base_model):
     name = models.CharField(max_length=100)
 
     def delete(self, using: Any = ..., keep_parents: bool = ...) -> Tuple[int, Dict[str, int]]:
+        print('file delete', self.file)
         self.file.delete()
         return super().delete()
 
@@ -323,6 +324,13 @@ class enterprise(base_model):
     area = models.ForeignKey(area, on_delete=models.DO_NOTHING, null=True, to_field="code", help_text="区域", verbose_name='区域')
     file = models.JSONField(default=list, help_text="文件", verbose_name='文件')
     image = models.JSONField(default=list, help_text="图片", verbose_name='图片')  # JSON类型前端直接传列表就可以,不需要JSON化, 前端axios接收后也不用解析直接使用
+
+    def delete(self, using=None, keep_parents=False):
+        f = file.objects.filter(id__in=[i['id'] for i in [*self.file, *self.image]])
+        for i in f:  # TODO:删除的同时删除文件,
+            # 必须是单个model对象的delete才会触发, 文件必须是用f-jfile或f-jimage组件上传的
+            i.delete()
+        super().delete(using=using, keep_parents=keep_parents)
 
     class Meta:
         db_table = "enterprise"

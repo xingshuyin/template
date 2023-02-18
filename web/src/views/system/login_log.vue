@@ -1,12 +1,3 @@
-<!--
- * @Filename     : menu.vue
- * @Description  : wjt-前端-菜单管理
- * @Author       : xingshuyin xingshuyin@outlook.com
- * @Date         : 2022-10-18 09:45:18
- * @LastEditors  : xingshuyin xingshuyin@outlook.com
- * @LastEditTime : 2022-11-30 19:14:14
- * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
--->
 <template>
     <el-config-provider :locale="zhCn">
         <div class="main-top">
@@ -108,25 +99,25 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { Tree } from '../../utils/data';
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_ } from '../../hooks/table_common'
 const attrs = reactive({
-    columns: {
-        'username': { type: 'text', label: '登录用户名', width: 100, size: 'small', align: "left", show: true },
-        'ip': { type: 'text', label: '登录ip', size: 'small', align: "left", show: true },
-        'agent': { type: 'text', label: 'agent信息', width: 300, size: 'small', align: "left", show: true },
-        'browser': { type: 'text', label: '浏览器名', width: 300, size: 'small', align: "left", show: true },
-        'os': { type: 'text', label: '操作系统', size: 'small', align: "left", show: true },
-        'continent': { type: 'text', label: '州', size: 'small', align: "left", show: true },
-        'country': { type: 'text', label: '国家', size: 'small', align: "left", show: true },
-        'province': { type: 'text', label: '省份', size: 'small', align: "left", show: true },
-        'city': { type: 'text', label: '城市', size: 'small', align: "left", show: true },
-        'district': { type: 'text', label: '县区', size: 'small', align: "left", show: true },
-        'isp': { type: 'text', label: '运营商', size: 'small', align: "left", show: true },
-        'area_code': { type: 'text', label: '区域代码', size: 'small', align: "left", show: true },
-        'country_english': { type: 'text', label: '英文全称', size: 'small', align: "left", show: true },
-        'country_code': { type: 'text', label: '简称', size: 'small', align: "left", show: true },
-        'longitude': { type: 'text', label: '经度', size: 'small', align: "left", show: true },
-        'latitude': { type: 'text', label: '纬度', size: 'small', align: "left", show: true },
-        'createAt': { type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
-    },
+    columns: [
+        { prop: 'username', type: 'text', label: '登录用户名', width: 100, size: 'small', align: "left", show: true },
+        { prop: 'ip', type: 'text', label: '登录ip', size: 'small', align: "left", show: true },
+        { prop: 'agent', type: 'text', label: 'agent信息', width: 300, size: 'small', align: "left", show: true },
+        { prop: 'browser', type: 'text', label: '浏览器名', width: 300, size: 'small', align: "left", show: true },
+        { prop: 'os', type: 'text', label: '操作系统', size: 'small', align: "left", show: true },
+        { prop: 'continent', type: 'text', label: '州', size: 'small', align: "left", show: true },
+        { prop: 'country', type: 'text', label: '国家', size: 'small', align: "left", show: true },
+        { prop: 'province', type: 'text', label: '省份', size: 'small', align: "left", show: true },
+        { prop: 'city', type: 'text', label: '城市', size: 'small', align: "left", show: true },
+        { prop: 'district', type: 'text', label: '县区', size: 'small', align: "left", show: true },
+        { prop: 'isp', type: 'text', label: '运营商', size: 'small', align: "left", show: true },
+        { prop: 'area_code', type: 'text', label: '区域代码', size: 'small', align: "left", show: true },
+        { prop: 'country_english', type: 'text', label: '英文全称', size: 'small', align: "left", show: true },
+        { prop: 'country_code', type: 'text', label: '简称', size: 'small', align: "left", show: true },
+        { prop: 'longitude', type: 'text', label: '经度', size: 'small', align: "left", show: true },
+        { prop: 'latitude', type: 'text', label: '纬度', size: 'small', align: "left", show: true },
+        { prop: 'createAt', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+    ],
     base_url: 'log',
     selects: [],
     data: [],

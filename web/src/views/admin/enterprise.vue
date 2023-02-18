@@ -143,8 +143,10 @@ const validate = () => {
 }
 const submit_success = (res) => {
     if (attrs.submit_type == 'add') {
+        console.log('addddd', res, attrs)
         attrs.data.shift(res.data)
     }
+    get_data()
 }
 const get_data = async () => {
     attrs.areas_tree = await store().get_areas_tree();

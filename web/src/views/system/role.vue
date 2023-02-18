@@ -1,12 +1,3 @@
-<!--
- * @Filename     : role.vue
- * @Description  : wjt-前端-角色管理
- * @Author       : xingshuyin xingshuyin@outlook.com
- * @Date         : 2022-10-18 09:45:18
- * @LastEditors  : xingshuyin xingshuyin@outlook.com
- * @LastEditTime : 2022-11-30 22:26:04
- * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
--->
 <template>
     <el-config-provider :locale="zhCn">
         <div class="main-top">
@@ -130,12 +121,12 @@ import { Tree, permission_type } from '../../utils/data';
 import r from '../../utils/request';
 const form_dom = ref()
 const attrs = reactive({
-    columns: {
-        'name': { type: 'text', label: '角色名称', size: 'small', align: "left", show: true },
-        'key': { type: 'text', label: '角色标识', size: 'small', align: "center", show: true },
-        'is_admin': { type: 'select', width: 150, label: '是否管理员', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-        'createAt': { type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
-    },
+    columns: [
+        { prop: 'name', type: 'text', label: '角色名称', size: 'small', align: "left", show: true },
+        { prop: 'key', type: 'text', label: '角色标识', size: 'small', align: "center", show: true },
+        { prop: 'is_admin', type: 'select', width: 150, label: '是否管理员', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        { prop: 'createAt', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+    ],
     base_url: 'role',
     selects: [],
     data: [],

@@ -1,12 +1,3 @@
-<!--
- * @Filename     : menu.vue
- * @Description  : wjt-前端-菜单管理
- * @Author       : xingshuyin xingshuyin@outlook.com
- * @Date         : 2022-10-18 09:45:18
- * @LastEditors  : xingshuyin xingshuyin@outlook.com
- * @LastEditTime : 2022-11-30 19:14:14
- * Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
--->
 <template>
     <el-config-provider :locale="zhCn">
         <div class="main-top">
@@ -81,10 +72,10 @@
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, export_data_ } from '../../hooks/table_common'
 const attrs = reactive({
-    columns: {
-        'name': { type: 'text', label: '文件名', align: "center", show: true },
-        'file': { type: 'link', label: '链接', align: "center", show: true },
-    },
+    columns: [
+        { prop: 'name', type: 'text', label: '文件名', align: "center", show: true },
+        { prop: 'file', type: 'link', label: '链接', align: "center", show: true },
+    ],
     base_url: 'file',
     selects: [],
     data: [],
