@@ -21,8 +21,7 @@
                 </el-button>
                 <el-button icon="Plus" circle
                     @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'; attrs.submit_type = 'add'" />
-                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns"
-                    :base_url="attrs.base_url"></f-columns-edit>
+                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
             </div>
         </div>
 
@@ -53,9 +52,9 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit"
-                :background="true" :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper"
-                :total="attrs.total" :pager-count="11">
+            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit" :background="true"
+                :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper" :total="attrs.total"
+                :pager-count="11">
             </el-pagination>
         </div>
 
@@ -122,21 +121,22 @@
             </template>
         </el-drawer>
     </el-config-provider>
-
-
 </template>
   
 <script setup>
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { get_data_, select_, mult_delete_, update_item_, delete_item_, sort_, submit_, get_all_menu_tree_, get_all_dept_tree_ } from '../../hooks/table_common'
-import store from "../../store/index";
 import { Tree, permission_type } from '../../utils/data';
 import r from '../../utils/request';
-;
 const form_dom = ref()
 const attrs = reactive({
-    columns: null,
-    base_url: 'Role',
+    columns: {
+        'name': { type: 'text', label: '角色名称', size: 'small', align: "left", show: true },
+        'key': { type: 'text', label: '角色标识', size: 'small', align: "center", show: true },
+        'is_admin': { type: 'select', width: 150, label: '是否管理员', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        'createAt': { type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+    },
+    base_url: 'role',
     selects: [],
     data: [],
     total: 0,
@@ -220,13 +220,6 @@ get_all_dept_tree_(attrs)
 get_all_menu_tree_(attrs)
 
 
-//动态列
-attrs.columns = [
-    { type: 'text', label: '角色名称', prop: 'name', size: 'small', align: "left", show: true },
-    { type: 'text', label: '角色标识', prop: 'key', size: 'small', align: "center", show: true },
-    { type: 'select', width: 150, label: '是否管理员', prop: 'is_admin', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-    { type: 'text', width: 160, label: '创建时间', prop: 'createAt', size: 'small', align: "center", show: true },
-]
 </script>
 
 <style scoped lang="scss">
@@ -257,8 +250,6 @@ attrs.columns = [
             align-items: center;
             padding-right: 10px;
         }
-
-        .permission-item-interface {}
     }
 }
 </style>

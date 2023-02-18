@@ -122,7 +122,7 @@ export const get_all_dept_tree_ = attrs => {
   if (store().all_dept) {
     attrs.all_dept = store().all_dept;
   } else {
-    rest.list("Dept", null, null, null, res => {
+    rest.list("dept", null, null, null, res => {
       console.log(res);
       attrs.all_dept = Tree(res.data.data);
       store().all_dept = attrs.all_dept;
@@ -145,7 +145,7 @@ export const get_all_role_ = async (attrs, params) => {
   if (store().all_role) {
     attrs.all_role = store().all_role;
   } else {
-    rest.list("Role", params, null, null, res => {
+    rest.list("role", params, null, null, res => {
       console.log(res);
       attrs.all_role = res.data.data;
       store().all_role = res.data.data;
@@ -172,13 +172,13 @@ export const get_all_users_ = async (attrs, params) => {
     });
 };
 export const get_all_area_tree_ = () => {
-  rest.list("Area", { page: 1, limit: 99999 }, null, null, res => {
+  rest.list("area", { page: 1, limit: 99999 }, null, null, res => {
     attrs.areas_tree = Tree(res.data.data, "code", "pcode");
     // resolve(nodes)
   });
 };
 export const get_all_area_ = () => {
-  rest.list("Area", { page: 1, limit: 99999 }, null, null, res => {
+  rest.list("area", { page: 1, limit: 99999 }, null, null, res => {
     attrs.areas = res.data.data;
     // resolve(nodes)
   });
@@ -224,8 +224,8 @@ export const remove_file_ = async file => {
 export const remove_jfile_ = async file => {
   //删除json类型文件, 针对elementplus  新上传的文件和原有值的数据格式不同
   console.log("remove jfile", file);
-  if (file.response) return r().delete(`/File/${file.response.id}/`);
-  else return r().delete(`/File/${file.id}/`);
+  if (file.response) return r().delete(`/file/${file.response.id}/`);
+  else return r().delete(`/file/${file.id}/`);
 };
 export const upload_file_ = (event, file, files) => {
   //手动上传文件

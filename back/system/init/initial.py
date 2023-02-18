@@ -14,13 +14,9 @@ sys.path.append(p)  # 将项目路径添加到系统搜寻路径当中
 os.environ['DJANGO_SETTINGS_MODULE'] = 'root.settings'  # 设置项目的配置文件
 django.setup()  # 加载项目配置
 from system.models import *
-'''
-description: 初始化后端用户
-return {*}
-'''
 
 
-def init_User():
+def init_user():
     l = [
         {
             'name': '管理员',
@@ -36,17 +32,11 @@ def init_User():
         },
     ]  #
     for i in l:
-        User.objects.create_user(**i)
-
-
-'''
-description: 初始化菜单
-return {*}
-'''
+        user.objects.create_user(**i)
 
 
 # 所有菜单路由都是子路由, 所以path不加/ (element-plus的menu组件)
-def init_Menu():
+def init_menu():
     l = [
         {
             'id': 1,
@@ -76,7 +66,7 @@ def init_Menu():
             'id': 3,
             'parent_id': 1,
             'label': '角色管理',
-            'icon': 'UserFilled',
+            'icon': 'userFilled',
             'component': 'system/role.vue',
             'name': 'role',
             'path': 'role',
@@ -159,7 +149,7 @@ def init_Menu():
     ]
     for i in l:
         print(i)
-        Menu.objects.create(**i)
+        menu.objects.create(**i)
 
 
 METHOD_CHOICES = (
@@ -170,19 +160,19 @@ METHOD_CHOICES = (
 )
 
 
-def init_MenuInterface():
-    menus = Menu.objects.all()
+def init_menu_interface():
+    menus = menu.objects.all()
     for m in menus:
         n = m._meta.object_name
         print(m.name)
 
         for i in [['add', '添加', 1, "/" + m.name + "/"], ['delete', '删除', 3, "/" + m.name + "/{id}/"], ['put', '修改', 2, "/" + m.name + "/{id}/"], ['list', '查询', 0, "/" + m.name + "/"]]:
-            MenuInterface.objects.create(name=i[1], key=n + '_' + i[0], method=i[2], path=i[3], menu=m)
+            menu_interface.objects.create(name=i[1], key=n + '_' + i[0], method=i[2], path=i[3], menu=m)
 
 
-def init_Role():
+def init_role():
     for i in [{"name": '管理员', "key": 'admin', 'is_admin': True, 'permission': 3}]:
-        r = Role.objects.create(**i)
+        r = role.objects.create(**i)
 
 
 def init_area():
@@ -196,11 +186,11 @@ def init_area():
 
 
 def init():
-    # init_User()
-    init_Menu()
-    # init_MenuInterface()
-    # init_Role()
-    # init_area()
+    init_user()
+    init_menu()
+    init_menu_interface()
+    init_role()
+    init_area()
 
 
 if __name__ == '__main__':

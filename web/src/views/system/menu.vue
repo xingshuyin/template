@@ -22,8 +22,7 @@
                 </el-button>
                 <el-button icon="Plus" circle
                     @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'" />
-                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns"
-                    :base_url="attrs.base_url"></f-columns-edit>
+                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
             </div>
         </div>
 
@@ -53,9 +52,9 @@
                 </el-table-column>
             </el-table>
 
-            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit"
-                :background="true" :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper"
-                :total="attrs.total" :pager-count="11">
+            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit" :background="true"
+                :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper" :total="attrs.total"
+                :pager-count="11">
             </el-pagination>
         </div>
 
@@ -114,23 +113,32 @@
             </template>
         </el-dialog>
     </el-config-provider>
-
-
 </template>
   
 <script setup>
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_ } from '../../hooks/table_common'
 import { Tree } from '../../utils/data';
-;
 const views = import.meta.glob("/src/views/**/**.vue");
 const components = []
 Object.keys(views).forEach(i => {
     components.push(i.slice(11))
 });
 const attrs = reactive({
-    columns: null,
-    base_url: 'Menu',
+    columns: {
+        'label': { type: 'text', label: '菜单名称', size: 'small', align: "left", show: true },
+        'icon': { type: 'text', width: 150, label: '菜单图标', size: 'small', align: "center", show: true },
+        'parent_name': { type: 'text', width: 130, label: '父级菜单', size: 'small', align: "center", show: true },
+        'name': { type: 'text', width: 100, label: '路由名称', size: 'small', align: "center", show: true },
+        'sort': { type: 'text', width: 100, label: '排序', size: 'small', align: "center", show: true },
+        'is_link': { type: 'select', width: 150, label: '是否外链', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        'is_catalog': { type: 'select', width: 100, label: '是否目录', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        'component': { type: 'text', width: 100, label: '组件地址', size: 'small', align: "center", show: true },
+        'disable': { type: 'select', width: 100, label: '是否禁用', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        'cache': { type: 'select', width: 150, label: '是否缓存', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        'createAt': { type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+    },
+    base_url: 'menu',
     selects: [],
     data: [],
     total: 0,
@@ -164,21 +172,8 @@ get_data()
 
 
 //动态列--------------------------
-attrs.columns = [
-    { type: 'text', label: '菜单名称', prop: 'label', size: 'small', align: "left", show: true },
-    { type: 'text', width: 150, label: '菜单图标', prop: 'icon', size: 'small', align: "center", show: true },
-    { type: 'text', width: 130, label: '父级菜单', prop: 'parent_name', size: 'small', align: "center", show: true },
-    { type: 'text', width: 100, label: '路由名称', prop: 'name', size: 'small', align: "center", show: true },
-    { type: 'text', width: 100, label: '排序', prop: 'sort', size: 'small', align: "center", show: true },
-    { type: 'select', width: 150, label: '是否外链', prop: 'is_link', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-    { type: 'select', width: 100, label: '是否目录', prop: 'is_catalog', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-    { type: 'text', width: 100, label: '组件地址', prop: 'component', size: 'small', align: "center", show: true },
-    { type: 'select', width: 100, label: '是否禁用', prop: 'disable', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-    { type: 'select', width: 150, label: '是否缓存', prop: 'cache', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-    { type: 'text', width: 160, label: '创建时间', prop: 'createAt', size: 'small', align: "center", show: true },
-]
+
 </script>
 
 <style scoped lang="scss">
-
 </style>

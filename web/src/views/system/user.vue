@@ -21,8 +21,7 @@
                 </el-button>
                 <el-button icon="Plus" circle
                     @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'; attrs.submit_type = 'add'" />
-                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns"
-                    :base_url="attrs.base_url"></f-columns-edit>
+                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
             </div>
         </div>
 
@@ -30,8 +29,7 @@
         <div class="main-table">
             <el-table :data="attrs.data" v-loading.fullscreen:false="attrs.loading" stripe border size="small"
                 :expand-row-keys="attrs.expandedRowKeys" :row-key="(row) => { return row.id }"
-                @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }"
-                :cell-style="() => { return { 'text-align': 'center' } }">
+                @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }">
                 <f-columns v-model="attrs.columns"></f-columns>
                 <el-table-column label="操作" fixed="right" width="150">
                     <template #default="scope">
@@ -48,9 +46,9 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit"
-                :background="true" :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper"
-                :total="attrs.total" :pager-count="11">
+            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit" :background="true"
+                :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper" :total="attrs.total"
+                :pager-count="11">
             </el-pagination>
         </div>
 
@@ -83,10 +81,6 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="部门" prop="dept">
-                    <!-- <el-select v-model="attrs.add_form.dept" class="m-2" placeholder="" multiple clearable collapse-tags
-                        collapse-tags-tooltip>
-                        <el-option v-for="item in attrs.all_dept" :key="item.id" :label="item.name" :value="item.id" />
-                    </el-select> -->
                     <el-cascader v-model="attrs.add_form.dept" :options="attrs.all_dept"
                         :props="{ checkStrictly: true, emitPath: false, value: 'id', label: 'name' }" />
                 </el-form-item>
@@ -101,20 +95,23 @@
             </template>
         </el-dialog>
     </el-config-provider>
-
-
 </template>
   
 <script setup>
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
-import { onBeforeMount } from 'vue';
-import { get_data_, select_, mult_delete_, update_item_, delete_item_, sort_, submit_, get_all_role_, get_all_role_dict_, get_all_dept_tree_ } from '../../hooks/table_common'
-import store from "../../store/index";
-
+import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, get_all_role_, get_all_role_dict_, get_all_dept_tree_ } from '../../hooks/table_common'
 const form_dom = ref()
 const attrs = reactive({
-    columns: [],
-    base_url: 'User',
+    columns: {
+        name: { type: 'text', label: '名称', size: 'small', align: "left", show: true },
+        username: { type: 'text', label: '账号', size: 'small', align: "center", show: true },
+        role: { type: 'list', label: '角色', option: {}, show: true },
+        dept_name: { type: 'text', width: 150, label: '部门', size: 'small', align: "center", show: true },
+        type: { type: 'select', label: '用户类型', option: { 1: '前端用户', 2: '后台用户' }, show: true },
+        is_super: { type: 'select', width: 150, label: '是否超级用户', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        createAt: { type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+    },
+    base_url: 'user',
     selects: [],
     data: [],
     total: 0,
@@ -139,7 +136,6 @@ const rules = reactive({
         { required: true, message: '请填写角色名称', trigger: 'blur' },
     ],
 })
-
 watch([form, special_form], () => {
     if (special_form.range == null) {
         special_form.range = [undefined, undefined]
@@ -150,7 +146,6 @@ const get_data = () => {
     get_data_(`/${attrs.base_url}/`, { create_start: special_form.range[0], create_end: special_form.range[1], ...form }, attrs)
 }
 get_data()
-
 const validate = () => {
     form_dom.value.validate((valid, fields) => {
         if (valid) {
@@ -165,46 +160,27 @@ const edit = (scope) => {
     for (let key in scope.row) { //拷贝对象
         temp[key] = scope.row[key];
     }
-    // temp.role = temp.role.reduce((pre, cur) => {
-    //     pre.push(cur.id)
-    //     return pre
-    // }, [])
     attrs.add_form = temp;
     attrs.submit_type = 'update';
-
 }
 
 get_all_role_(attrs)
 get_all_dept_tree_(attrs)
-const get_columns = async () => {
-    attrs.columns = [
-        { type: 'text', label: '名称', prop: 'name', size: 'small', align: "left", show: true },
-        { type: 'text', label: '账号', prop: 'username', size: 'small', align: "center", show: true },
-        { type: 'list', label: '角色', prop: 'role', option: await get_all_role_dict_(), show: true },
-        { type: 'text', width: 150, label: '部门', prop: 'dept_name', size: 'small', align: "center", show: true },
-        { type: 'select', label: '用户类型', prop: 'type', option: { 1: '前端用户', 2: '后台用户' }, show: true },
-        { type: 'select', width: 150, label: '是否超级用户', prop: 'is_super', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-        { type: 'text', width: 160, label: '创建时间', prop: 'createAt', size: 'small', align: "center", show: true },
-    ]
-}
-get_columns()
-onBeforeMount(async () => {
-    // attrs.columns.push({ type: 'list', label: '角色', prop: 'role', option: await get_all_role_dict_(), show: true })
-    // attrs.columns = [
-    //     { type: 'text', label: '名称', prop: 'name', size: 'small', align: "left", show: true },
-    //     { type: 'text', label: '账号', prop: 'username', size: 'small', align: "center", show: true },
-    //     { type: 'list', label: '角色', prop: 'role', option: await get_all_role_dict_(), show: true },
-    //     { type: 'text', width: 150, label: '部门', prop: 'dept_name', size: 'small', align: "center", show: true },
-    //     { type: 'select', label: '用户类型', prop: 'type', option: { 1: '前端用户', 2: '后台用户' }, show: true },
-    //     { type: 'select', width: 150, label: '是否超级用户', prop: 'is_super', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-    //     { type: 'text', width: 160, label: '创建时间', prop: 'createAt', size: 'small', align: "center", show: true },
-    // ]
+get_all_role_dict_().then((res) => {
+    attrs.columns.role.option = res
 })
 
-//动态列
+// attrs.columns = [
+//     { type: 'text', label: '名称', prop: 'name', size: 'small', align: "left", show: true },
+//     { type: 'text', label: '账号', prop: 'username', size: 'small', align: "center", show: true },
+//     { type: 'list', label: '角色', prop: 'role', option: await get_all_role_dict_(), show: true },
+//     { type: 'text', width: 150, label: '部门', prop: 'dept_name', size: 'small', align: "center", show: true },
+//     { type: 'select', label: '用户类型', prop: 'type', option: { 1: '前端用户', 2: '后台用户' }, show: true },
+//     { type: 'select', width: 150, label: '是否超级用户', prop: 'is_super', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+//     { type: 'text', width: 160, label: '创建时间', prop: 'createAt', size: 'small', align: "center", show: true },
+// ]
 
 </script>
 
 <style scoped lang="scss">
-
 </style>

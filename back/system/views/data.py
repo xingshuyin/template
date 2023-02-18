@@ -55,7 +55,7 @@ def dictfetchall(cursor):
 
 def get_all_sub_dept(dept_id):
     r = [dept_id]
-    childern = Dept.objects.filter(parent__id=dept_id)
+    childern = dept.objects.filter(parent__id=dept_id)
     if len(childern):
         for i in childern:
             r.extend(get_all_sub_dept(i.id))
@@ -108,8 +108,8 @@ class Data(ViewSet):
     # 获取所有菜单 及对应接口
     @action(['get'], url_path='GetAllMenu', url_name='GetAllMenu', detail=False, permission_classes=[SuperPermisssion])
     def GetAllMenu(self, request: Request):
-        interfaces = MyQuerySet(MenuInterface)
-        menus = list(MyQuerySet(Menu).values())
+        interfaces = MyQuerySet(menu_interface)
+        menus = list(MyQuerySet(menu).values())
         for i in menus:
             i['interfaces'] = list(interfaces.filter(menu__id=i['id']).values())
         return JsonResponse(menus, safe=False)
@@ -118,7 +118,7 @@ class Data(ViewSet):
     @action(['get'], url_path='GetRolePermision', url_name='GetRolePermision', detail=False, permission_classes=[])
     def GetRolePermision(self, request: Request):
         role_id = request.GET.get('role_id')
-        role = Role.objects.get(id=role_id)
+        role = role.objects.get(id=role_id)
         menus = [i.id for i in role.menu.all()]
         interfaces = [i.id for i in role.menu_interface.all()]
         return JsonResponse({'interfaces': interfaces, 'menus': menus, 'permission': role.permission}, safe=False)
@@ -130,7 +130,7 @@ class Data(ViewSet):
         permission = request.data['permission']
         menus = request.data['menus']
         role_id = request.data['role_id']
-        role = Role.objects.get(id=role_id)
+        role = role.objects.get(id=role_id)
         role.permission = permission
         role.menu.set(menus)  # TODO:request-多对多 覆盖值
         role.menu_interface.set(interfaces)
@@ -143,12 +143,12 @@ class Data(ViewSet):
         # try:
         user = request.user
         if user.is_super:
-            menus = list(MyQuerySet(Menu).values())
+            menus = list(MyQuerySet(menu).values())
         else:
             menus_set = set()
             menus = []
             for i in user.role:
-                for j in list(Role.objects.get(id=i).menu.values()):
+                for j in list(role.objects.get(id=i).menu.values()):
                     if j['id'] not in menus_set:
                         menus.append(j)
                         menus_set.add(j['id'])
@@ -158,7 +158,7 @@ class Data(ViewSet):
     @action(['get'], url_path='GetAllRoleDict', url_name='GetAllRoleDict', detail=False, permission_classes=[])
     def GetAllRoleDict(self, request: Request):
         filter_dict = request.GET.dict()
-        roles = MyQuerySet(Role).filter(**filter_dict).values(
+        roles = MyQuerySet(role).filter(**filter_dict).values(
             'id',
             'name',
         )
@@ -194,7 +194,7 @@ class Data(ViewSet):
         p = str(Path(__file__).resolve().parent.parent.parent).replace("\\", "/")
         zip_path = f'{p}/media/img_zip/{pk}.jpg'
         if not os.path.exists(zip_path):
-            f = File.objects.get(id=pk)
+            f = file.objects.get(id=pk)
             from PIL import Image
             path = f.file.path
             im = Image.open(path)

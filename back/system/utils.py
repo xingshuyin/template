@@ -12,7 +12,7 @@ from django.urls.resolvers import ResolverMatch
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from user_agents import parse
 
-from .models import LoginLog
+from .models import log
 
 
 def get_request_user(request):
@@ -187,7 +187,7 @@ def save_login_log(request):
     analysis_data['os'] = get_os(request)
     analysis_data['creator_id'] = request.user.id
     analysis_data['dept_belong_id'] = getattr(request.user, 'dept_id', '')
-    LoginLog.objects.create(**analysis_data)
+    log.objects.create(**analysis_data)
 
 
 def get_time(f):

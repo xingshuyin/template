@@ -22,8 +22,7 @@
                 </el-button>
                 <el-button icon="Plus" circle
                     @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'" />
-                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns"
-                    :base_url="attrs.base_url"></f-columns-edit>
+                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
             </div>
         </div>
 
@@ -52,9 +51,9 @@
                 </el-table-column>
             </el-table>
 
-            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit"
-                :background="true" :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper"
-                :total="attrs.total" :pager-count="11">
+            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit" :background="true"
+                :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper" :total="attrs.total"
+                :pager-count="11">
             </el-pagination>
         </div>
 
@@ -102,19 +101,33 @@
         </el-dialog>
 
     </el-config-provider>
-
-
 </template>
   
 <script setup>
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { Tree } from '../../utils/data';
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_ } from '../../hooks/table_common'
-import store from "../../store/index";
-import rest from '../../utils/rest';
 const attrs = reactive({
-    columns: null,
-    base_url: 'LoginLog',
+    columns: {
+        'username': { type: 'text', label: '登录用户名', width: 100, size: 'small', align: "left", show: true },
+        'ip': { type: 'text', label: '登录ip', size: 'small', align: "left", show: true },
+        'agent': { type: 'text', label: 'agent信息', width: 300, size: 'small', align: "left", show: true },
+        'browser': { type: 'text', label: '浏览器名', width: 300, size: 'small', align: "left", show: true },
+        'os': { type: 'text', label: '操作系统', size: 'small', align: "left", show: true },
+        'continent': { type: 'text', label: '州', size: 'small', align: "left", show: true },
+        'country': { type: 'text', label: '国家', size: 'small', align: "left", show: true },
+        'province': { type: 'text', label: '省份', size: 'small', align: "left", show: true },
+        'city': { type: 'text', label: '城市', size: 'small', align: "left", show: true },
+        'district': { type: 'text', label: '县区', size: 'small', align: "left", show: true },
+        'isp': { type: 'text', label: '运营商', size: 'small', align: "left", show: true },
+        'area_code': { type: 'text', label: '区域代码', size: 'small', align: "left", show: true },
+        'country_english': { type: 'text', label: '英文全称', size: 'small', align: "left", show: true },
+        'country_code': { type: 'text', label: '简称', size: 'small', align: "left", show: true },
+        'longitude': { type: 'text', label: '经度', size: 'small', align: "left", show: true },
+        'latitude': { type: 'text', label: '纬度', size: 'small', align: "left", show: true },
+        'createAt': { type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+    },
+    base_url: 'log',
     selects: [],
     data: [],
     total: 0,
@@ -142,26 +155,6 @@ const get_data = () => {
 get_data()
 
 
-//动态列--------------------------
-attrs.columns = [
-    { type: 'text', label: '登录用户名', prop: 'username', width: 100, size: 'small', align: "left", show: true },
-    { type: 'text', label: '登录ip', prop: 'ip', size: 'small', align: "left", show: true },
-    { type: 'text', label: 'agent信息', prop: 'agent', width: 300, size: 'small', align: "left", show: true },
-    { type: 'text', label: '浏览器名', prop: 'browser', width: 300, size: 'small', align: "left", show: true },
-    { type: 'text', label: '操作系统', prop: 'os', size: 'small', align: "left", show: true },
-    { type: 'text', label: '州', prop: 'continent', size: 'small', align: "left", show: true },
-    { type: 'text', label: '国家', prop: 'country', size: 'small', align: "left", show: true },
-    { type: 'text', label: '省份', prop: 'province', size: 'small', align: "left", show: true },
-    { type: 'text', label: '城市', prop: 'city', size: 'small', align: "left", show: true },
-    { type: 'text', label: '县区', prop: 'district', size: 'small', align: "left", show: true },
-    { type: 'text', label: '运营商', prop: 'isp', size: 'small', align: "left", show: true },
-    { type: 'text', label: '区域代码', prop: 'area_code', size: 'small', align: "left", show: true },
-    { type: 'text', label: '英文全称', prop: 'country_english', size: 'small', align: "left", show: true },
-    { type: 'text', label: '简称', prop: 'country_code', size: 'small', align: "left", show: true },
-    { type: 'text', label: '经度', prop: 'longitude', size: 'small', align: "left", show: true },
-    { type: 'text', label: '纬度', prop: 'latitude', size: 'small', align: "left", show: true },
-    { type: 'text', width: 160, label: '创建时间', prop: 'createAt', size: 'small', align: "center", show: true },
-]
 </script>
 
 <style scoped lang="scss">

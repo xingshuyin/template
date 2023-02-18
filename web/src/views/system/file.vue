@@ -22,8 +22,7 @@
                 </el-button>
                 <el-button @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'" icon="Plus"
                     circle />
-                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns"
-                    :base_url="attrs.base_url"></f-columns-edit>
+                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
                 <el-button icon="Download" circle
                     @click="export_data_(attrs.base_url, { create_start: special_form.range[0], create_end: special_form.range[1], ...form })" />
             </div>
@@ -51,9 +50,9 @@
                 </el-table-column>
             </el-table>
 
-            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit"
-                :background="true" :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper"
-                :total="attrs.total" :pager-count="11">
+            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit" :background="true"
+                :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper" :total="attrs.total"
+                :pager-count="11">
             </el-pagination>
         </div>
 
@@ -76,19 +75,17 @@
             </template>
         </el-dialog>
     </el-config-provider>
-
-
 </template>
   
 <script setup>
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
-import { Tree } from '../../utils/data';
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, export_data_ } from '../../hooks/table_common'
-import store from "../../store/index";
-import rest from '../../utils/rest';
 const attrs = reactive({
-    columns: null,
-    base_url: 'File',
+    columns: {
+        'name': { type: 'text', label: '文件名', align: "center", show: true },
+        'file': { type: 'link', label: '链接', align: "center", show: true },
+    },
+    base_url: 'file',
     selects: [],
     data: [],
     total: 0,
@@ -115,12 +112,6 @@ const get_data = () => {
     get_data_(`/${attrs.base_url}/`, { create_start: special_form.range[0], create_end: special_form.range[1], ...form }, attrs)
 }
 get_data()
-
-attrs.columns = [
-    // { type: 'text', label: '名称', prop: 'file', align: "left", show: true },
-    { type: 'text', label: '文件名', prop: 'name', align: "center", show: true },
-    { type: 'link', label: '链接', prop: 'file', align: "center", show: true },
-]
 </script>
 
 <style scoped lang="scss">

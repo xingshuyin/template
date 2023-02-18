@@ -22,7 +22,7 @@ from django.utils.encoding import filepath_to_uri
 from urllib.parse import urljoin
 
 
-class BaseModel(models.Model):
+class base_model(models.Model):
     createAt = models.DateTimeField(auto_now_add=True, help_text='创建时间', null=True)
     updateAt = models.DateTimeField(auto_now=True, help_text='更新时间', null=True)
     dept_belong_id = models.IntegerField(help_text='所属部门id', null=True, blank=True)
@@ -112,7 +112,7 @@ fs = storage()
 
 
 # TODO:文件上传-模型/表单
-class File(BaseModel):
+class file(base_model):
     file = models.FileField(upload_to=make_file_name, max_length=200, storage=fs)
     name = models.CharField(max_length=100)
 
@@ -121,18 +121,18 @@ class File(BaseModel):
         return super().delete()
 
     class Meta:
-        db_table = "File"
+        db_table = "file"
         verbose_name = "文件"
 
 
 class FileForm(ModelForm):
 
     class Meta:
-        model = File
+        model = file
         fields = '__all__'
 
 
-class Dept(BaseModel):
+class dept(base_model):
     name = models.CharField(max_length=20, help_text='部门名称')
     key = models.CharField(max_length=50, help_text="标识符", null=True)
     parent = models.ForeignKey(to='self', on_delete=models.PROTECT, null=True, blank=True)
@@ -140,15 +140,15 @@ class Dept(BaseModel):
     owner = models.CharField(max_length=32, null=True, blank=True, help_text="负责人")
 
     class Meta:
-        db_table = "Dept"
+        db_table = "dept"
         verbose_name = "部门"
         verbose_name_plural = verbose_name
         ordering = ("sort", )
 
 
-class Menu(BaseModel):
+class menu(base_model):
     parent = models.ForeignKey(
-        to="Menu",
+        to="menu",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -171,13 +171,13 @@ class Menu(BaseModel):
     cache = models.BooleanField(default=False, null=True, blank=True, help_text="是否页面缓存")
 
     class Meta:
-        db_table = "Menu"
-        verbose_name = "菜单表"
+        db_table = "menu"
+        verbose_name = "菜单"
         verbose_name_plural = verbose_name
         ordering = ("sort", )
 
 
-class MenuInterface(BaseModel):
+class menu_interface(base_model):
     name = models.CharField(max_length=50, help_text='接口名称')
     key = models.CharField(max_length=50, help_text="标识符", null=True)
     METHOD_CHOICES = (
@@ -188,15 +188,15 @@ class MenuInterface(BaseModel):
     )
     method = models.IntegerField(choices=METHOD_CHOICES, help_text='请求方式')
     path = models.CharField(max_length=100, help_text="接口地址")
-    menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
+    menu = models.ForeignKey(menu, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = "MenuInterface"
+        db_table = "menu_interface"
         verbose_name = "菜单接口"
         verbose_name_plural = verbose_name
 
 
-class Role(BaseModel):
+class role(base_model):
     name = models.CharField(max_length=50)
     key = models.CharField(max_length=50, help_text="标识符", null=True)
     PERMISSION_CHOICES = (
@@ -207,12 +207,12 @@ class Role(BaseModel):
         (4, "自定数据权限"),
     )
     permission = models.IntegerField(choices=PERMISSION_CHOICES, help_text="数据权限范围", default=0)
-    menu = models.ManyToManyField(Menu, blank=True)
-    menu_interface = models.ManyToManyField(MenuInterface, blank=True)
+    menu = models.ManyToManyField(menu, blank=True)
+    menu_interface = models.ManyToManyField(menu_interface, blank=True)
     is_admin = models.BooleanField(default=False, help_text='是否为管理员')
 
     class Meta:
-        db_table = "Role"
+        db_table = "role"
         verbose_name = "角色"
         verbose_name_plural = verbose_name
 
@@ -240,35 +240,35 @@ class UserManager(BaseUserManager):
         return self._create_user(username, password, **extra_fields)
 
 
-class User(AbstractBaseUser, BaseModel):
-    name = models.CharField(max_length=100, help_text='名称', null=True)
-    openid = models.CharField(max_length=100, help_text='微信openid', unique=True, null=True)
-    username = models.CharField(max_length=100, help_text='用户名', unique=True)
-    role = models.JSONField(default=list, help_text='用户角色')
-    type = models.IntegerField(choices=((1, '前端'), (2, '后端')), default=1, help_text='用户类型')
-    dept = models.ForeignKey(Dept, on_delete=models.PROTECT, null=True, help_text="所属部门")
-    email = models.EmailField(help_text="邮箱", null=True)
-    phone = models.CharField(max_length=12, help_text="电话", null=True)
+class user(AbstractBaseUser, base_model):
+    name = models.CharField(max_length=100, help_text='用户名', verbose_name='用户名', null=True)
+    openid = models.CharField(max_length=100, help_text='微信openid', verbose_name='微信openid', unique=True, null=True)
+    username = models.CharField(max_length=100, help_text='账号', verbose_name='账号', unique=True)
+    role = models.JSONField(default=list, help_text='角色', verbose_name='角色')
+    type = models.IntegerField(choices=((1, '前端'), (2, '后端')), default=1, help_text='类型', verbose_name='类型')
+    dept = models.ForeignKey(dept, on_delete=models.PROTECT, null=True, help_text="部门", verbose_name='部门')
+    email = models.EmailField(help_text="邮箱", verbose_name='邮箱', null=True)
+    phone = models.CharField(max_length=12, help_text="电话", verbose_name='电话', null=True)
     USERNAME_FIELD = 'username'
     objects = UserManager()
-    is_super = models.BooleanField(default=False, help_text='是否为超级管理员')
+    is_super = models.BooleanField(default=False, help_text='是否为超级管理员', verbose_name='是否为超级管理员')
 
     def set_password(self, raw_password):  # TODO:model-用户表-设置密码方式
         # encode(encoding="UTF-8")  之后 通过索引获取的值为unciode编码值
         super().set_password(hashlib.md5(raw_password.encode(encoding="UTF-8")).hexdigest())
 
     class Meta:
-        db_table = "User"
-        verbose_name = "用户表"
+        db_table = "user"
+        verbose_name = "用户"
         verbose_name_plural = verbose_name
 
 
-class Area(models.Model):
+class area(models.Model):
     name = models.CharField(max_length=100, verbose_name="名称", help_text="名称")
     code = models.CharField(max_length=20, verbose_name="地区编码", help_text="地区编码", unique=True, db_index=True)
-    level = models.BigIntegerField(verbose_name="地区层级(0省份 1城市 2区县 3乡级)", help_text="地区层级(0省份 1城市 2区县 3乡级)")
-    lat = models.CharField(max_length=10, help_text='', null=True, blank=True)
-    lng = models.CharField(max_length=10, help_text='', null=True, blank=True)
+    level = models.BigIntegerField(verbose_name="地区等级", help_text="地区等级(0省份 1城市 2区县 3乡级)")
+    lat = models.CharField(max_length=10, help_text='纬度', verbose_name='纬度', null=True, blank=True)
+    lng = models.CharField(max_length=10, help_text='经度', verbose_name='经度', null=True, blank=True)
     pcode = models.ForeignKey(
         to="self",
         verbose_name="父地区编码",
@@ -281,8 +281,8 @@ class Area(models.Model):
     )
 
     class Meta:
-        db_table = "Area"
-        verbose_name = "地区表"
+        db_table = "area"
+        verbose_name = "地区"
         verbose_name_plural = verbose_name
         ordering = ("code", )
 
@@ -290,7 +290,7 @@ class Area(models.Model):
         return f"{self.name}"
 
 
-class LoginLog(BaseModel):
+class log(base_model):
     LOGIN_TYPE_CHOICES = ((1, "普通登录"), )
     username = models.CharField(max_length=32, verbose_name="登录用户名", null=True, blank=True, help_text="登录用户名")
     ip = models.CharField(max_length=32, verbose_name="登录ip", null=True, blank=True, help_text="登录ip")
@@ -311,19 +311,20 @@ class LoginLog(BaseModel):
     login_type = models.IntegerField(default=1, choices=LOGIN_TYPE_CHOICES, verbose_name="登录类型", help_text="登录类型")
 
     class Meta:
-        db_table = "LoginLog"
+        db_table = "log"
         verbose_name = "登录日志"
         verbose_name_plural = verbose_name
         ordering = ("-createAt", )
 
 
-class Enterprise(BaseModel):
+class enterprise(base_model):
     name = models.CharField(max_length=100, verbose_name="名称", help_text="名称", null=True)
-    area = models.ForeignKey(Area, on_delete=models.DO_NOTHING, null=True, to_field="code")
-    file = models.JSONField(default=list, help_text="文件")
-    image = models.JSONField(default=list, help_text="图片")  # JSON类型前端直接传列表就可以,不需要JSON化, 前端axios接收后也不用解析直接使用
+    code = models.CharField(max_length=100, unique=True, help_text='唯一编码', verbose_name="编码")
+    area = models.ForeignKey(area, on_delete=models.DO_NOTHING, null=True, to_field="code", help_text="区域", verbose_name='区域')
+    file = models.JSONField(default=list, help_text="文件", verbose_name='文件')
+    image = models.JSONField(default=list, help_text="图片", verbose_name='图片')  # JSON类型前端直接传列表就可以,不需要JSON化, 前端axios接收后也不用解析直接使用
 
     class Meta:
-        db_table = "Enterprise"
-        verbose_name = "企业信息"
+        db_table = "enterprise"
+        verbose_name = "企业"
         verbose_name_plural = verbose_name

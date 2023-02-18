@@ -22,8 +22,7 @@
                 </el-button>
                 <el-button @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'" icon="Plus"
                     circle />
-                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns"
-                    :base_url="attrs.base_url"></f-columns-edit>
+                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
                 <el-button icon="Download" circle
                     @click="export_data_(attrs.base_url, { create_start: special_form.range[0], create_end: special_form.range[1], ...form })" />
             </div>
@@ -54,18 +53,21 @@
                 </el-table-column>
             </el-table>
 
-            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit"
-                :background="true" :page-sizes="[50, 100, 200, 300, 400]"
-                layout="total, sizes, prev, pager, next, jumper" :total="attrs.total" :pager-count="11">
+            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit" :background="true"
+                :page-sizes="[50, 100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper" :total="attrs.total"
+                :pager-count="11">
             </el-pagination>
         </div>
 
 
         <el-dialog v-model="attrs.adding" class="add_form" :title="attrs.submit_type == 'add' ? '新增' : '编辑'" width="50%"
             :modal="false">
-            <el-form :model="attrs.add_form" label-width="120px">
-                <el-form-item label="名称">
+            <el-form :model="attrs.add_form" label-width="120px" :rules="rules" ref="form_dom">
+                <el-form-item label="名称" prop="name">
                     <el-input v-model="attrs.add_form.name" />
+                </el-form-item>
+                <el-form-item label="编码" prop="code">
+                    <el-input v-model="attrs.add_form.code" />
                 </el-form-item>
                 <el-form-item label="地址" prop="area">
                     <el-cascader v-model="attrs.add_form.area" :options="attrs.areas_tree"
@@ -81,16 +83,13 @@
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="attrs.adding = false">取消</el-button>
-                    <el-button type="primary"
-                        @click="submit_(attrs.base_url, attrs.add_form, attrs.submit_type, submit_success); attrs.adding = false">
+                    <el-button type="primary" @click="validate">
                         提交
                     </el-button>
                 </span>
             </template>
         </el-dialog>
     </el-config-provider>
-
-
 </template>
   
 <script setup>
@@ -98,8 +97,15 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, export_data_ } from '../../hooks/table_common'
 import store from "../../store/index";
 const attrs = reactive({
-    columns: null,
-    base_url: 'Enterprise',
+    columns: [
+        { type: 'text', label: '名称', prop: 'name', align: "left", show: true },
+        { type: 'text', label: '编码', prop: 'code', align: "left", show: true },
+        { type: 'text', width: 150, label: '行政区域', prop: 'area_name', align: "center", show: true },
+        { type: 'jfile', width: 150, label: '文件', prop: 'file', align: "center", show: true },
+        { type: 'jimage', width: 150, label: '图片', prop: 'image', align: "center", show: true },
+        { type: 'text', width: 160, label: '创建时间', prop: 'createAt', align: "center", show: true, sortable: true },
+    ],
+    base_url: 'enterprise',
     selects: [],
     data: [],
     total: 0,
@@ -112,36 +118,45 @@ const attrs = reactive({
 const special_form = reactive({
     range: [undefined, undefined],
 })
+
 const form = reactive({
     page: 1,
     limit: 50,
+    // defer: ['code'],  //排除字段
+    // values: ['name', 'code'] //选择字段
 })
+const form_dom = ref()
+const rules = reactive({  //https://element-plus.gitee.io/zh-CN/component/form.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%A0%A1%E9%AA%8C%E8%A7%84%E5%88%99
+    name: [
+        { required: true, message: '请填写名称', trigger: 'blur' },
+    ],
+    code: [
+        { required: true, message: '请填写编码', trigger: 'blur' },
+    ],
+})
+const validate = () => {
+    form_dom.value.validate((valid, fields) => {
+        if (valid) {
+            submit_(attrs.base_url, attrs.add_form, attrs.submit_type, submit_success); attrs.adding = false
+        }
+    })
+}
+const submit_success = (res) => {
+    if (attrs.submit_type == 'add') {
+        attrs.data.shift(res.data)
+    }
+}
+const get_data = async () => {
+    attrs.areas_tree = await store().get_areas_tree();
+    get_data_(`/${attrs.base_url}/`, { create_start: special_form.range[0], create_end: special_form.range[1], ...form }, attrs)
+}
+get_data()
 watch([form, special_form], () => {
     if (special_form.range == null) {
         special_form.range = [undefined, undefined]
     }
     get_data()
 })
-const get_data = async () => {
-    attrs.areas_tree = await store().get_areas_tree();
-    get_data_(`/${attrs.base_url}/`, { create_start: special_form.range[0], create_end: special_form.range[1], ...form }, attrs)
-}
-get_data()
-const submit_success = (res) => {
-    if (attrs.submit_type == 'add') {
-        attrs.data.shift(res.data)
-    }
-}
-
-
-
-attrs.columns = [
-    { type: 'text', label: '名称', prop: 'name', align: "left", show: true },
-    { type: 'text', width: 150, label: '行政区域', prop: 'area_name', align: "center", show: true },
-    { type: 'jfile', width: 150, label: '文件', prop: 'file', align: "center", show: true },
-    { type: 'jimage', width: 150, label: '图片', prop: 'image', align: "center", show: true },
-    { type: 'text', width: 160, label: '创建时间', prop: 'createAt', align: "center", show: true, sortable: true },
-]
 </script>
 
 <style scoped lang="scss">

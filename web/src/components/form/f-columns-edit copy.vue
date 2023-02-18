@@ -17,30 +17,28 @@ const attrs = reactive({
     columns: [],
     show: false,
 })
+let columns;
 onBeforeMount(() => {
+    let temp = []
+    for (let index = 0; index < props.modelValue.length; index++) {
+        temp.push({ ...props.modelValue[index] })
+    }
+    columns = temp
     if (localStorage.getItem(`columns_${props.base_url}`)) {
         attrs.columns = JSON.parse(localStorage.getItem(`columns_${props.base_url}`))
     } else {
-        let temp = []
-        for (const key in props.modelValue) {
-            temp.push({ prop: key, ...props.modelValue[key] })
-        }
-        attrs.columns = temp
+        attrs.columns = props.modelValue
     }
 })
 
 watch(() => { return attrs.columns }, () => {
     localStorage.setItem(`columns_${props.base_url}`, JSON.stringify(attrs.columns))
-    let r = {}
-    for (let index = 0; index < attrs.columns.length; index++) {
-        r[attrs.columns[index].prop] = attrs.columns[index]
-    }
-    emits('update:modelValue', r)
+    emits('update:modelValue', attrs.columns)
 }, { deep: true })
 const reset_column = () => {
     let temp = []
-    for (const key in props.modelValue) {
-        temp.push({ prop: key, ...props.modelValue[key] })
+    for (let index = 0; index < columns.length; index++) {
+        temp.push({ ...columns[index] })
     }
     attrs.columns = temp
 }

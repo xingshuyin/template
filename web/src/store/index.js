@@ -42,7 +42,7 @@ export default defineStore("counter", {
             return state.areas_tree;
           }
         }
-        let a = await r().get("/Area/", { params: { page: 1, limit: 99999 } });
+        let a = await r().get("/area/", { params: { page: 1, limit: 99999 } });
         if (a) {
           state.areas_tree = Tree(a.data.data, "code", "pcode", null);
           return state.areas_tree;

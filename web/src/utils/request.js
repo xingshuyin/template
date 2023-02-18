@@ -22,11 +22,11 @@ const r = () => {
       return config; //必须返回
     },
     error => {
-      if (error?.response?.data?.code == "token_not_valid") {
-        localStorage.removeItem("token"); //token无效了必须删除token
-        window.location = "/#/login"; //token失效跳转登录页
-      }
-      return Promise.reject("interceptors.request.error", error);
+      // if (error?.response?.data?.code == "token_not_valid") {
+      //   localStorage.removeItem("token"); //token无效了必须删除token
+      //   window.location = "/#/login"; //token失效跳转登录页
+      // }
+      // return Promise.reject("interceptors.request.error", error);
     }
   );
   r_.interceptors.response.use(
@@ -52,6 +52,12 @@ const r = () => {
         ElMessage({
           showClose: true,
           message: error?.response?.data?.detail,
+          center: true,
+        });
+      } else if (error?.response?.data?.code) {
+        ElMessage({
+          showClose: true,
+          message: error?.response?.data?.code[0],
           center: true,
         });
       } else {

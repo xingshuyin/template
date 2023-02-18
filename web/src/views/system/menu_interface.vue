@@ -21,8 +21,7 @@
                 </el-button>
                 <el-button icon="Plus" circle
                     @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'; attrs.submit_type = 'add'" />
-                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns"
-                    :base_url="attrs.base_url"></f-columns-edit>
+                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
             </div>
         </div>
 
@@ -48,9 +47,9 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit"
-                :background="true" :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper"
-                :total="attrs.total" :pager-count="11">
+            <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit" :background="true"
+                :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper" :total="attrs.total"
+                :pager-count="11">
             </el-pagination>
         </div>
 
@@ -94,18 +93,29 @@
             </template>
         </el-dialog>
     </el-config-provider>
-
-
 </template>
 
 <script setup>
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, get_all_role_, get_all_menu_tree_, get_all_interface_ } from '../../hooks/table_common'
-import store from "../../store/index";
 const form_dom = ref()
 const attrs = reactive({
-    columns: null,
-    base_url: 'MenuInterface',
+    columns: {
+        'name': { type: 'text', label: '接口名称', size: 'small', align: "center", show: true },
+        'key': { type: 'text', label: '标识符', size: 'small', align: "center", show: true },
+        'method': {
+            type: 'select', label: '请求方式', size: 'small', align: "center", show: true, option: {
+                0: "GET",
+                1: "POST",
+                2: "PUT",
+                3: "DELETE",
+            }
+        },
+        'path': { type: 'text', width: 180, label: '接口地址', size: 'small', align: "center", show: true },
+        'menu_label': { type: 'text', width: 150, label: '菜单', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        'createAt': { type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+    },
+    base_url: 'menu_interface',
     selects: [],
     data: [],
     total: 0,
@@ -161,25 +171,7 @@ get_all_menu_tree_(attrs)
 get_all_interface_(attrs)
 
 
-
-//动态列
-attrs.columns = [
-    { type: 'text', label: '接口名称', prop: 'name', size: 'small', align: "center", show: true },
-    { type: 'text', label: '标识符', prop: 'key', size: 'small', align: "center", show: true },
-    {
-        type: 'select', label: '请求方式', prop: 'method', size: 'small', align: "center", show: true, option: {
-            0: "GET",
-            1: "POST",
-            2: "PUT",
-            3: "DELETE",
-        }
-    },
-    { type: 'text', width: 180, label: '接口地址', prop: 'path', size: 'small', align: "center", show: true },
-    { type: 'text', width: 150, label: '菜单', prop: 'menu_label', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-    { type: 'text', width: 160, label: '创建时间', prop: 'createAt', size: 'small', align: "center", show: true },
-]
 </script>
 
 <style scoped lang="scss">
-
 </style>

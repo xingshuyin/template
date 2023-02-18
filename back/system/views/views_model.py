@@ -1,14 +1,3 @@
-'''
-Filename     : views_model.py
-Author       : xingshuyin xingshuyin@outlook.com
-Date         : 2022-10-31 19:40:52
-LastEditors  : xingshuyin xingshuyin@outlook.com
-LastEditTime : 2022-11-30 12:55:43
-FilePath     : \wjt\back\system\views\views_model.py
-Description  : 微镜头所有模型的restful规范接口
-
-Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
-'''
 from django.db import models
 from django.utils import timezone
 from django.forms import model_to_dict
@@ -99,7 +88,7 @@ def deal_special_params(request: HttpRequest, queryset: QuerySet, filter_dict):
 
 def get_all_sub_dept(dept_id):
     r = [dept_id]
-    childern = Dept.objects.filter(parent__id=dept_id)
+    childern = dept.objects.filter(parent__id=dept_id)
     if len(childern):
         for i in childern:
             r.extend(get_all_sub_dept(i.id))
@@ -134,7 +123,7 @@ def deal_permission(request, queryset):
         permission_list = []  # 权限范围列表
         for role in role_list:
             # 判断用户是否为超级管理员角色/如果拥有[全部数据权限]则返回所有数据
-            role = Role.objects.get(id=role)
+            role = role.objects.get(id=role)
             if 3 == role.permission or role.is_admin == True:
                 return queryset
             permission_list.append(role.permission)
@@ -148,7 +137,7 @@ def deal_permission(request, queryset):
         for p in permission_list:
             if p == 4:
                 for i in request.user.role:
-                    dept_list.extend(Role.objects.get(id=i).dept.values_list("dept__id", flat=True))
+                    dept_list.extend(role.objects.get(id=i).dept.values_list("dept__id", flat=True))
             elif p == 2:
                 dept_list.append(user_dept_id)
             elif p == 1:
@@ -194,22 +183,36 @@ def list_common(self, request: HttpRequest, *args):
     filter_dict = request.GET.dict()
     temp_dict = request.GET.dict()
     queryset: QuerySet = self.get_queryset()
+    fields = [i.name for i in queryset.model._meta.fields]
     queryset = deal_permission(request, queryset)
     if (page and limit):
         for k, v in temp_dict.items():
-            if v == '':
+            if v == '' or v == 'null' or v == 'undefined':  # s删除无用过滤字段
                 del filter_dict[k]
         for i in ['page', 'limit']:
             if i in filter_dict.keys():
                 del filter_dict[i]
+        if 'values[]' in temp_dict.keys():  #TODO:选择字段
+            values = request.GET.getlist('values[]')
+            for i in values[:]:
+                if i not in fields:
+                    values.remove(i)
+            fields = values
+            del filter_dict['values[]']
+        if 'defer[]' in temp_dict.keys():  #TODO:排除字段
+            print(fields)
+            for i in request.GET.getlist('defer[]'):
+                if i in fields:
+                    fields.remove(i)
+            del filter_dict['defer[]']
         queryset, filter_dict = deal_special_params(request, queryset, filter_dict)
         queryset = queryset.filter(**filter_dict)
         queryset = get_extra_value(request, queryset)
         total = queryset.count()
         r = queryset[(page - 1) * limit:page * limit]
+        r = r.values(*fields)
         if r is not None:
-            r = list(r.values())
-            return Response({'data': r, 'page': page, 'limit': limit, 'total': total}, 200)
+            return Response({'data': list(r), 'page': page, 'limit': limit, 'total': total}, 200)
     return Response({'detail': '未分页'}, 400)
 
 
@@ -231,11 +234,12 @@ def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
-        if instance._meta.object_name == 'User':
+        if instance._meta.object_name == 'user':
             instance.set_password(instance.password)
             headers = self.get_success_headers(serializer.data)
         instance.save()
         headers = self.get_success_headers(serializer.data)
+        print('返回')
         return Response(serializer.data, status=201, headers=headers)
 
     dept_belong_id = getattr(request.user, 'dept_belong_id', None)
@@ -251,7 +255,7 @@ def create(self, request, *args, **kwargs):
         instance.dept_belong_id = dept_belong_id
     if "creator_id" in fields:
         instance.creator_id = request.user.id
-    if instance._meta.object_name == 'User':
+    if instance._meta.object_name == 'user':
         instance.set_password(instance.password)
     instance.save()
     headers = self.get_success_headers(serializer.data)
@@ -440,48 +444,48 @@ def model_viewset(m, inherit_viewset, inherit_serializer, **kwargs):
 # 生成所有视图及链接的基础
 view_list = [
     {
-        "url": "Dept",  # restful链接基础url
+        "url": "dept",  # restful链接基础url
         "label": "部门",
-        "viewset": model_viewset(Dept, (ModelViewSet, ), (ModelSerializer, ))  # 对应视图集
+        "viewset": model_viewset(dept, (ModelViewSet, ), (ModelSerializer, ))  # 对应视图集
     },
     {
-        "url": "File",
+        "url": "file",
         "label": "文件",
-        "viewset": model_viewset(File, (ModelViewSet, ), (ModelSerializer, ))
+        "viewset": model_viewset(file, (ModelViewSet, ), (ModelSerializer, ))
     },
     {
-        "url": "Menu",
+        "url": "menu",
         "label": "菜单",
-        "viewset": model_viewset(Menu, (ModelViewSet, ), (ModelSerializer, ))
+        "viewset": model_viewset(menu, (ModelViewSet, ), (ModelSerializer, ))
     },
     {
-        "url": "Role",
+        "url": "role",
         "label": "角色",
-        "viewset": model_viewset(Role, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[SuperPermisssion])
+        "viewset": model_viewset(role, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[SuperPermisssion])
     },
     {
-        "url": "User",
+        "url": "user",
         "label": "用户",
-        "viewset": model_viewset(User, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[SuperPermisssion])
+        "viewset": model_viewset(user, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[SuperPermisssion])
     },
     {
-        "url": "LoginLog",
+        "url": "log",
         "label": "日志",
-        "viewset": model_viewset(LoginLog, (ModelViewSet, ), (ModelSerializer, ))
+        "viewset": model_viewset(log, (ModelViewSet, ), (ModelSerializer, ))
     },
     {
-        "url": "Area",
+        "url": "area",
         "label": "区域",
-        "viewset": model_viewset(Area, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[])
+        "viewset": model_viewset(area, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[])
     },
     {
-        "url": "MenuInterface",
+        "url": "menu_interface",
         "label": "接口",
-        "viewset": model_viewset(MenuInterface, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[SuperPermisssion])
+        "viewset": model_viewset(menu_interface, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[SuperPermisssion])
     },
     {
-        "url": "Enterprise",
+        "url": "enterprise",
         "label": "企业",
-        "viewset": model_viewset(Enterprise, (ModelViewSet, ), (ModelSerializer, ))
+        "viewset": model_viewset(enterprise, (ModelViewSet, ), (ModelSerializer, ))
     },
 ]

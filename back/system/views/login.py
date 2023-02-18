@@ -19,7 +19,7 @@ from rest_framework import serializers, exceptions
 from django.contrib.auth import authenticate
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from ..models import User, LoginLog
+from ..models import user, log
 from ..utils import save_login_log
 
 
@@ -70,7 +70,7 @@ class MyTokenObtainSerializer(TokenObtainSerializer):
         self.fields["openid"] = serializers.CharField(allow_null=True, required=False)  # 添加微信openid字段
 
     class Meta:
-        model = User
+        model = user
         fields = "__all__"
         read_only_fields = ["id"]
 
@@ -89,7 +89,7 @@ class MyTokenObtainSerializer(TokenObtainSerializer):
         # attrs 为账号密码 ->  OrderedDict([('username', 'admin'), ('password', '123456')])
 
         if 'openid' in attrs.keys() and attrs['openid']:  # TODO:微信id登陆,小程序登陆
-            if users := User.objects.filter(openid=attrs['openid']):
+            if users := user.objects.filter(openid=attrs['openid']):
                 self.user = users.first()
             else:
                 raise exceptions.AuthenticationFailed(
