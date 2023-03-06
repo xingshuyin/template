@@ -185,8 +185,8 @@ def save_login_log(request):
     analysis_data['agent'] = str(parse(request.META['HTTP_USER_AGENT']))
     analysis_data['browser'] = get_browser(request)
     analysis_data['os'] = get_os(request)
-    analysis_data['creator_id'] = request.user.id
-    analysis_data['dept_belong_id'] = getattr(request.user, 'dept_id', '')
+    analysis_data['creator'] = request.user.id
+    analysis_data['dept_belong'] = getattr(request.user, 'dept_id', '')
     log.objects.create(**analysis_data)
 
 

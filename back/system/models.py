@@ -23,16 +23,16 @@ from urllib.parse import urljoin
 
 
 class base_model(models.Model):
-    createAt = models.DateTimeField(auto_now_add=True, help_text='创建时间', null=True)
-    updateAt = models.DateTimeField(auto_now=True, help_text='更新时间', null=True)
-    dept_belong_id = models.IntegerField(help_text='所属部门id', null=True, blank=True)
-    creator_id = models.IntegerField(help_text='创建人id', null=True, blank=True)
+    create_time = models.DateTimeField(auto_now_add=True, help_text='创建时间', null=True)
+    update_time = models.DateTimeField(auto_now=True, help_text='更新时间', null=True)
+    dept_belong = models.IntegerField(help_text='所属部门id', null=True, blank=True)
+    creator = models.IntegerField(help_text='创建人id', null=True, blank=True)
 
     class Meta:
         abstract = True
         verbose_name = '基础模型'
         verbose_name_plural = verbose_name
-        ordering = ('-createAt', )
+        ordering = ('-create_time', )
 
     def model_to_dict(self, fields=None, exclude=None, deep=2):
         opts = self._meta
@@ -315,7 +315,7 @@ class log(base_model):
         db_table = "log"
         verbose_name = "登录日志"
         verbose_name_plural = verbose_name
-        ordering = ("-createAt", )
+        ordering = ("-create_time", )
 
 
 class enterprise(base_model):
@@ -335,4 +335,17 @@ class enterprise(base_model):
     class Meta:
         db_table = "enterprise"
         verbose_name = "企业"
+        verbose_name_plural = verbose_name
+
+
+class article(base_model):
+    name = models.CharField(max_length=200, verbose_name="名称", help_text='名称')
+    tag = models.IntegerField(verbose_name="标签", help_text='标签')
+    content = models.TextField(verbose_name="内容", help_text='内容')
+    file = models.JSONField(default=list, help_text="文件", verbose_name='文件')
+    link = models.JSONField(default=list, help_text="链接", verbose_name='链接')
+
+    class Meta:
+        db_table = "article"
+        verbose_name = "文章"
         verbose_name_plural = verbose_name

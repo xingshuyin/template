@@ -26,6 +26,7 @@ const form = reactive({
   password: null,
   // openid: '1234567890',
 })
+const form_dom = ref()
 const rules = reactive({
   username: [{ required: true, message: '请填写账号', trigger: 'blur' }],
   password: [{ required: true, message: '请填写密码', trigger: 'blur' }]
@@ -33,24 +34,36 @@ const rules = reactive({
 const router = useRouter();
 
 const login = () => { //TODO:登录
-  r().post('/token/', { ...toRaw(form) }).then((response) => {
-    if (response?.status == 200) {
-      console.log('set token')
-      localStorage.setItem('token', response.data.access)
-      localStorage.setItem('refresh', response.data.refresh)
-      console.log('set token sucess')
-      store().get_userinfo(true).then(res => {
-        if (res.name) localStorage.setItem('username', res.name);
-        else localStorage.setItem('username', res.username)
-        console.log("login---userinfo", res)
-        if (res.is_super || res.type == 2) {
-          router.push('/admin/enterprise') //TODO:管理员进入后台管理界面
-        } else {
-          router.push('/') //TODO:普通用户进入前台
+  form_dom.value.validate((valid, fields) => {
+    if (valid) {
+      r().post('/token/', { ...toRaw(form) }).then((response) => {
+        if (response?.status == 200) {
+          console.log('set token')
+          localStorage.setItem('token', response.data.access)
+          localStorage.setItem('refresh', response.data.refresh)
+          console.log('set token sucess')
+          store().get_userinfo(true).then(res => {
+            if (res.name) localStorage.setItem('username', res.name);
+            else localStorage.setItem('username', res.username)
+            console.log("login---userinfo", res)
+            if (res.is_super || res.type == 2) {
+              router.push('/admin/enterprise') //TODO:管理员进入后台管理界面
+            } else {
+              router.push('/') //TODO:普通用户进入前台
+            }
+          })
         }
       })
+    } else {
+      ElMessage({
+        showClose: true,
+        message: '请填写账号或密码',
+        center: true,
+      });
     }
   })
+
+
 }
 /**
  * @description: 刷新token令牌
@@ -76,30 +89,30 @@ const env = import.meta.env
   <div class="login">
     <div class="login_form ">
       <!-- <div class="left">
-        <img src="../../assets/img/logo.webp" alt="" style="width: 300px;height: 300px;">
-        <div class="footer">
-          <div class="chinese">
-            {{ env.VITE_FOOTER_CHINESE }}
-          </div>
-          <div class="english">
-            <div>
-              {{ env.VITE_FOOTER_ENGLISH1 }}
-            </div>
-            <div>
-              {{ env.VITE_FOOTER_ENGLISH2 }}
-            </div>
+                        <img src="../../assets/img/logo.webp" alt="" style="width: 300px;height: 300px;">
+                        <div class="footer">
+                          <div class="chinese">
+                            {{ env.VITE_FOOTER_CHINESE }}
+                          </div>
+                          <div class="english">
+                            <div>
+                              {{ env.VITE_FOOTER_ENGLISH1 }}
+                            </div>
+                            <div>
+                              {{ env.VITE_FOOTER_ENGLISH2 }}
+                            </div>
 
-          </div>
-        </div>
-      </div> -->
+                          </div>
+                        </div>
+                      </div> -->
       <div class="right">
         <div class="title">{{ env.VITE_TITLE }}</div>
         <div class="form">
-          <el-form :model="form" status-icon :rules="rules" label-width="40px">
-            <el-form-item label="账号" prop="checkPass">
+          <el-form ref="form_dom" :model="form" status-icon :rules="rules" label-width="60px">
+            <el-form-item label="账号" prop="username">
               <el-input @keyup.enter="login" v-model="form.username" size="large" autocomplete="off" />
             </el-form-item>
-            <el-form-item label="密码" prop="pass">
+            <el-form-item label="密码" prop="password">
               <el-input @keyup.enter="login" v-model="form.password" type="password" size="large" autocomplete="off" />
             </el-form-item>
           </el-form>
@@ -113,7 +126,6 @@ const env = import.meta.env
     </div>
 
   </div>
-
 </template>
 <style scoped lang='scss'>
 .login {

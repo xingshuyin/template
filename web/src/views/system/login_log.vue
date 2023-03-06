@@ -5,15 +5,15 @@
                 <!-- <f-input v-model="form.label" label="名称" /> -->
                 <f-input v-model="form.name" label="名称" />
                 <f-timerange v-model="special_form.range" />
-            </div>
+                            </div>
             <div class="tool">
                 <el-button size="small" type="danger"
                     @click="mult_delete_(`/${attrs.base_url}/mult_destroy/`, attrs?.selects, get_data)"
-                    v-if="attrs?.selects?.length > 0">批量删除
-                </el-button>
+                                        v-if="attrs?.selects?.length > 0">批量删除
+                                    </el-button>
                 <el-button icon="Plus" circle
                     @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'" />
-                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
+                                    <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
             </div>
         </div>
 
@@ -21,19 +21,19 @@
         <div class="main-table">
             <el-table :data="attrs.data" v-loading.fullscreen:false="attrs.loading" stripe border size="small"
                 :expand-row-keys="attrs.expandedRowKeys" :row-key="(row) => { return row.id }"
-                @expand-change="async (row, rows) => { await get_devices_(row, rows, attrs) }"
-                @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }"
-                :cell-style="() => { return { 'text-align': 'center' } }">
-                <!-- 动态列 -->
+                                @expand-change="async (row, rows) => { await get_devices_(row, rows, attrs) }"
+                                @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }"
+                                :cell-style="() => { return { 'text-align': 'center' } }">
+                                <!-- 动态列 -->
                 <f-columns v-if="attrs.columns" v-model="attrs.columns"></f-columns>
                 <el-table-column label="操作" fixed="right" width="150">
                     <template #default="scope">
                         <el-button size="small" type="primary"
                             @click="attrs.adding = true; attrs.add_form = scope.row; attrs.submit_type = 'update' ">编辑
-                        </el-button>
+                                                    </el-button>
                         <el-popconfirm title="确定删除吗?"
                             @confirm="delete_item_(`/${attrs.base_url}/${scope.row.id}/`, get_data)">
-                            <template #reference>
+                                                        <template #reference>
                                 <el-button size="small" type="primary">删除
                                 </el-button>
                             </template>
@@ -45,22 +45,22 @@
             <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit" :background="true"
                 :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper" :total="attrs.total"
                 :pager-count="11">
-            </el-pagination>
+                            </el-pagination>
         </div>
 
 
         <el-dialog v-model="attrs.adding" class="add_form" :title="attrs.submit_type == 'add' ? '新增' : '编辑'" width="50%"
-            :modal="false">
-            <el-form :model="attrs.add_form" label-width="120px">
+                    :modal="false">
+                    <el-form :model="attrs.add_form" label-width="120px">
                 <el-form-item label="登录用户名" prop="username"> <el-input v-model="attrs.add_form.username" />
                 </el-form-item>
-                <el-form-item label="登录ip" prop="ip"> <el-input v-model="attrs.add_form.ip" /> </el-form-item>
+                                <el-form-item label="登录ip" prop="ip"> <el-input v-model="attrs.add_form.ip" /> </el-form-item>
                 <el-form-item label="agent信息" prop="agent"> <el-input v-model="attrs.add_form.agent" /> </el-form-item>
                 <el-form-item label="浏览器名" prop="browser"> <el-input v-model="attrs.add_form.browser" /> </el-form-item>
                 <el-form-item label="操作系统" prop="os"> <el-input v-model="attrs.add_form.os" /> </el-form-item>
                 <el-form-item label="州" prop="continent"> <el-input v-model="attrs.add_form.continent" />
                 </el-form-item>
-                <el-form-item label="国家" prop="country"> <el-input v-model="attrs.add_form.country" /> </el-form-item>
+                                <el-form-item label="国家" prop="country"> <el-input v-model="attrs.add_form.country" /> </el-form-item>
                 <el-form-item label="省份" prop="province"> <el-input v-model="attrs.add_form.province" />
                 </el-form-item>
                 <el-form-item label="城市" prop="city"> <el-input v-model="attrs.add_form.city" /> </el-form-item>
@@ -80,14 +80,14 @@
 
 
             </el-form>
-            <template #footer>
+                        <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="attrs.adding = false">取消</el-button>
                     <el-button type="primary"
                         @click="submit_(attrs.base_url, attrs.add_form, attrs.submit_type, get_data); attrs.adding = false">
-                        提交
-                    </el-button>
-                </span>
+                                                提交
+                                            </el-button>
+                                        </span>
             </template>
         </el-dialog>
 
@@ -116,7 +116,7 @@ const attrs = reactive({
         { prop: 'country_code', type: 'text', label: '简称', size: 'small', align: "left", show: true },
         { prop: 'longitude', type: 'text', label: '经度', size: 'small', align: "left", show: true },
         { prop: 'latitude', type: 'text', label: '纬度', size: 'small', align: "left", show: true },
-        { prop: 'createAt', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+        { prop: 'create_time', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
     ],
     base_url: 'log',
     selects: [],

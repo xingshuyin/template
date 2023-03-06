@@ -16,7 +16,8 @@ const r = () => {
   //TODO:axios-拦截器
   r_.interceptors.request.use(
     config => {
-      if (["/refresh/", "/token/"].indexOf(config.url) == -1) {
+      console.log(config.url);
+      if (config.url.startsWith("/admin")) {
         parse_token();
       }
       return config; //必须返回
@@ -34,6 +35,7 @@ const r = () => {
       return res; //必须返回
     },
     error => {
+      console.log("error", error);
       if (error?.response?.status == 401) {
         ElMessage({
           showClose: true,
@@ -60,10 +62,16 @@ const r = () => {
           message: error?.response?.data?.code[0],
           center: true,
         });
-      } else {
+      } else if (error?.response?.data) {
         ElMessage({
           showClose: true,
           message: error?.response?.data,
+          center: true,
+        });
+      } else {
+        ElMessage({
+          showClose: true,
+          message: error,
           center: true,
         });
       }

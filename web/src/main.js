@@ -6,25 +6,46 @@ import "./assets/css/quill.snow.css";
 import "uno.css"; // npm i -D @unocss/vite (无预设安装)   还需要在vite.config.ts中配置  具体看->  https://github.com/unocss/unocss/tree/main/packages/vite
 import "animate.css";
 import "element-plus/dist/index.css"; //导入element样式文件
+import r from "./utils/request";
 
 import BaiduMap from "vue-baidu-map-3x"; //npm install vue-baidu-map-3x --save
+
 import * as ElementPlusIconsVue from "@element-plus/icons-vue"; //引入所有element图标
+
 import { createPinia } from "pinia"; //引入pinia   npm install pinia
-const pinia = createPinia();
-import App from "./App.vue";
-import r from "./utils/request";
 import store from "./store/index";
+const pinia = createPinia();
+
+import App from "./App.vue";
 import vue3videoPlay from "vue3-video-play"; // 引入组件  npm i vue3-video-play --save
 import "vue3-video-play/dist/style.css"; // 引入css    npm i vue3-video-play --save
-import { ElMessage } from "element-plus";
-const views = import.meta.glob("./views/*/*.vue"); //TODO:动态路由-引入所有菜单路径,然后才能动态引入
 
+const views = import.meta.glob("./views/*/*.vue"); //TODO:动态路由-引入所有菜单路径,然后才能动态引入
 import route from "./route"; //引入路由组件
+
+import VMdEditor from "@kangc/v-md-editor";
+import "@kangc/v-md-editor/lib/style/base-editor.css";
+import githubTheme from "@kangc/v-md-editor/lib/theme/github.js";
+import "@kangc/v-md-editor/lib/theme/style/github.css";
+import VMdPreview from "@kangc/v-md-editor/lib/preview";
+import "@kangc/v-md-editor/lib/style/preview.css";
+// highlightjs
+import hljs from "highlight.js";
+VMdEditor.use(githubTheme, {
+  Hljs: hljs,
+});
+VMdPreview.use(githubTheme, {
+  Hljs: hljs,
+});
+
 const app = createApp(App);
 app.use(route); //使用路由组件
 app.use(pinia);
 app.use(BaiduMap, { ak: "ium5InHYNhRUBiSlGWeak9i6ufZ5jdf3" });
 app.use(vue3videoPlay);
+app.use(VMdEditor);
+app.use(VMdPreview);
+
 app.mount("#app");
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   //注册所有element图标    <el-button icon="Search"/>   <el-icon :size="20"> <Edit /> </el-icon>
@@ -85,6 +106,7 @@ const get_menu = (to, next) => {
 const whiteList = ["/login"]; //前置守卫白名单
 route.beforeEach((to, from, next) => {
   console.log("进入", to.path);
+  if (to.meta.title != undefined) window.document.title = to.meta.title;
   //TODO:router-前置守卫
   if (localStorage.getItem("token") && localStorage.getItem("refresh")) {
     store()
@@ -100,7 +122,7 @@ route.beforeEach((to, from, next) => {
               //判断store中是否有菜单数据
               if (!store().hasmenu) set_menu(); //判断是否已经添加路由
               if (to.matched.length === 0) next("/admin/enterprise"); //未知页面跳到首页
-              if (to.meta.title != undefined) window.document.title = to.meta.title; //TODO:设置标题
+              // if (to.meta.title != undefined) window.document.title = to.meta.title; //TODO:设置标题
               next(); // 进入页面, 其他带参数都是跳转路由
             } else get_menu(to, next); //没有菜单数据获取数据
           } else {
@@ -116,7 +138,8 @@ route.beforeEach((to, from, next) => {
       });
   } else {
     if (whiteList.includes(to.path)) next(); //白名单中路由直接进入
-    else next("/login"); //不在白名单进入登录页
+    else if (to.path.startsWith("/admin")) next("/login");
+    else next(); //不在白名单进入登录页
   }
 });
 route.afterEach((to, from, next) => {

@@ -243,7 +243,7 @@ export const select_ = (data, v) => {
 };
 export const sort_ = (d, form) => {
   //排序
-  //d -> {column: Proxy, prop: 'createAt', order: 'ascending'}
+  //d -> {column: Proxy, prop: 'create_time', order: 'ascending'}
   //form -> 需要提交的表单(reactive)
   console.log(d);
   if (d.order == "ascending") {

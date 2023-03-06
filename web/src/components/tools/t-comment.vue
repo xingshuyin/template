@@ -1,7 +1,7 @@
 <!--
  * @Filename     : CommentTree.vue
  * @Description  : wjt-前端-评论树
-                    data => [{id: 1,user_avatar: 'a',createAt: '2121',...},...]
+                    data => [{id: 1,user_avatar: 'a',create_time: '2121',...},...]
  * @Author       : xingshuyin xingshuyin@outlook.com
  * @Date         : 2022-10-07 14:41:30
  * @LastEditors  : xingshuyin xingshuyin@outlook.com
@@ -26,7 +26,7 @@ const props = defineProps(['data']); // defineProps的参数, 可以直接使用
         <div class="right">
             <div class="title">
                 <div class="user_name">{{ i.user_nick_name }}</div>
-                <div class="create_time">{{ i.createAt }}</div>
+                <div class="create_time">{{ i.create_time }}</div>
             </div>
             <div class="content">
                 {{ i.content }}
@@ -41,11 +41,11 @@ const props = defineProps(['data']); // defineProps的参数, 可以直接使用
                         <div class="title">
                             <div class="user_name">
                                 {{
-                                    reply.user_nick_name + (reply.reply_user_nick_name ? (' 回复@ ' +
-                                        reply.reply_user_nick_name) : '')
-                                }}
+                                                                reply.user_nick_name + (reply.reply_user_nick_name ? (' 回复@ ' +
+                                                                reply.reply_user_nick_name) : '')
+                                                                }}
                             </div>
-                            <div class="create_time">{{ reply.createAt }}</div>
+                            <div class="create_time">{{ reply.create_time }}</div>
                         </div>
                         <div class="content">
                             {{ reply.content }}

@@ -146,6 +146,18 @@ def init_menu():
             'is_link': False,
             'is_catalog': False
         },
+        {
+            'id': 10,
+            'parent_id': None,
+            'label': '文章管理',
+            'icon': 'Document',
+            'component': 'admin/article.vue',
+            'name': 'article',
+            'path': 'article',
+            'sort': 1,
+            'is_link': False,
+            'is_catalog': False
+        },
     ]
     for i in l:
         print(i)

@@ -4,15 +4,15 @@
             <div class="search">
                 <f-input v-model="form.name" label="名称" />
                 <f-timerange v-model="special_form.range" />
-            </div>
+                            </div>
             <div class="tool">
                 <el-button size="small" type="danger"
                     @click="mult_delete_(`/${attrs.base_url}/mult_destroy/`, attrs.selects, get_data)"
-                    v-if="attrs.selects.length > 0">批量删除
-                </el-button>
+                                        v-if="attrs.selects.length > 0">批量删除
+                                    </el-button>
                 <el-button icon="Plus" circle
                     @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'; attrs.submit_type = 'add'" />
-                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
+                                    <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
             </div>
         </div>
 
@@ -20,17 +20,17 @@
         <div class="main-table">
             <el-table :data="attrs.data" v-loading.fullscreen:false="attrs.loading" stripe border size="small"
                 :expand-row-keys="attrs.expandedRowKeys" :row-key="(row) => { return row.id }"
-                @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }"
-                :cell-style="() => { return { 'text-align': 'center' } }">
-                <f-columns v-if="attrs.columns" v-model="attrs.columns"></f-columns>
-                <el-table-column label="操作" fixed="right" width="150">
+                                @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }"
+                                :cell-style="() => { return { 'text-align': 'center' } }">
+                                <f-columns v-if="attrs.columns" v-model="attrs.columns"></f-columns>
+                                <el-table-column label="操作" fixed="right" width="150">
                     <template #default="scope">
                         <el-button size="small" type="primary" @click="edit(scope)">编辑
                         </el-button>
                         <!-- <el-button size="small" type="primary" @click="handleDelete(scope.$index, scope.row)">屏蔽</el-button> -->
                         <el-popconfirm title="确定删除吗?"
                             @confirm="delete_item_(`/${attrs.base_url}/${scope.row.id}/`, get_data)">
-                            <template #reference>
+                                                        <template #reference>
                                 <el-button size="small" type="primary">删除
                                 </el-button>
                             </template>
@@ -41,20 +41,20 @@
             <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit" :background="true"
                 :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper" :total="attrs.total"
                 :pager-count="11">
-            </el-pagination>
+                            </el-pagination>
         </div>
 
 
         <el-dialog v-model="attrs.adding" class="add_form" :title="attrs.submit_type == 'add' ? '新增' : '编辑'" width="50%"
-            :modal="false">
-            <el-form :model="attrs.add_form" label-width="120px" :rules="rules" ref="form_dom">
+                    :modal="false">
+                    <el-form :model="attrs.add_form" label-width="120px" :rules="rules" ref="form_dom">
                 <el-form-item label="接口名称" prop="name">
                     <el-input v-model="attrs.add_form.name" />
                 </el-form-item>
-                <el-form-item label="接口标识符" prop="key">
+                                <el-form-item label="接口标识符" prop="key">
                     <el-input v-model="attrs.add_form.key" />
                 </el-form-item>
-                <el-form-item label="请求方式" prop="method">
+                                <el-form-item label="请求方式" prop="method">
                     <el-select v-model="attrs.add_form.method" placeholder="" clearable>
                         <el-option key="0" label="GET" :value="0" />
                         <el-option key="1" label="POST" :value="1" />
@@ -70,11 +70,11 @@
                 <el-form-item label="菜单">
                     <el-cascader :options="attrs.menus" v-model="attrs.add_form.menu"
                         :props="{ checkStrictly: true, value: 'id', label: 'label' }" checkStrictly clearable
-                        :show-all-levels="false" :getCheckedNodes="true"
+                                                :show-all-levels="false" :getCheckedNodes="true"
                         @change="(value) => { attrs.add_form.menu = value.slice(-1)[0] }" />
                 </el-form-item>
-            </el-form>
-            <template #footer>
+                         </el-form>
+                         <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="attrs.adding = false">取消</el-button>
                     <el-button type="primary" @click="validate">
@@ -105,7 +105,7 @@ const attrs = reactive({
         },
         { prop: 'path', type: 'text', width: 180, label: '接口地址', size: 'small', align: "center", show: true },
         { prop: 'menu_label', type: 'text', width: 150, label: '菜单', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-        { prop: 'createAt', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+        { prop: 'create_time', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
     ],
     base_url: 'menu_interface',
     selects: [],

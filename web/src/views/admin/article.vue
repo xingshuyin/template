@@ -60,25 +60,26 @@
         </div>
 
 
-        <el-dialog v-model="attrs.adding" class="add_form" :title="attrs.submit_type == 'add' ? '新增' : '编辑'" width="50%"
-            :modal="false">
-            <el-form :model="attrs.add_form" label-width="120px" :rules="rules" ref="form_dom">
+        <el-dialog v-model="attrs.adding" class="add_form" :title="attrs.submit_type == 'add' ? '新增' : '编辑'" width="80%"
+            :modal="false" fullscreen append-to-body>
+            <el-form :model="attrs.add_form" label-width="60px" :rules="rules" ref="form_dom">
                 <el-form-item label="名称" prop="name">
                     <el-input v-model="attrs.add_form.name" />
                 </el-form-item>
-                <el-form-item label="编码" prop="code">
-                    <el-input v-model="attrs.add_form.code" />
-                </el-form-item>
-                <el-form-item label="地址" prop="area">
-                    <el-cascader v-model="attrs.add_form.area" :options="attrs.areas_tree"
-                        :props="{ emitPath: false, value: 'code', label: 'name' }" />
+                <el-form-item label="标签" prop="tag">
+                    <el-input v-model="attrs.add_form.tag" />
                 </el-form-item>
                 <el-form-item label="文件" prop="file">
                     <f-jfile v-model="attrs.add_form.file" :limit="10" :size="3" />
                 </el-form-item>
-                <el-form-item label="图片" prop="image">
-                    <f-jimage v-model="attrs.add_form.image" :limit="10" :size="3" />
+                <el-form-item label="链接" prop="link">
+                    <el-input v-model="attrs.add_form.link" />
                 </el-form-item>
+                <el-form-item label="" prop="content">
+                    <v-md-editor v-model="attrs.add_form.content" height="600px" :disabled-menus="[]"
+                        @upload-image="upload_image"></v-md-editor>
+                </el-form-item>
+
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
@@ -91,21 +92,21 @@
         </el-dialog>
     </el-config-provider>
 </template>
-  
+
 <script setup>
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, export_data_ } from '../../hooks/table_common'
+import r from '../../utils/request';
 import store from "../../store/index";
 const attrs = reactive({
     columns: [
         { type: 'text', label: '名称', prop: 'name', align: "left", show: true },
-        { type: 'text', label: '编码', prop: 'code', align: "left", show: true },
-        { type: 'text', width: 150, label: '行政区域', prop: 'area_name', align: "center", show: true },
+        { type: 'text', label: '标签', prop: 'tag', align: "left", show: true },
         { type: 'jfile', width: 150, label: '文件', prop: 'file', align: "center", show: true },
-        { type: 'jimage', width: 150, label: '图片', prop: 'image', align: "center", show: true },
+        { type: 'text', width: 150, label: '链接', prop: 'link', align: "center", show: true },
         { type: 'text', width: 160, label: '创建时间', prop: 'create_time', align: "center", show: true, sortable: true },
     ],
-    base_url: 'enterprise',
+    base_url: 'article',
     selects: [],
     data: [],
     total: 0,
@@ -160,6 +161,23 @@ watch([form, special_form], () => {
     }
     get_data()
 })
+const upload_image = (event, insertImage, files) => {
+    console.log(files)
+    r().post('/data/upload/', { file: files[0] }, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    }).then((res) => {
+        insertImage({
+            url:
+                window.location.protocol + "//" + window.location.host + '/' + res.data.url,
+            desc: res.data.name,
+            id: res.data.id,
+            // width: 'auto',
+            // height: 'auto',
+        });
+    })
+}
 </script>
 
 <style scoped lang="scss">

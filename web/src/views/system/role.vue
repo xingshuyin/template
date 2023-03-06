@@ -4,15 +4,15 @@
             <div class="search">
                 <f-input v-model="form.label" label="名称" />
                 <f-timerange v-model="special_form.range" />
-            </div>
+                            </div>
             <div class="tool">
                 <el-button size="small" type="danger"
                     @click="mult_delete_(`/${attrs.base_url}/mult_destroy/`, attrs.selects, get_data)"
-                    v-if="attrs.selects.length > 0">批量删除
-                </el-button>
+                                        v-if="attrs.selects.length > 0">批量删除
+                                    </el-button>
                 <el-button icon="Plus" circle
                     @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'; attrs.submit_type = 'add'" />
-                <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
+                                    <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
             </div>
         </div>
 
@@ -20,22 +20,22 @@
         <div class="main-table">
             <el-table :data="attrs.data" v-loading.fullscreen:false="attrs.loading" stripe border size="small"
                 :expand-row-keys="attrs.expandedRowKeys" :row-key="(row) => { return row.id }"
-                @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }"
-                :cell-style="() => { return { 'text-align': 'center' } }">
-                <f-columns v-if="attrs.columns" v-model="attrs.columns"></f-columns>
-                <el-table-column label="操作" fixed="right" width="250">
+                                @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }"
+                                :cell-style="() => { return { 'text-align': 'center' } }">
+                                <f-columns v-if="attrs.columns" v-model="attrs.columns"></f-columns>
+                                <el-table-column label="操作" fixed="right" width="250">
                     <template #default="scope">
                         <el-button size="small" type="primary"
                             @click="attrs.adding = true; attrs.add_form = scope.row; attrs.submit_type = 'update' ">编辑
-                        </el-button>
+                                                    </el-button>
                         <el-button size="small" type="primary"
                             @click="attrs.show_permissions = true; attrs.role_id = scope.row.id; GetRolePermision()">
-                            权限管理
+                                                        权限管理
                         </el-button>
                         <!-- <el-button size="small" type="primary" @click="handleDelete(scope.$index, scope.row)">屏蔽</el-button> -->
                         <el-popconfirm title="确定删除吗?"
                             @confirm="delete_item_(`/${attrs.base_url}/${scope.row.id}/`, get_data)">
-                            <template #reference>
+                                                        <template #reference>
                                 <el-button size="small" type="primary">删除
                                 </el-button>
                             </template>
@@ -46,14 +46,14 @@
             <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit" :background="true"
                 :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper" :total="attrs.total"
                 :pager-count="11">
-            </el-pagination>
+                            </el-pagination>
         </div>
-
+        
 
         <el-dialog v-model="attrs.adding" class="add_form" :title="attrs.submit_type == 'add' ? '新增' : '编辑'" width="50%"
-            :modal="false">
-            <el-form :model="attrs.add_form" label-width="120px" :rules="rules" ref="form_dom">
-                <el-form-item label="角色名称" prop="name">
+                    :modal="false">
+                    <el-form :model="attrs.add_form" label-width="120px" :rules="rules" ref="form_dom">
+                            <el-form-item label="角色名称" prop="name">
                     <el-input v-model="attrs.add_form.name" />
                 </el-form-item>
                 <el-form-item label="角色标识" prop="key">
@@ -62,7 +62,7 @@
                 <el-form-item label="是否管理员" prop="is_admin">
                     <!-- <el-input v-model="attrs.add_form.is_admin" /> -->
                     <el-switch v-model="attrs.add_form.is_admin" style="margin-left: 24px" inline-prompt active-text="是"
-                        inactive-text="否" />
+                                            inactive-text="否" />
                 </el-form-item>
             </el-form>
             <template #footer>
@@ -81,9 +81,9 @@
             </el-select>
             <el-cascader v-if="permission == 4" v-model="custom_dept" :options="attrs.all_dept" clearable
                 :show-all-levels="false"
-                :props="{ emitPath: false, multiple: true, checkStrictly: true, value: 'id', label: 'name', }" />
-            <div class="permissions-body common-scroll">
-                <el-tree ref="tree" :data="attrs.menus" node-key="id" show-checkbox check-strictly default-expand-all
+                                :props="{ emitPath: false, multiple: true, checkStrictly: true, value: 'id', label: 'name', }" />
+                            <div class="permissions-body common-scroll">
+                                <el-tree ref="tree" :data="attrs.menus" node-key="id" show-checkbox check-strictly default-expand-all
                     @check-change="check_fellow_interface">
                     <template #default="{ node, data }">
                         <div class="permission-item">
@@ -93,7 +93,7 @@
                                 <el-checkbox-group v-model="menu_interface">
                                     <el-checkbox v-for="i in data.interfaces" :key="i.id" :label="i.id">
                                         {{ i.name }}
-                                    </el-checkbox>
+                                                                            </el-checkbox>
                                 </el-checkbox-group>
                             </div>
                         </div>
@@ -106,7 +106,7 @@
                 <span class="dialog-footer">
                     <el-button @click="attrs.show_permissions = false">取消</el-button>
                     <el-button type="primary" @click="SetRolePermision">
-                        提交
+                                            提交
                     </el-button>
                 </span>
             </template>
@@ -125,7 +125,7 @@ const attrs = reactive({
         { prop: 'name', type: 'text', label: '角色名称', size: 'small', align: "left", show: true },
         { prop: 'key', type: 'text', label: '角色标识', size: 'small', align: "center", show: true },
         { prop: 'is_admin', type: 'select', width: 150, label: '是否管理员', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
-        { prop: 'createAt', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
+        { prop: 'create_time', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
     ],
     base_url: 'role',
     selects: [],

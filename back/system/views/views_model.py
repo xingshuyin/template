@@ -1,26 +1,24 @@
-from django.db import models
-from django.utils import timezone
-from django.forms import model_to_dict
-from django.db.models import QuerySet
-from django.db.models import F
-from django.db.models.query import BaseIterable
-from django.views.decorators.cache import cache_page
-from django.db.models.fields.related import ManyToManyField, ForeignKey
-from rest_framework import filters, serializers, status, exceptions
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.serializers import ModelSerializer
-from rest_framework.decorators import action
-from rest_framework.request import Request, HttpRequest
-from rest_framework.response import Response
-from pathlib import Path
-from itertools import chain
-from tomlkit import datetime
-from ..models import *
-from ..utils import get_time
-from ..permission import SuperPermisssion
-import json
 import time
+from itertools import chain
+from pathlib import Path
+
 import pandas as pd
+from django.db import models
+from django.db.models import F, QuerySet
+from django.db.models.fields.related import ForeignKey, ManyToManyField
+from django.db.models.query import BaseIterable
+from django.utils import timezone
+from rest_framework import exceptions, filters, status
+from rest_framework.decorators import action
+from rest_framework.request import HttpRequest
+from rest_framework.response import Response
+from rest_framework.serializers import ModelSerializer
+from rest_framework.viewsets import ModelViewSet
+from tomlkit import datetime
+
+from ..models import *
+from ..permission import SuperPermisssion
+from ..utils import get_time
 
 
 # 模型序列化(附加外键序列化)
@@ -59,7 +57,7 @@ def to_dict(instance, deep=2):
 
 
 # 处理特殊搜索参数
-def deal_special_params(request: HttpRequest, queryset: QuerySet, filter_dict):
+def special_filter(request: HttpRequest, queryset: QuerySet, filter_dict):
     fields = [i.name for i in queryset.model._meta.fields]
     model_name = queryset.model._meta.model_name
 
@@ -73,10 +71,10 @@ def deal_special_params(request: HttpRequest, queryset: QuerySet, filter_dict):
         queryset = queryset.filter(parent__name=filter_dict['parent_name'])
         del filter_dict['parent_name']
     if 'create_start' in filter_dict.keys():
-        queryset = queryset.filter(createAt__gte=filter_dict['create_start'])
+        queryset = queryset.filter(create_time__gte=filter_dict['create_start'])
         del filter_dict['create_start']
     if 'create_end' in filter_dict.keys():
-        queryset = queryset.filter(createAt__lte=filter_dict['create_end'])
+        queryset = queryset.filter(create_time__lte=filter_dict['create_end'])
         del filter_dict['create_end']
 
     for i in ['name', 'project', 'city', 'county', 'legal_person', 'leader', 'industry']:  # 所有字符串包含类型的过滤
@@ -105,13 +103,13 @@ def deal_permission(request, queryset):
         if not user_dept_id:
             return queryset.none()
 
-        # 1. 判断过滤的数据是否有创建人所在部门 "dept_belong_id" 字段
-        if not getattr(queryset.model, "dept_belong_id", None):
+        # 1. 判断过滤的数据是否有创建人所在部门 "dept_belong" 字段
+        if not getattr(queryset.model, "dept_belong", None):
             return queryset
 
         # 2. 如果用户没有关联角色则返回本部门数据
         if not hasattr(request.user, "role"):
-            return queryset.filter(dept_belong_id=user_dept_id)
+            return queryset.filter(dept_belong=user_dept_id)
 
         # 3. 根据所有角色 获取所有权限范围
         # (0, "仅本人数据权限"),
@@ -130,7 +128,7 @@ def deal_permission(request, queryset):
         permission_list = list(set(permission_list))
         # 4. 只为仅本人数据权限时只返回过滤本人数据，并且部门为自己本部门(考虑到用户会变部门，只能看当前用户所在的部门数据)
         if 0 in permission_list:
-            return queryset.filter(creator_id=request.user.id, dept_belong_id=user_dept_id)
+            return queryset.filter(creator=request.user.id, dept_belong=user_dept_id)
 
         # 5. 自定数据权限 获取部门，根据部门过滤
         dept_list = []
@@ -144,29 +142,34 @@ def deal_permission(request, queryset):
                 dept_list.extend(get_all_sub_dept(user_dept_id))
         if queryset.model._meta.model_name == 'dept':
             return queryset.filter(id__in=list(set(dept_list)))
-        return queryset.filter(dept_belong_id__in=list(set(dept_list)))
+        return queryset.filter(dept_belong__in=list(set(dept_list)))
     else:
         return queryset
 
 
 def get_extra_value(request, queryset):
     fields = [i.name for i in queryset.model._meta.fields]
+    print(fields)
     model_name = queryset.model._meta.model_name  # queryset.model  TODO:获取queryset的model对象
     if 'parent' in fields:
         queryset = queryset.annotate(parent_name=F("parent__name"))
+        fields.append('parent_name')
     if 'area' in fields:
         queryset = queryset.annotate(area_name=F("area__name"))
+        fields.append('area_name')
     if 'dept' in fields:
         queryset = queryset.annotate(dept_name=F("dept__name"))
+        fields.append('dept_name')
     if model_name in ['menuinterface']:
         queryset = queryset.annotate(menu_name=F('menu__name'), menu_label=F('menu__label'))
+        fields.extend(['menu_name', 'menu_label'])
     if model_name in ['user']:
         if not request.user.is_super:
             raise exceptions.AuthenticationFailed(
                 '用户不存在',
                 "no_active_account",
             )
-    return queryset
+    return queryset, fields
 
 
 def prefetch_related(queryset: QuerySet):
@@ -183,34 +186,31 @@ def list_common(self, request: HttpRequest, *args):
     filter_dict = request.GET.dict()
     temp_dict = request.GET.dict()
     queryset: QuerySet = self.get_queryset()
-    fields = [i.name for i in queryset.model._meta.fields]
     queryset = deal_permission(request, queryset)
     if (page and limit):
         for k, v in temp_dict.items():
             if v == '' or v == 'null' or v == 'undefined':  # s删除无用过滤字段
                 del filter_dict[k]
-        for i in ['page', 'limit']:
+        for i in ['page', 'limit', 'values[]', 'defer[]']:
             if i in filter_dict.keys():
                 del filter_dict[i]
+        queryset, filter_dict = special_filter(request, queryset, filter_dict)
+        queryset = queryset.filter(**filter_dict)
+        queryset, fields = get_extra_value(request, queryset)
+
         if 'values[]' in temp_dict.keys():  #TODO:选择字段
             values = request.GET.getlist('values[]')
             for i in values[:]:
                 if i not in fields:
                     values.remove(i)
             fields = values
-            del filter_dict['values[]']
         if 'defer[]' in temp_dict.keys():  #TODO:排除字段
-            print(fields)
             for i in request.GET.getlist('defer[]'):
                 if i in fields:
                     fields.remove(i)
-            del filter_dict['defer[]']
-        queryset, filter_dict = deal_special_params(request, queryset, filter_dict)
-        queryset = queryset.filter(**filter_dict)
-        queryset = get_extra_value(request, queryset)
-        total = queryset.count()
-        r = queryset[(page - 1) * limit:page * limit]
-        r = r.values(*fields)
+        r = queryset.values(*fields)
+        total = r.count()
+        r = r[(page - 1) * limit:page * limit]
         if r is not None:
             return Response({'data': list(r), 'page': page, 'limit': limit, 'total': total}, 200)
     return Response({'detail': '未分页'}, 400)
@@ -222,7 +222,8 @@ def retrieve(self, request, *args, **kwargs):
     serializer = self.get_serializer(instance)
     r = serializer.data
     for i in instance._meta.fields:
-        if type(i) == models.fields.DateTimeField:
+        if isinstance(i, models.fields.DateTimeField):
+            # if type(i) == models.fields.DateTimeField:
             if v := instance.__dict__[i.name]:
                 r[i.name] = deal_value(v)
     return Response(r)
@@ -242,8 +243,8 @@ def create(self, request, *args, **kwargs):
         print('返回')
         return Response(serializer.data, status=201, headers=headers)
 
-    dept_belong_id = getattr(request.user, 'dept_belong_id', None)
-    if not dept_belong_id:
+    dept_belong = getattr(request.user, 'dept_belong', None)
+    if not dept_belong:
         return Response({'detail': '没有数据权限'}, status=400, headers=headers)
     serializer = self.get_serializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -251,10 +252,10 @@ def create(self, request, *args, **kwargs):
     fields = []
     for field in instance._meta.fields:
         fields.append(field.name)
-    if "dept_belong_id" in fields:
-        instance.dept_belong_id = dept_belong_id
-    if "creator_id" in fields:
-        instance.creator_id = request.user.id
+    if "dept_belong" in fields:
+        instance.dept_belong = dept_belong
+    if "creator" in fields:
+        instance.creator = request.user.id
     if instance._meta.object_name == 'user':
         instance.set_password(instance.password)
     instance.save()
@@ -281,7 +282,7 @@ def update(self, request, *args, **kwargs):
             for j in i.dept.all():
                 print(j)
                 depts.add(j.i)
-        if instance.dept_belong_id in depts:
+        if instance.dept_belong in depts:
             self.perform_update(serializer)
             if getattr(instance, '_prefetched_objects_cache', None):
                 instance._prefetched_objects_cache = {}
@@ -304,7 +305,7 @@ def destroy(self, request, *args, **kwargs):
             for j in i.dept.all():
                 print(j)
                 depts.add(j.i)
-        if instance.dept_belong_id in depts:
+        if instance.dept_belong in depts:
             self.perform_destroy(instance)
             return Response({'detail': '删除成功'}, 200)
         else:
@@ -486,5 +487,10 @@ view_list = [
         "url": "enterprise",
         "label": "企业",
         "viewset": model_viewset(enterprise, (ModelViewSet, ), (ModelSerializer, ))
+    },
+    {
+        "url": "article",
+        "label": "文章",
+        "viewset": model_viewset(article, (ModelViewSet, ), (ModelSerializer, ))
     },
 ]
