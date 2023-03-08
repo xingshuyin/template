@@ -1,7 +1,6 @@
 <template>
     <div class="article">
-
-        <v-md-preview v-if="attrs.item" v-model="attrs.item.content">
+        <v-md-preview v-if="attrs.item" :text="attrs.item.content">
 
         </v-md-preview>
     </div>
