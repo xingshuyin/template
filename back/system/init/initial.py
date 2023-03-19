@@ -158,6 +158,18 @@ def init_menu():
             'is_link': False,
             'is_catalog': False
         },
+        {
+            'id': 11,
+            'parent_id': None,
+            'label': '爬虫管理',
+            'icon': 'Document',
+            'component': 'admin/spider.vue',
+            'name': 'spider',
+            'path': 'spider',
+            'sort': 1,
+            'is_link': False,
+            'is_catalog': False
+        },
     ]
     for i in l:
         print(i)

@@ -35,7 +35,6 @@ def to_dict(instance, deep=2):
     argument.
     """
     opts = instance._meta
-    print(opts.fields)
     data = {}
     for f in chain(opts.concrete_fields, opts.private_fields, opts.many_to_many):
         v = f.value_from_object(instance)
@@ -149,7 +148,6 @@ def deal_permission(request, queryset):
 
 def get_extra_value(request, queryset):
     fields = [i.name for i in queryset.model._meta.fields]
-    print(fields)
     model_name = queryset.model._meta.model_name  # queryset.model  TODO:获取queryset的model对象
     if 'parent' in fields:
         queryset = queryset.annotate(parent_name=F("parent__name"))
@@ -492,5 +490,10 @@ view_list = [
         "url": "article",
         "label": "文章",
         "viewset": model_viewset(article, (ModelViewSet, ), (ModelSerializer, ))
+    },
+    {
+        "url": "spider",
+        "label": "爬虫",
+        "viewset": model_viewset(spider, (ModelViewSet, ), (ModelSerializer, ))
     },
 ]

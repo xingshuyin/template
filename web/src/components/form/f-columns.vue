@@ -1,14 +1,19 @@
 
 <script setup>
+import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, export_data_ } from '../../hooks/table_common'
 //TODO:动态列
-const props = defineProps(['modelValue']); // defineProps的参数, 可以直接使用
+const props = defineProps(['modelValue', 'attrs', 'callback_delete', 'opt_width']); // defineProps的参数, 可以直接使用
+const emits = defineEmits(['update:attrs']); // emits 触发父组件函数
+watch(() => props.attrs, () => {
+    emits('update:attrs', props.attrs)
+})
 // modelValue = [
 //     { type: ['text','select','jimage','jfile'], width: 180, label: '名称', prop: 'name', align: "center", show: true , [option]: { false: '否', true: '是' }},
 // ]
 
 </script>
 <template>
-    <template v-for="i in modelValue">
+    <template v-for="i in attrs.columns">
         <!-- 普通文本 -->
         <el-table-column v-if="i.type == 'text' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
             :sortable="i.sortable" :width="i.width">
@@ -63,7 +68,22 @@ const props = defineProps(['modelValue']); // defineProps的参数, 可以直接
             </template>
         </el-table-column>
     </template>
+    <el-table-column label="操作" fixed="right" :width="opt_width ? opt_width : 150" align="center">
+        <template #default="scope">
+            <slot name="opt" :scope="scope"></slot>
+            <el-button size="small" type="primary"
+                @click="attrs.adding = true; attrs.add_form = scope.row; attrs.submit_type = 'update' ">编辑
+            </el-button>
+            <!-- <el-button size="small" type="primary" @click="handleDelete(scope.$index, scope.row)">屏蔽</el-button> -->
+            <el-popconfirm title="确定删除吗?" v-if="scope.row.is_delete != 1"
+                @confirm="delete_item_(`/${attrs.base_url}/${scope.row.id}/`, callback_delete)">
+                <template #reference>
+                    <el-button size="small" type="primary">删除
+                    </el-button>
+                </template>
+            </el-popconfirm>
+        </template>
+    </el-table-column>
 </template>
 <style scoped lang='scss'>
-
 </style>

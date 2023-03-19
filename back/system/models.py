@@ -318,6 +318,33 @@ class log(base_model):
         ordering = ("-create_time", )
 
 
+class spider(base_model):
+    name = models.CharField(max_length=50, help_text='规则名称-')
+    allowed_domains = models.CharField(max_length=800, help_text='域名列表(逗号分隔)', null=True, blank=True)
+    start_urls = models.CharField(max_length=200, help_text='开始页(逗号分隔)', null=True, blank=True)
+    start_page_num = models.IntegerField(help_text='分页页数开头', null=True, blank=True)
+    re_page_num = models.CharField(max_length=200, help_text='分页页数正则', null=True, blank=True)
+    page_format = models.CharField(max_length=200, help_text='分页链接格式化字符', null=True, blank=True)
+    page_format_shift = models.CharField(max_length=200, help_text='分页链接页码转换(传入num判断并修改)', null=True, blank=True)
+    re_page = models.CharField(max_length=200, help_text='分页链接正则', null=True, blank=True)
+    re_item = models.CharField(max_length=200, help_text='内容链接正则', null=True, blank=True)
+    xpath_page_restrict = models.CharField(max_length=200, help_text='分页链接提取区域xpath', null=True, blank=True)
+    xpath_item_restrict = models.CharField(max_length=200, help_text='内容链接提取区域xpath', null=True, blank=True)
+    xpath_name = models.CharField(max_length=200, help_text='标题xpath', null=True, blank=True)
+    xpath_time = models.CharField(max_length=200, help_text='时间xpath', null=True, blank=True)
+    re_time = models.CharField(max_length=200, help_text='时间正则', null=True, blank=True)
+    xpath_cover = models.CharField(max_length=200, help_text='封面xpath', null=True, blank=True)
+    xpath_content = models.CharField(max_length=200, help_text='内容xpath', null=True, blank=True)
+    xpath_source = models.CharField(max_length=200, help_text='来源xpath', null=True, blank=True)
+    re_source = models.CharField(max_length=200, help_text='来源正则', null=True, blank=True)
+    enable = models.BooleanField(help_text="是否启用", default=True)
+    category = models.IntegerField(help_text='类型', null=True, blank=True)
+
+    class Meta:
+        db_table = 'spider'
+        verbose_name = "爬虫规则表"
+
+
 class enterprise(base_model):
     name = models.CharField(max_length=100, verbose_name="名称", help_text="名称", null=True)
     code = models.CharField(max_length=100, unique=True, help_text='唯一编码', verbose_name="编码")
@@ -340,10 +367,10 @@ class enterprise(base_model):
 
 class article(base_model):
     name = models.CharField(max_length=200, verbose_name="名称", help_text='名称')
-    tag = models.IntegerField(verbose_name="标签", help_text='标签')
+    tag = models.IntegerField(verbose_name="标签", help_text='标签', null=True)
     content = models.TextField(verbose_name="内容", help_text='内容')
-    file = models.JSONField(default=list, help_text="文件", verbose_name='文件')
-    link = models.JSONField(default=list, help_text="链接", verbose_name='链接')
+    file = models.JSONField(default=list, help_text="文件", verbose_name='文件', null=True)
+    link = models.JSONField(default=list, help_text="链接", verbose_name='链接', null=True)
 
     class Meta:
         db_table = "article"

@@ -4,14 +4,18 @@
         <div class="side">
 
         </div>
-        <div class="list">
-            <div v-if="attrs.data" class="article" v-for="i in attrs.data"
+        <div class="items">
+            <div v-if="attrs.data" class="item" v-for="i in attrs.data"
                 @click="router.push({ name: 'article_detail', params: { id: i.id } })">
-                <div class="article-title">
+                <div class="item-title">
                     {{ i.name }}
+                </div>
+                <div class="item-time">
+                    {{ i.create_time }}
                 </div>
             </div>
         </div>
+
     </div>
 </template>
 <script setup>
@@ -46,9 +50,25 @@ onMounted(() => {
         background-size: cover;
     }
 
-    .list {
+    .items {
+        // box-shadow: 0 0 10px 0 black;
+        width: 50%;
         margin: auto;
-        text-align: center;
+
+        .item {
+            background-color: rgb(241 241 241);
+            box-shadow: 0 0 3px 0 black;
+            padding: 15px;
+            box-sizing: border-box;
+            margin: 10px 0;
+            border-radius: 5px;
+
+            .item-title {
+                font-size: 30px;
+                // text-align: center;
+            }
+        }
     }
+
 }
 </style>
