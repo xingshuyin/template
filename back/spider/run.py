@@ -49,13 +49,13 @@ def main():
     cursor.close()
     db.close()
     for i in spiders:
-        print('运行- ', i)
-    #     runner.crawl(ArticleSpider, rule=i)
-    # d = runner.join()
-    # d.addBoth(lambda _: reactor.stop())
-    # reactor.run()  # the script will block here until the crawling is finished
-    # end = time.time()
-    # print('程序运行时间为: %s s' % (end - start))
+        print('运行- ', i['name'])
+        runner.crawl(ArticleSpider, rule=i)
+    d = runner.join()
+    d.addBoth(lambda _: reactor.stop())
+    reactor.run()  # the script will block here until the crawling is finished
+    end = time.time()
+    print('程序运行时间为: %s s' % (end - start))
 
 
 if __name__ == '__main__':
