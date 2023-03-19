@@ -47,7 +47,7 @@ const login = () => { //TODO:登录
             else localStorage.setItem('username', res.username)
             console.log("login---userinfo", res)
             if (res.is_super || res.type == 2) {
-              router.push('/admin/enterprise') //TODO:管理员进入后台管理界面
+              router.push('/admin/article') //TODO:管理员进入后台管理界面
             } else {
               router.push('/') //TODO:普通用户进入前台
             }
@@ -89,22 +89,22 @@ const env = import.meta.env
   <div class="login">
     <div class="login_form ">
       <!-- <div class="left">
-                        <img src="../../assets/img/logo.webp" alt="" style="width: 300px;height: 300px;">
-                        <div class="footer">
-                          <div class="chinese">
-                            {{ env.VITE_FOOTER_CHINESE }}
-                          </div>
-                          <div class="english">
-                            <div>
-                              {{ env.VITE_FOOTER_ENGLISH1 }}
+                          <img src="../../assets/img/logo.webp" alt="" style="width: 300px;height: 300px;">
+                          <div class="footer">
+                            <div class="chinese">
+                              {{ env.VITE_FOOTER_CHINESE }}
                             </div>
-                            <div>
-                              {{ env.VITE_FOOTER_ENGLISH2 }}
-                            </div>
+                            <div class="english">
+                              <div>
+                                {{ env.VITE_FOOTER_ENGLISH1 }}
+                              </div>
+                              <div>
+                                {{ env.VITE_FOOTER_ENGLISH2 }}
+                              </div>
 
+                            </div>
                           </div>
-                        </div>
-                      </div> -->
+                        </div> -->
       <div class="right">
         <div class="title">{{ env.VITE_TITLE }}</div>
         <div class="form">

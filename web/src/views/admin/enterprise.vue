@@ -28,28 +28,13 @@
 
 
     <div class="main-table">
-    <el-table :data="attrs.data" v-loading.fullscreen:false="attrs.loading" stripe border size="small"
-        :expand-row-keys="attrs.expandedRowKeys" :row-key="(row) => { return row.id }"
-        @expand-change="async (row, rows) => { await get_devices_(row, rows, attrs) }"
-        @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }">
-        <!-- 动态列 -->
-        <f-columns v-if="attrs.columns" v-model="attrs.columns" v-model:attrs="attrs" :callback_delete="get_data">
-        </f-columns>
-
-        <!-- <el-table-column label="操作" fixed="right" width="150" align="center">
-                <template #default="scope">
-                    <el-button size="small" type="primary"
-                        @click="attrs.adding = true; attrs.add_form = scope.row; attrs.submit_type = 'update' ">编辑
-                    </el-button>
-                        <el-popconfirm title="确定删除吗?" v-if="scope.row.is_delete != 1"
-                            @confirm="delete_item_(`/${attrs.base_url}/${scope.row.id}/`, get_data)">
-                            <template #reference>
-                                <el-button size="small" type="primary">删除
-                                </el-button>
-                            </template>
-                        </el-popconfirm>
-                    </template>
-                </el-table-column> -->
+        <el-table :data="attrs.data" v-loading.fullscreen:false="attrs.loading" stripe border size="small"
+            :expand-row-keys="attrs.expandedRowKeys" :row-key="(row) => { return row.id }"
+            @expand-change="async (row, rows) => { await get_devices_(row, rows, attrs) }"
+            @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }">
+            <!-- 动态列 -->
+            <f-columns v-if="attrs.columns" v-model="attrs.columns" v-model:attrs="attrs" :callback_delete="get_data">
+            </f-columns>
         </el-table>
         <t-page v-model:page="form.page" v-model:limit="form.limit" :total="attrs.total"></t-page>
     </div>
@@ -87,7 +72,7 @@
 </template>
   
 <script setup>
-import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, export_data_ } from '../../hooks/table_common'
+import { get_data_, select_, mult_delete_, sort_, submit_, export_data_ } from '../../hooks/table_common'
 import store from "../../store/index";
 const attrs = reactive({
     columns: [

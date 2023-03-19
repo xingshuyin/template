@@ -26,7 +26,6 @@
             <f-columns v-if="attrs.columns" v-model="attrs.columns" v-model:attrs="attrs" :callback_delete="get_data">
             </f-columns>
         </el-table>
-
         <t-page v-model:page="form.page" v-model:limit="form.limit" :total="attrs.total"></t-page>
     </div>
 

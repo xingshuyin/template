@@ -24,10 +24,7 @@
             <f-columns v-if="attrs.columns" v-model="attrs.columns" v-model:attrs="attrs" :callback_delete="get_data">
             </f-columns>
         </el-table>
-        <el-pagination class="pager" v-model:currentPage="form.page" v-model:page-size="form.limit" :background="true"
-            :page-sizes="[100, 200, 300, 400]" layout="total, sizes, prev, pager, next, jumper" :total="attrs.total"
-            :pager-count="11">
-        </el-pagination>
+        <t-page v-model:page="form.page" v-model:limit="form.limit" :total="attrs.total"></t-page>
     </div>
 
 
@@ -73,7 +70,7 @@
 
 <script setup>
 
-import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, get_all_role_, get_all_menu_tree_, get_all_interface_ } from '../../hooks/table_common'
+import { get_data_, select_, mult_delete_, sort_, submit_, get_all_role_, get_all_menu_tree_, get_all_interface_ } from '../../hooks/table_common'
 const form_dom = ref()
 const attrs = reactive({
     columns: [

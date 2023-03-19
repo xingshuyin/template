@@ -23,42 +23,14 @@
             <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
             <el-button icon="Download" circle
                 @click="export_data_(attrs.base_url, { create_start: special_form.range[0], create_end: special_form.range[1], ...form })" />
+        </div>
     </div>
-</div>
-<div class="main-table">
-    <el-table :data="attrs.data" v-loading.fullscreen:false="attrs.loading" stripe border size="small"
-        :expand-row-keys="attrs.expandedRowKeys" :row-key="(row) => { return row.id }"
-        @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }">
-        <f-columns v-if="attrs.columns" v-model="attrs.columns" v-model:attrs="attrs" :callback_delete="get_data">
-        </f-columns>
-        <!-- <el-table-column label="操作" fixed="right" width="250">
-                <template #default="scope">
-                    <el-button size="small" type="primary"
-                        @click="attrs.adding = true; attrs.add_form = scope.row; attrs.submit_type = 'update' ">编辑
-                    </el-button>
-                    <el-popconfirm title="确定禁用吗?" v-if="scope.row.enable"
-                        @confirm="update_item_(`/${attrs.base_url}/${scope.row.id}/`, { enable: 0 }, get_data)">
-                        <template #reference>
-                            <el-button size="small" type="primary">禁用
-                            </el-button>
-                        </template>
-                    </el-popconfirm>
-                    <el-popconfirm title="确定启用吗?" v-if="!scope.row.enable"
-                        @confirm="update_item_(`/${attrs.base_url}/${scope.row.id}/`, { enable: 1 }, get_data)">
-                        <template #reference>
-                            <el-button size="small" type="primary">启用
-                            </el-button>
-                        </template>
-                    </el-popconfirm>
-                        <el-popconfirm title="确定删除吗?" v-if="scope.row.is_delete != 1"
-                            @confirm="delete_item_(`/${attrs.base_url}/${scope.row.id}/`, get_data)">
-                            <template #reference>
-                                <el-button size="small" type="primary">删除
-                                </el-button>
-                            </template>
-                        </el-popconfirm>
-                    </template>
-                </el-table-column> -->
+    <div class="main-table">
+        <el-table :data="attrs.data" v-loading.fullscreen:false="attrs.loading" stripe border size="small"
+            :expand-row-keys="attrs.expandedRowKeys" :row-key="(row) => { return row.id }"
+            @selection-change="(d) => { select_(d, attrs) }" @sort-change="(d) => { sort_(d, form) }">
+            <f-columns v-if="attrs.columns" v-model="attrs.columns" v-model:attrs="attrs" :callback_delete="get_data">
+            </f-columns>
         </el-table>
         <t-page v-model:page="form.page" v-model:limit="form.limit" :total="attrs.total"></t-page>
     </div>
@@ -149,14 +121,14 @@
 </template>
   
 <script setup>
-import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, export_data_ } from '../../hooks/table_common'
+import { get_data_, select_, mult_delete_, sort_, submit_, export_data_ } from '../../hooks/table_common'
 import r from '../../utils/request';
 import store from "../../store/index";
 const attrs = reactive({
     columns: [
         { type: 'text', label: '规则名称', prop: 'name', align: "left", show: true },
         { type: 'text', label: '域名列表', prop: 'allowed_domains', align: "center", show: true },
-        { type: 'text', label: '开始页', prop: 'start_urls', align: "center", show: true },
+        { type: 'link', label: '开始页', prop: 'start_urls', width: 200, align: "center", show: true },
         { type: 'text', label: '分页页数开头', prop: 'start_page_num', width: 115, align: "center", show: true },
         { type: 'text', label: '分页页数正则', prop: 're_page_num', width: 115, align: "center", show: true },
         { type: 'text', label: '分页链接格式化字符', prop: 'page_format', width: 155, align: "center", show: true },

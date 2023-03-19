@@ -25,7 +25,6 @@
             <f-columns v-if="attrs.columns" v-model="attrs.columns" v-model:attrs="attrs" :callback_delete="get_data">
             </f-columns>
         </el-table>
-
         <t-page v-model:page="form.page" v-model:limit="form.limit" :total="attrs.total"></t-page>
     </div>
 
@@ -86,7 +85,7 @@
   
 <script setup>
 
-import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_ } from '../../hooks/table_common'
+import { get_data_, select_, mult_delete_, sort_, submit_ } from '../../hooks/table_common'
 import { Tree } from '../../utils/data';
 const views = import.meta.glob("/src/views/**/**.vue");
 const components = []

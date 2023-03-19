@@ -169,6 +169,14 @@ class Data(ViewSet):
     def get_userinfo(self, request: Request):
         user = request.user
         r = model_to_dict(user)
+        role_list = user.role
+        interfaces = []
+        for role_ in role_list:
+            # 判断用户是否为超级管理员角色/如果拥有[全部数据权限]则返回所有数据
+            role_item = role.objects.get(id=role_)
+            interfaces.extend(list(role_item.menu_interface.all().values_list('key')))
+        interfaces = list(set([i[0] for i in interfaces]))
+        r['interfaces'] = interfaces
         del r['password']
         del r['role']
         return JsonResponse(r, safe=False)

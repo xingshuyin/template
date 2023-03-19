@@ -69,7 +69,7 @@
             :props="{ emitPath: false, multiple: true, checkStrictly: true, value: 'id', label: 'name', }" />
         <div class="permissions-body common-scroll">
             <el-tree ref="tree" :data="attrs.menus" node-key="id" show-checkbox check-strictly default-expand-all
-                @check-change="check_fellow_interface">
+                @check="check">
                 <template #default="{ node, data }">
                     <div class="permission-item">
                         <div class="permission-item-label">{{ data.label }}</div>
@@ -82,7 +82,6 @@
                             </el-checkbox-group>
                         </div>
                     </div>
-
                 </template>
             </el-tree>
         </div>
@@ -100,7 +99,7 @@
   
 <script setup>
 
-import { get_data_, select_, mult_delete_, update_item_, delete_item_, sort_, submit_, get_all_menu_tree_, get_all_dept_tree_ } from '../../hooks/table_common'
+import { get_data_, select_, mult_delete_, sort_, submit_, get_all_menu_tree_, get_all_dept_tree_ } from '../../hooks/table_common'
 import { Tree, permission_type } from '../../utils/data';
 import r from '../../utils/request';
 const form_dom = ref()
@@ -180,20 +179,22 @@ const SetRolePermision = () => {
         })
     })
 }
-const check_fellow_interface = (data, check, children_check) => {
-    if (check) {
-        data.interfaces.forEach(i => {
+
+const check = (node) => {
+    let checked = tree.value.getCheckedKeys()
+    console.log(node, checked)
+    if (checked.indexOf(node.id) != -1) {
+        node.interfaces.forEach(i => {
             if (menu_interface.value.indexOf(i.id) == -1) {
                 menu_interface.value.push(i.id)
             }
         });
     } else {
-        data.interfaces.forEach(i => {
-            if (menu_interface.value.indexOf(i.id) != -1) {
-                menu_interface.value.splice(menu_interface.value.indexOf(i.id), 1);
-            }
+        node.interfaces.forEach(i => {
+            menu_interface.value.splice(menu_interface.value.indexOf(i.id), 1)
         });
     }
+
 }
 get_all_dept_tree_(attrs)
 get_all_menu_tree_(attrs)

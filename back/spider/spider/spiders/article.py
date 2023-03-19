@@ -1,42 +1,28 @@
-import re
-from time import time, sleep
 from ..tools import path, deal_path
-from ..items import NewsItem
-from ..pipelines import NewsPipeline
+from ..pipelines import SpiderPipeline
 import scrapy
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-import copy
-from hashlib import md5
-
-from system.models import Article
 from scrapy.http import Request, Response, HtmlResponse
 from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import Spider
-
 from hashlib import md5
-import django
-from system.models import Category
-import random
-import requests
-from django.db import close_old_connections, connections
-import time
+import pymysql
+import re
 
-# from scrapy.utils.asyncgen import collect_asyncgen
-# from scrapy.utils.spider import iterate_spider_output
-default_cover = {
-    12: ['http://121.89.199.142/api/media/cover/hot1.jpg', 'http://121.89.199.142/api/media/cover/hot2.png'],
-    14: ['http://121.89.199.142/api/media/cover/notice1.jpg', 'http://121.89.199.142/api/media/cover/notice2.png'],
-    13: ['http://121.89.199.142/api/media/cover/news1.jpg', 'http://121.89.199.142/api/media/cover/news2.jpg'],
-    15: ['http://121.89.199.142/api/media/cover/media1.png', 'http://121.89.199.142/api/media/cover/media2.png'],
-    16: ['http://121.89.199.142/api/media/cover/performance1.jpg', 'http://121.89.199.142/api/media/cover/performance2.jpg'],
-}
+db = pymysql.connect(
+    host="localhost",
+    port=3306,
+    user='root',  #在这里输入用户名
+    password='123456',  #在这里输入密码
+    # charset='utf8mb4',
+    database='template')  #连接数据库
+cursor = db.cursor()
 
 
-class CommonSpider(CrawlSpider):  # https://docs.scrapy.org/en/latest/topics/spiders.html#crawlspider
+class ArticleSpider(CrawlSpider):  # https://docs.scrapy.org/en/latest/topics/spiders.html#crawlspider
     '''通用爬虫'''
-    name = "CommonSpider"
-    pipline = set([NewsPipeline])
+    name = "ArticleSpider"
+    pipline = set([SpiderPipeline])
 
     def __init__(self, rule):
         '''初始化
@@ -44,8 +30,6 @@ class CommonSpider(CrawlSpider):  # https://docs.scrapy.org/en/latest/topics/spi
         Args:
             rule (dict): 爬虫规则
         '''
-        for i in connections.all():
-            i.close()
         self.count = 0
         self.rule = rule
         self.name = rule['name']
@@ -62,19 +46,10 @@ class CommonSpider(CrawlSpider):  # https://docs.scrapy.org/en/latest/topics/spi
         rule_list.append(Rule(LinkExtractor(allow=rule['re_item'], restrict_xpaths=[rule['xpath_item_restrict']]), callback='parse_item'))
 
         self.rules = tuple(rule_list)
-        super(CommonSpider, self).__init__()
+        super(ArticleSpider, self).__init__()
 
     def parse_start_url(self, response, **kwargs):
         '''判断是否构造分页链接
-
-        Args:
-            response (): 响应
-
-        Returns:
-            list: []
-
-        Yields:
-            Request: 分页数据请求
         '''
         if self.rule['re_page_num']:
             pages = response.css('*').re(self.rule['re_page_num'])  # 正则匹配页码,最终使用第一个匹配到的页数
@@ -98,38 +73,36 @@ class CommonSpider(CrawlSpider):  # https://docs.scrapy.org/en/latest/topics/spi
                 if rule.link_extractor.restrict_xpaths[0] == self.rule['xpath_page_restrict']:
                     if link.url not in self.page_seen:  #  分页链接去重
                         self.page_seen.add(link.url)
+                        print(link.url)
                         yield scrapy.Request(url=link.url, method="GET", callback=lambda r: self._requests_to_follow(r), dont_filter=True)
                     else:
                         pass
                 else:
-                    # yield scrapy.Request(url=link.url, method="GET", callback=lambda r: self.parse(r), dont_filter=True)
 
-                    if Article.objects.filter(url_hash=md5(link.url.encode(encoding='UTF-8')).hexdigest()).exists():
-                        # sleep(1)
-                        continue
-                    else:
-                        print('获取新的文章', link.url)
+                    cursor.execute(f"select 1 from  `article` where url_hash = '{md5(link.url.encode(encoding='UTF-8')).hexdigest()}' and type=2 limit 1")
+                    count = cursor.fetchone()
+                    print(count)
+                    if count is None:
                         yield scrapy.Request(url=link.url, method="GET", callback=lambda r: self.parse(r), dont_filter=True)
 
     def parse(self, response):
         '''请求/解析文章详情页
         '''
-        createAt = response.xpath(self.rule['xpath_time'])
+        pub_time = response.xpath(self.rule['xpath_time'])
         if self.rule['re_time']:
-            createAt = createAt.re(self.rule['re_time'])
-            if len(createAt) > 0:
-                createAt = createAt[0].replace('\n', '').strip()
+            pub_time = pub_time.re(self.rule['re_time'])
+            if len(pub_time) > 0:
+                pub_time = pub_time[0].replace('\n', '').strip()
             else:
-                createAt = None
+                pub_time = None
         else:
-            createAt = ''.join(createAt.getall()).replace('\n', '').strip()
-        cover = response.xpath(self.rule['xpath_cover']).re('<img.*?src="(.*?)".*?>')
-        if len(cover) > 0:
-            cover = path(cover[0], response)
-        else:
-            cover = None
+            pub_time = ''.join(pub_time.getall()).replace('\n', '').strip()
         # content = ''.join(response.xpath(self.rule['xpath_content']).getall()).replace('\n', '').strip()  # 获取文章内容
-        content = response.xpath(self.rule['xpath_content']).getall()[0].replace('\n', '').strip()  # 获取文章内容
+        content = response.xpath(self.rule['xpath_content']).getall()  # 获取文章内容
+        if len(content) == 0:
+            print('内容为空', response.url)
+            return
+        content = content[0].replace('\n', '').strip()
         content = deal_path(content, response)  # 处理所有相对路径的链接
         name = ''.join(response.xpath(self.rule['xpath_name']).getall()[:2]).replace('\n', '').strip()  # 获取文章名称
         source = response.xpath(self.rule['xpath_source'])
@@ -142,40 +115,20 @@ class CommonSpider(CrawlSpider):  # https://docs.scrapy.org/en/latest/topics/spi
         else:
             source = ''.join(source.getall()).replace('\n', '').strip()
 
-        item = NewsItem()
+        item = {}
         item['url'] = response.url
-        item['category'] = self.rule['category_id']
         item['name'] = name
-        item['cover'] = cover
-        item['pub_time'] = createAt
+        item['pub_time'] = pub_time
         item['content'] = content
         item['source'] = source
-
-        item['category'] = Category.objects.get(id=item['category'])
         item['url_hash'] = md5(item['url'].encode(encoding='UTF-8')).hexdigest()
-        item['type'] = 3
-        if not item['cover']:
-            item['cover'] = random.choice(default_cover[item['category'].id])
+        item['type'] = 2
 
-        if self.count > 5:
-            self.count = 0
-        if self.count == 0:
-            for i in connections.all():
-                i.close()
-        self.count += 1
-
-        # if Article.objects.filter(url_hash=item['url_hash']).exists():
-        #     # sleep(1)
-        #     Article.objects.filter(url_hash=item['url_hash']).update(content=content)
-        #     print('更新成功----------', item['url'])
-        #     return
-
-        try:
-            item.save()
-
-            print('保存成功----------', item['url'])
-        except:
-            close_old_connections()
-            print('保存失败----------', item['url'])
-
-        # return item
+        # try:
+        #     item.save()
+        #     print('保存成功----------', item['url'])
+        # except:
+        #     close_old_connections()
+        #     print('保存失败----------', item['url'])
+        print('保存成功----------', item['url'])
+        return item

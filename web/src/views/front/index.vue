@@ -28,10 +28,9 @@ import rest from '../../utils/rest';
 const router = useRouter()
 const attrs = reactive({
     page: 1,
-    limit: 10
+    limit: 100
 })
 onMounted(() => {
-
     rest.list('article', { page: attrs.page, limit: attrs.limit, values: ['name', 'create_time', 'id'] }, attrs, 'data', null)
 })
 </script>

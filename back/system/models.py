@@ -367,10 +367,14 @@ class enterprise(base_model):
 
 class article(base_model):
     name = models.CharField(max_length=200, verbose_name="名称", help_text='名称')
+    source = models.CharField(max_length=200, verbose_name="来源", help_text='来源', null=True)
     tag = models.IntegerField(verbose_name="标签", help_text='标签', null=True)
     content = models.TextField(verbose_name="内容", help_text='内容')
     file = models.JSONField(default=list, help_text="文件", verbose_name='文件', null=True)
-    link = models.JSONField(default=list, help_text="链接", verbose_name='链接', null=True)
+    url = models.CharField(max_length=100, help_text='文章链接', verbose_name='文章链接', null=True, blank=True)
+    url_hash = models.CharField(max_length=255, unique=True, db_index=True, null=True, blank=True)
+    pub_time = models.DateTimeField(help_text='抓取文章的发布时间', null=True, blank=True)
+    type = models.IntegerField(default=1, choices=((1, '发布'), (2, '抓取')), help_text='文章类型(1 发布, 2 抓取)')
 
     class Meta:
         db_table = "article"

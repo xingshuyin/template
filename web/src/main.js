@@ -121,7 +121,7 @@ route.beforeEach((to, from, next) => {
             if (store().menu.length > 0) {
               //判断store中是否有菜单数据
               if (!store().hasmenu) set_menu(); //判断是否已经添加路由
-              if (to.matched.length === 0) next("/admin/enterprise"); //未知页面跳到首页
+              if (to.matched.length === 0) next("/admin/article"); //未知页面跳到首页
               // if (to.meta.title != undefined) window.document.title = to.meta.title; //TODO:设置标题
               next(); // 进入页面, 其他带参数都是跳转路由
             } else get_menu(to, next); //没有菜单数据获取数据
