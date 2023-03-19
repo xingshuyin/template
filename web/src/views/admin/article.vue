@@ -79,9 +79,9 @@ import store from "../../store/index";
 const attrs = reactive({
     columns: [
         { type: 'text', label: '名称', prop: 'name', align: "left", show: true },
-        { type: 'link', width: 150, label: '链接', prop: 'url', align: "center", show: true },
+        { type: 'link', width: 350, label: '链接', prop: 'url', align: "center", show: true },
         { type: 'text', width: 160, label: '发布时间', prop: 'pub_time', align: "center", show: true, sortable: true },
-        { type: 'text', label: '标签', prop: 'tag', align: "left", show: true },
+        { type: 'text', width: 100, label: '标签', prop: 'tag', align: "left", show: true },
         { type: 'jfile', width: 150, label: '文件', prop: 'file', align: "center", show: true },
         { type: 'text', width: 160, label: '创建时间', prop: 'create_time', align: "center", show: true, sortable: true },
     ],

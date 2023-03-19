@@ -21,20 +21,22 @@ rule = [{
     'allowed_domains': '*',  # 域名列表(逗号分隔)
     'start_urls': 'http://www.hebeitour.gov.cn/xwzx/mtgz/index.html',  # 开始页(逗号分隔)
     'start_page_num': None,  # 分页页数开头
+    'max_page_num': None,  # 分页页数最大值 --- 优先使用分页页数正则而不是最大值
     're_page_num': None,  # 分页页数正则
-    'page_format': None,  # 分页链接格式化字符
-    'page_format_shift': None,  # 分页链接页码转换(传入num判断并修改)
-    're_page': '.*/index_.*',  # 分页链接正则
-    're_item': '.*/c/.*',  # 内容链接正则
-    'xpath_page_restrict': '//span[contains(text(), "下一页")]/parent::a',  # 分页链接提取区域xpath
-    'xpath_item_restrict': '//div[@class="list"]/ul/li/a',  # 内容链接提取区域xpath
-    'xpath_name': '//div[@class="content"]/h1/text()',  # 标题xpath
-    'xpath_time': '//div[@class="post_source"]/text()',  # 时间xpath
-    're_time': '(.*?)来源.*?',  # 时间正则
-    'xpath_cover': '//div[@id="content"]',  # 封面xpath
-    'xpath_content': '//div[@id="content"]',  # 内容xpath
-    'xpath_source': '//div[@class="post_source"]/text()',  # 来源xpath
-    're_source': '.*?来源：(.*)',  # 来源正则
+    'page_format': None,  # 分页链接格式化字符(和分页正则同时存在)
+    'page_format_shift': None,  # 分页链接页码转换(传入num判断并修改)(和分页正则同时存在)
+    # 上下两块选其一
+    'xpath_page_restrict': '//span[contains(text(), "下一页")]/parent::a',  # 分页链接提取区域xpath(必填)
+    're_page': '.*/index_.*',  # 分页链接正则(必填)
+    'xpath_item_restrict': '//div[@class="list"]/ul/li/a',  # 内容链接提取区域xpath(必填)
+    're_item': '.*/c/.*',  # 内容链接正则(必填)
+    'xpath_name': '//div[@class="content"]/h1/text()',  # 标题xpath(必填)
+    'xpath_time': '//div[@class="post_source"]/text()',  # 时间xpath(必填)
+    're_time': '(.*?)来源.*?',  # 时间正则(选填)
+    'xpath_cover': '//div[@id="content"]',  # 封面xpath(一般和内容xpath一样就行)
+    'xpath_content': '//div[@id="content"]',  # 内容xpath(必填)
+    'xpath_source': '//div[@class="post_source"]/text()',  # 来源xpath(必填)
+    're_source': '.*?来源：(.*)',  # 来源正则(选填)
     'enable': 1,  # 是否启用
 }]
 

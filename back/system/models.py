@@ -323,6 +323,7 @@ class spider(base_model):
     allowed_domains = models.CharField(max_length=800, help_text='域名列表(逗号分隔)', null=True, blank=True)
     start_urls = models.CharField(max_length=200, help_text='开始页(逗号分隔)', null=True, blank=True)
     start_page_num = models.IntegerField(help_text='分页页数开头', null=True, blank=True)
+    max_page_num = models.IntegerField(help_text='分页页数最大值', null=True, blank=True)
     re_page_num = models.CharField(max_length=200, help_text='分页页数正则', null=True, blank=True)
     page_format = models.CharField(max_length=200, help_text='分页链接格式化字符', null=True, blank=True)
     page_format_shift = models.CharField(max_length=200, help_text='分页链接页码转换(传入num判断并修改)', null=True, blank=True)

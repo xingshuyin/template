@@ -50,6 +50,9 @@
             <el-form-item label="分页页数开头">
                 <el-input v-model="attrs.add_form.start_page_num" placeholder="分页页数起始值" />
             </el-form-item>
+            <el-form-item label="分页页数最大值">
+                <el-input v-model="attrs.add_form.max_page_num" placeholder="分页页数起始值" />
+            </el-form-item>
             <el-form-item label="分页页数正则">
                 <el-input v-model="attrs.add_form.re_page_num" placeholder="分页是动态生成的时侯可以用正则匹配(第一个组为所需要的值)" />
             </el-form-item>
@@ -130,6 +133,7 @@ const attrs = reactive({
         { type: 'text', label: '域名列表', prop: 'allowed_domains', align: "center", show: true },
         { type: 'link', label: '开始页', prop: 'start_urls', width: 200, align: "center", show: true },
         { type: 'text', label: '分页页数开头', prop: 'start_page_num', width: 115, align: "center", show: true },
+        { type: 'text', label: '分页页数最大值', prop: 'max_page_num', width: 135, align: "center", show: true },
         { type: 'text', label: '分页页数正则', prop: 're_page_num', width: 115, align: "center", show: true },
         { type: 'text', label: '分页链接格式化字符', prop: 'page_format', width: 155, align: "center", show: true },
         { type: 'text', label: '分页链接页码转换', prop: 'page_format_shift', width: 150, align: "center", show: true },

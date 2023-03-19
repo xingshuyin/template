@@ -58,6 +58,11 @@ class ArticleSpider(CrawlSpider):  # https://docs.scrapy.org/en/latest/topics/sp
                     if self.rule['page_format_shift']:
                         num = eval(self.rule['page_format_shift'])
                     yield scrapy.Request(url=self.rule['page_format'].format(num), method="GET", callback=lambda r: self._requests_to_follow(r), dont_filter=True)
+        elif self.rule['max_page_num']:
+            for num in range(int(self.rule['start_page_num']), self.rule['max_page_num'] + 1):
+                if self.rule['page_format_shift']:
+                    num = eval(self.rule['page_format_shift'])
+                yield scrapy.Request(url=self.rule['page_format'].format(num), method="GET", callback=lambda r: self._requests_to_follow(r), dont_filter=True)
         return []
 
     def _requests_to_follow(self, response):
