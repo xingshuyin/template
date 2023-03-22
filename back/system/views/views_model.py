@@ -485,7 +485,7 @@ view_list = [
     {
         "url": "enterprise",
         "label": "企业",
-        "viewset": model_viewset(enterprise, (ModelViewSet, ), (ModelSerializer, ), list=None)
+        "viewset": model_viewset(enterprise, (ModelViewSet, ), (ModelSerializer, ))
     },
     {
         "url": "article",
