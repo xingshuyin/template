@@ -10,6 +10,7 @@
 <script setup>
 // 上传文件 ; 返回文件 id列表(modelValue)
 import { reactive } from 'vue';
+import { get_token } from '../../utils/request'
 import { upload_file_, remove_file_, remove_jfile_ } from '../../hooks/table_common'
 //const router = useRouter() //全局路由对象
 const props = defineProps(['modelValue', 'limit', 'size']); // limit数量限制   size大小限制(mb)
@@ -24,7 +25,7 @@ const emits = defineEmits(['update:modelValue']);
 //defineExpose({ map,}); //暴露组件的内容, 父组件通过组件对象(如ref)的value获取暴露的对象
 const attrs = reactive({
     file_list: [],
-    headers: {},
+    headers: { Authorization: get_token(), },
 })
 const sucess = (res, file, files) => { //返回数据构造
     let f = []

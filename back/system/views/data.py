@@ -12,7 +12,7 @@ from django.forms import CharField, model_to_dict
 from system.models import *
 from django.utils._os import safe_join
 from django.conf import settings
-from django.http import FileResponse, HttpResponse, JsonResponse
+from django.http import FileResponse
 from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet
 from rest_framework.request import Request
@@ -25,7 +25,7 @@ from django.utils import timezone
 from .views_model import MyQuerySet
 import os
 import hashlib
-from ..permission import SuperPermisssion
+from ..permission import SuperPermisssion, UrlPermisssion, LoginPermisssion
 
 
 def ranges():
@@ -77,15 +77,15 @@ def get_dept_permission(request, dept_id, permission):
 
 class Data(ViewSet):
     # 文件上传接口
-    @action(['post'], url_path='upload', url_name='upload', detail=False, permission_classes=[])
+    @action(['post'], url_path='upload', url_name='upload', detail=False, permission_classes=[LoginPermisssion])
     def upload(self, request: Request):  #TODO:文件上传-上传接口
         print(request.FILES['file'].name)  # 上传文件以file为key值
         form = FileForm({'name': request.FILES['file'].name}, request.FILES)
         if form.is_valid():
             f = form.save()
-            return JsonResponse({'id': f.id, 'name': f.name, 'url': f.file.url})
+            return Response({'id': f.id, 'name': f.name, 'url': f.file.url})
         print(form)
-        return JsonResponse({'msg': '格式验证失败', 'data': form.data})
+        return Response({'detail': '格式验证失败', 'data': form.data}, 400)
 
     # # 文件删除接口(已使用文件表删除)
     # @action(['post'], url_path='remove', url_name='remove', detail=False, permission_classes=[])
@@ -99,11 +99,11 @@ class Data(ViewSet):
     #                 os.rmdir(real_path)
     #             else:
     #                 os.remove(real_path)
-    #             return JsonResponse({'msg': '删除文件成功', 'code': 200, 'data': {'path': real_path}})
+    #             return Response({'msg': '删除文件成功', 'code': 200, 'data': {'path': real_path}})
     #         except FileNotFoundError:
     #             # FileNotFoundError is raised if the file or directory was removed
     #             # concurrently.
-    #             return JsonResponse({'msg': '格式验证失败', 'data': {}})
+    #             return Response({'msg': '格式验证失败', 'data': {}})
 
     # 获取所有菜单 及对应接口
     @action(['get'], url_path='GetAllMenu', url_name='GetAllMenu', detail=False, permission_classes=[SuperPermisssion])
@@ -112,19 +112,19 @@ class Data(ViewSet):
         menus = list(MyQuerySet(menu).values())
         for i in menus:
             i['interfaces'] = list(interfaces.filter(menu__id=i['id']).values())
-        return JsonResponse(menus, safe=False)
+        return Response(menus, status=200)
 
     # 获取角色权限 及接口权限
-    @action(['get'], url_path='GetRolePermision', url_name='GetRolePermision', detail=False, permission_classes=[])
+    @action(['get'], url_path='GetRolePermision', url_name='GetRolePermision', detail=False, permission_classes=[LoginPermisssion])
     def GetRolePermision(self, request: Request):
         role_id = request.GET.get('role_id')
         ro = role.objects.get(id=role_id)
         menus = [i.id for i in ro.menu.all()]
         interfaces = [i.id for i in ro.menu_interface.all()]
-        return JsonResponse({'interfaces': interfaces, 'menus': menus, 'permission': ro.permission}, safe=False)
+        return Response({'interfaces': interfaces, 'menus': menus, 'permission': ro.permission}, status=200)
 
     # 设置角色权限
-    @action(['post'], url_path='SetRolePermision', url_name='SetRolePermision', detail=False, permission_classes=[SuperPermisssion])
+    @action(['post'], url_path='SetRolePermision', url_name='SetRolePermision', detail=False, permission_classes=[SuperPermisssion, UrlPermisssion])
     def SetRolePermision(self, request: Request):
         interfaces = request.data['interfaces']
         permission = request.data['permission']
@@ -135,10 +135,10 @@ class Data(ViewSet):
         ro.menu.set(menus)  # TODO:request-多对多 覆盖值
         ro.menu_interface.set(interfaces)
         ro.save()
-        return JsonResponse({'msg': '设置成功'})
+        return Response({'detail': '设置成功'}, status=200)
 
     # 获取菜单
-    @action(['get'], url_path='GetMenu', url_name='GetMenu', detail=False, permission_classes=[])
+    @action(['get'], url_path='GetMenu', url_name='GetMenu', detail=False, permission_classes=[LoginPermisssion])
     def GetMenu(self, request: Request):
         # try:
         user = request.user
@@ -152,10 +152,10 @@ class Data(ViewSet):
                     if j['id'] not in menus_set:
                         menus.append(j)
                         menus_set.add(j['id'])
-        return JsonResponse(list(menus), safe=False)
+        return Response(list(menus), status=200)
 
     # 获取角色列表
-    @action(['get'], url_path='GetAllRoleDict', url_name='GetAllRoleDict', detail=False, permission_classes=[])
+    @action(['get'], url_path='GetAllRoleDict', url_name='GetAllRoleDict', detail=False, permission_classes=[LoginPermisssion])
     def GetAllRoleDict(self, request: Request):
         filter_dict = request.GET.dict()
         roles = MyQuerySet(role).filter(**filter_dict).values(
@@ -165,7 +165,7 @@ class Data(ViewSet):
         return Response({i['id']: i for i in list(roles)}, 200)
 
     # 获取用户信息
-    @action(['get'], url_path='get_userinfo', url_name='get_userinfo', detail=False, permission_classes=[])
+    @action(['get'], url_path='get_userinfo', url_name='get_userinfo', detail=False, permission_classes=[LoginPermisssion])
     def get_userinfo(self, request: Request):
         user = request.user
         r = model_to_dict(user)
@@ -179,10 +179,10 @@ class Data(ViewSet):
         r['interfaces'] = interfaces
         del r['password']
         del r['role']
-        return JsonResponse(r, safe=False)
+        return Response(r, status=200)
 
     # 修改密码
-    @action(['post'], url_path='change_password', url_name='change_password', detail=False, permission_classes=[])
+    @action(['post'], url_path='change_password', url_name='change_password', detail=False, permission_classes=[LoginPermisssion])
     def change_password(self, request: Request):
         user = request.user
         new_password = request.data.get("new_password")
@@ -192,9 +192,9 @@ class Data(ViewSet):
         if mm_user:
             user.set_password(new_password)
             user.save()
-            return JsonResponse({'code': 200, 'msg': '密码修改成功'}, safe=False)
+            return Response({'detail': '密码修改成功'}, status=200)
         else:
-            return JsonResponse({'code': 400, 'msg': '旧密码错误'}, safe=False)
+            return Response({'detail': '旧密码错误'}, status=400)
 
     # 获取压缩图片
     @action(['get'], url_path='zip_img', url_name='zip_img', detail=True, permission_classes=[])

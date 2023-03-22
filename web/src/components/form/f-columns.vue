@@ -1,11 +1,24 @@
 
 <script setup>
-import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, export_data_ } from '../../hooks/table_common'
+import { delete_item_ } from '../../hooks/table_common'
+import store from '../../store';
 //TODO:动态列
 const props = defineProps(['modelValue', 'attrs', 'callback_delete', 'opt_width']); // defineProps的参数, 可以直接使用
 const emits = defineEmits(['update:attrs']); // emits 触发父组件函数
 watch(() => props.attrs, () => {
     emits('update:attrs', props.attrs)
+})
+const attrs_ = reactive({
+    can_delete: false,
+    can_put: false,
+})
+store().get_userinfo().then((res) => {
+    if (res.interfaces.indexOf(props.attrs.base_url + '_delete') != -1) {
+        attrs_.can_delete = true
+    }
+    if (res.interfaces.indexOf(props.attrs.base_url + '_put') != -1) {
+        attrs_.can_put = true
+    }
 })
 // modelValue = [
 //     { type: ['text','select','jimage','jfile'], width: 180, label: '名称', prop: 'name', align: "center", show: true , [option]: { false: '否', true: '是' }},
@@ -71,11 +84,11 @@ watch(() => props.attrs, () => {
     <el-table-column label="操作" fixed="right" :width="opt_width ? opt_width : 150" align="center">
         <template #default="scope">
             <slot name="opt" :scope="scope"></slot>
-            <el-button size="small" type="primary"
+            <el-button size="small" type="primary" v-if="attrs_.can_put"
                 @click="attrs.adding = true; attrs.add_form = scope.row; attrs.submit_type = 'update' ">编辑
             </el-button>
             <!-- <el-button size="small" type="primary" @click="handleDelete(scope.$index, scope.row)">屏蔽</el-button> -->
-            <el-popconfirm title="确定删除吗?" v-if="scope.row.is_delete != 1"
+            <el-popconfirm title="确定删除吗?" v-if="attrs_.can_delete"
                 @confirm="delete_item_(`/${attrs.base_url}/${scope.row.id}/`, callback_delete)">
                 <template #reference>
                     <el-button size="small" type="primary">删除

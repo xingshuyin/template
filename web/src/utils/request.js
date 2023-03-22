@@ -1,6 +1,6 @@
 import axios from "axios";
 import { parse_token } from "./tools";
-const get_token = () => {
+export const get_token = () => {
   return "Bearer " + localStorage.getItem("token");
 };
 

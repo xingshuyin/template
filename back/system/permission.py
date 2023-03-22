@@ -15,6 +15,7 @@ class UrlPermisssion(permissions.BasePermission):
         return True
 
     def has_permission(self, request, view):  # 过滤所有请求, 接口权限
+
         # id = request.META.get('HTTP_UID')  #TODO:header中的uid值
         # ip = request.META.get('REMOTE_ADDR')  #TODO:获取ip
         if request.path in white_api:
@@ -47,3 +48,19 @@ class SuperPermisssion(permissions.BasePermission):
             if i.is_admin:
                 return True
         return False
+
+
+class LoginPermisssion(permissions.BasePermission):
+    """
+    Custom permission to only allow owners of an object to edit it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        if str(request.user) == 'AnonymousUser':
+            return False
+        return True
+
+    def has_permission(self, request, view):  # 过滤所有请求
+        if str(request.user) == 'AnonymousUser':
+            return False
+        return True

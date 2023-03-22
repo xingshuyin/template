@@ -86,7 +86,7 @@ const attrs = reactive({
             }
         },
         { prop: 'path', type: 'text', width: 180, label: '接口地址', size: 'small', align: "center", show: true },
-        { prop: 'menu_label', type: 'text', width: 150, label: '菜单', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
+        { prop: 'menu_label', type: 'text', width: 150, label: '菜单', size: 'small', align: "center", show: true },
         { prop: 'create_time', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
     ],
     base_url: 'menu_interface',

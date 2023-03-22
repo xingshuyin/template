@@ -173,10 +173,13 @@ const GetRolePermision = () => {
 const SetRolePermision = () => {
     r().post('/data/SetRolePermision/', { custom_dept: custom_dept.value, menus: tree.value.getCheckedKeys(), interfaces: menu_interface.value, role_id: attrs.role_id, permission: permission.value }).then((res) => {
         attrs.show_permissions = false
-        ElMessage({
-            message: '权限设置成功',
-            type: 'success',
-        })
+        if (res.status == 200) {
+            ElMessage({
+                message: '权限设置成功',
+                type: 'success',
+            })
+        }
+
     })
 }
 

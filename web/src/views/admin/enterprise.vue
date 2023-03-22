@@ -62,7 +62,7 @@
         </el-form>
         <template #footer>
             <span class="dialog-footer">
-                <el-button @click="attrs.adding = false">取消</el-button>
+                <el-button @click="cancel">取消</el-button>
                 <el-button type="primary" @click="validate">
                     提交
                 </el-button>
@@ -112,6 +112,9 @@ const rules = reactive({  //https://element-plus.gitee.io/zh-CN/component/form.h
         { required: true, message: '请填写编码', trigger: 'blur' },
     ],
 })
+const cancel = () => {
+    attrs.adding = false
+}
 const validate = () => {
     form_dom.value.validate((valid, fields) => {
         if (valid) {

@@ -158,7 +158,7 @@ def get_extra_value(request, queryset):
     if 'dept' in fields:
         queryset = queryset.annotate(dept_name=F("dept__name"))
         fields.append('dept_name')
-    if model_name in ['menuinterface']:
+    if model_name in ['menu_interface']:
         queryset = queryset.annotate(menu_name=F('menu__name'), menu_label=F('menu__label'))
         fields.extend(['menu_name', 'menu_label'])
     if model_name in ['user']:
@@ -179,6 +179,7 @@ def prefetch_related(queryset: QuerySet):
 # 通用list方法
 # @get_time
 def list_common(self, request: HttpRequest, *args):
+    print(request.user)
     page = int(request.GET.get('page'))
     limit = int(request.GET.get('limit'))
     filter_dict = request.GET.dict()
@@ -484,7 +485,7 @@ view_list = [
     {
         "url": "enterprise",
         "label": "企业",
-        "viewset": model_viewset(enterprise, (ModelViewSet, ), (ModelSerializer, ))
+        "viewset": model_viewset(enterprise, (ModelViewSet, ), (ModelSerializer, ), list=None)
     },
     {
         "url": "article",
