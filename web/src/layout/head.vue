@@ -43,17 +43,6 @@ const env = import.meta.env
         </span>
       </template>
     </el-dialog>
-
-    <!-- 左上角logo -->
-    <!-- <div class="logo" :style="{ width: store().toggle_side ? '50px' : '200px' }"> -->
-    <!-- <img src="/src/assets/icon.png" alt="" style="height: 80%;border-radius: 50%" />
-      <span v-if="!store().toggle_side" style="width: 120px;padding-left: 5px;white-space: nowrap;">微镜头(心连心)</span> -->
-    <!-- </div> -->
-
-
-    <!-- <iframe style="margin-left: 15px;" allowtransparency="true" frameborder="0" width="220" height="28" scrolling="no"
-      src="//tianqi.2345.com/plugin/widget/index.htm?s=3&z=1&t=1&v=0&d=1&bd=0&k=&f=000000&ltf=000000&htf=000000&q=1&e=0&a=1&c=54511&w=220&h=28&align=left"></iframe>
-    &nbsp;&nbsp; -->
     <!-- 标题 -->
     <div class="title" :style="{ width: store().menu_width }">
       <div class="title-img">
@@ -62,7 +51,6 @@ const env = import.meta.env
       <div class="title-text" v-if="!store().toggle_side">
         {{ env.VITE_TITLE }}
       </div>
-
     </div>
     <Expand style="width: 2em; height: 2em; margin-right: 8px;color: white;" v-if="store().toggle_side"
       @click="store().toggle_side = !store().toggle_side; store().toggle_side ? store().menu_width = '50px' : store().menu_width = '200px'" />

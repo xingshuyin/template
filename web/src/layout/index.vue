@@ -1,6 +1,7 @@
 <script setup>
-import Side from './side.vue'
-import Head from './head.vue'
+import { defineAsyncComponent } from 'vue';
+const Side = defineAsyncComponent(() => import('./side.vue'))
+const Head = defineAsyncComponent(() => import('./head.vue'))
 const router = useRouter()
 const route = useRoute()
 </script>

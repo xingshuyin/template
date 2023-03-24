@@ -1,8 +1,9 @@
 <script setup>
 // import { ref, reactive, watch } from 'vue';
-import MenuTree from './MenuTree.vue';
+import { defineAsyncComponent } from 'vue';
 // import { useRoute, useRouter } from 'vue-router';
 import store from "../store/index";
+const MenuTree = defineAsyncComponent(() => import('./MenuTree.vue'))
 const route = useRoute() //当前路由
 const router = useRouter() //全局路由对象
 // const items = JSON.parse(sessionStorage.getItem('menu'))
@@ -17,15 +18,15 @@ const items = store().menu
     <div :style="`height: 100%;overflow: visible;width: ${store().menu_width};position: relative;`">
         <div :style="{ height: '100%', width: store().menu_width }" class="side">
             <el-menu class="menu" router :collapse="store().toggle_side" background-color="rgba(0,0,0,0)"
-                active-text-color="yellow" :collapse-transition="true" text-color="white"
-                :default-active="route.fullPath" unique-opened>
+                active-text-color="yellow" :collapse-transition="true" text-color="white" :default-active="route.fullPath"
+                unique-opened>
                 <MenuTree :data="items" :parent_path="'/admin'"></MenuTree>
             </el-menu>
             <!-- <div class="collapse-btn"
-                @click="store().toggle_side = !store().toggle_side; store().toggle_side ? store().menu_width = '50px' : store().menu_width = '200px'">
-                <ep:arrow-left v-if="!store().toggle_side" style="font-size: 10px;color: black;" />
-                <ep:arrow-right v-else style="font-size: 10px;color: black;" />
-            </div> -->
+                        @click="store().toggle_side = !store().toggle_side; store().toggle_side ? store().menu_width = '50px' : store().menu_width = '200px'">
+                        <ep:arrow-left v-if="!store().toggle_side" style="font-size: 10px;color: black;" />
+                        <ep:arrow-right v-else style="font-size: 10px;color: black;" />
+                    </div> -->
         </div>
     </div>
 </template>

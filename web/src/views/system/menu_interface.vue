@@ -3,6 +3,8 @@
         <div class="search">
             <f-input v-model="form.name" label="名称" />
             <f-timerange v-model="special_form.range" />
+            <el-cascader v-model="form.menu" :options="attrs.menus" @change="search_change" :filter-method="filter_method"
+                placeholder="菜单" :props="{ emitPath: false, value: 'id', label: 'label', }" filterable clearable />
         </div>
         <div class="tool">
             <el-button size="small" type="danger"
@@ -69,7 +71,7 @@
 </template>
 
 <script setup>
-
+import store from '../../store';
 import { get_data_, select_, mult_delete_, sort_, submit_, get_all_role_, get_all_menu_tree_, get_all_interface_ } from '../../hooks/table_common'
 const form_dom = ref()
 const attrs = reactive({

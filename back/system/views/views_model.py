@@ -14,8 +14,8 @@ from rest_framework.request import HttpRequest
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
-from tomlkit import datetime
-
+# from tomlkit import datetime
+import datetime
 from ..models import *
 from ..permission import SuperPermisssion
 from ..utils import get_time
@@ -179,7 +179,6 @@ def prefetch_related(queryset: QuerySet):
 # 通用list方法
 # @get_time
 def list_common(self, request: HttpRequest, *args):
-    print(request.user)
     page = int(request.GET.get('page'))
     limit = int(request.GET.get('limit'))
     filter_dict = request.GET.dict()
@@ -328,7 +327,6 @@ def export(self, request: HttpRequest, *args, **kwargs):
     filter_dict = request.data
     temp_dict = request.data
     columns = [i for i in request.data.get('columns') if i['show']]
-    fields = [i['prop'] for i in columns]
     for k, v in temp_dict.items():
         if v == '':
             del filter_dict[k]
@@ -337,11 +335,10 @@ def export(self, request: HttpRequest, *args, **kwargs):
             del filter_dict[i]
     queryset: QuerySet = self.get_queryset()
     queryset = deal_permission(request, queryset)
-    queryset, filter_dict = deal_special_params(request, queryset, filter_dict)
+    queryset, filter_dict = special_filter(request, queryset, filter_dict)
     queryset = queryset.filter(**filter_dict)
-    queryset = get_extra_value(request, queryset)
-
-    r = queryset.values_list(*fields)
+    queryset, fields = get_extra_value(request, queryset)
+    r = queryset.values_list(*[i['prop'] for i in columns])
     d = pd.DataFrame(list(r), columns=[i['label'] for i in columns])
     p = str(Path(__file__).resolve().parent.parent.parent).replace("\\", "/")
     filename = queryset.model._meta.model_name + str(int(time.time() * 1000))

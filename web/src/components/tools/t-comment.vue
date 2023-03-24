@@ -13,7 +13,16 @@
 //import {useRoute, useRouter} from 'vue-router';
 //const route = useRoute() //当前路由
 //const router = useRouter() //全局路由对象
-const props = defineProps(['data']); // defineProps的参数, 可以直接使用
+const props = defineProps({
+    data: {},
+    user_avatar: { default: 'user_avatar' },
+    user_name: { default: 'user_nick_name' },
+    create_time: { default: 'create_time' },
+    content: { default: 'content' },
+    replys: { default: 'replys' },
+    reply_user_avatar: { default: 'reply_user_avatar' },
+    reply_user_name: { default: 'reply_user_nick_name' },
+}); // defineProps的参数, 可以直接使用
 //const emits = defineEmits(['onclick']); // emits 触发父组件函数
 //const map = ref(null); //获取ref值为map的元素
 //defineExpose({ map,}); //暴露组件的内容, 父组件通过组件对象(如ref)的value获取暴露的对象
@@ -21,42 +30,39 @@ const props = defineProps(['data']); // defineProps的参数, 可以直接使用
 <template>
     <div class="comment" v-for="i in data" :key="i.id">
         <div class="left">
-            <el-avatar shape="circle" :src="i.user_avatar"></el-avatar>
+            <el-avatar shape="circle" :src="i[user_avatar]"></el-avatar>
         </div>
         <div class="right">
             <div class="title">
-                <div class="user_name">{{ i.user_nick_name }}</div>
-                <div class="create_time">{{ i.create_time }}</div>
+                <div class="user_name">{{ i[user_name] }}</div>
+                <div class="create_time">{{ i[create_time] }}</div>
             </div>
             <div class="content">
-                {{ i.content }}
+                {{ i[content] }}
             </div>
 
-            <div class="replys" v-if="i?.replys?.length">
-                <div class="reply" v-for="reply in i.replys">
+            <div class="replys" v-if="i?.[replys]?.length">
+                <div class="reply" v-for="reply in i[replys]">
                     <div class="reply-left">
-                        <el-avatar shape="circle" :src="r.user_avatar"></el-avatar>
+                        <el-avatar shape="circle" :src="r[reply_user_avatar]"></el-avatar>
                     </div>
                     <div class="reply-right">
                         <div class="title">
                             <div class="user_name">
                                 {{
-                                                                reply.user_nick_name + (reply.reply_user_nick_name ? (' 回复@ ' +
-                                                                reply.reply_user_nick_name) : '')
-                                                                }}
+                                    reply[user_name] + (reply[reply_user_name] ?
+                                        (' 回复@ ' + reply[reply_user_name]) : '')
+                                }}
                             </div>
-                            <div class="create_time">{{ reply.create_time }}</div>
+                            <div class="create_time">{{ reply[create_time] }}</div>
                         </div>
                         <div class="content">
-                            {{ reply.content }}
+                            {{ reply[content] }}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-
-
     </div>
 </template>
 <style scoped lang='scss'>
