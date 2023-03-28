@@ -8,14 +8,14 @@
     { "name": "makemigrations", "type": "python", "request": "launch", "program": "${workspaceFolder}\\back\\manage.py", "args": ["makemigrations"], "django": true, "justMyCode": true },
     { "name": "migrate", "type": "python", "request": "launch", "program": "${workspaceFolder}\\back\\manage.py", "args": ["migrate"], "django": true, "justMyCode": true },
     {
-      "command": "pnpm run dev",
+      "command": "npm run dev",
       "name": "dev",
       "request": "launch",
       "type": "node-terminal",
       "cwd": "${workspaceFolder}/web"
     },
     {
-      "command": "pnpm run build",
+      "command": "npm run build",
       "name": "build",
       "request": "launch",
       "type": "node-terminal",

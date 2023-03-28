@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # pip install django_comment_migrate
     'django_comment_migrate',  # TODO:setting-安装这个包才会迁移数据库的注释
     'system',
     # https://github.com/adamchainz/django-cors-headers

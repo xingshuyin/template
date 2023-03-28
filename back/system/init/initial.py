@@ -1,11 +1,11 @@
 # TODO:初始化数据
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import django
-import pandas as pd
-from faker import Faker
+from system.models import *
+
 # TODO:通过倒推父级目录得到项目目录
 p = str(Path(__file__).resolve().parent.parent.parent).replace("\\", "/")
 
@@ -13,18 +13,19 @@ p = str(Path(__file__).resolve().parent.parent.parent).replace("\\", "/")
 sys.path.append(p)  # 将项目路径添加到系统搜寻路径当中
 os.environ['DJANGO_SETTINGS_MODULE'] = 'root.settings'  # 设置项目的配置文件
 django.setup()  # 加载项目配置
-from system.models import *
 
 
 def init_user():
     l = [
         {
+            'id': 1,
             'name': '管理员',
             'username': 'admin',
             'password': 'admin',
             'is_super': True
         },
         {
+            'id': 2,
             'name': '用户',
             'username': 'user',
             'password': 'user',
@@ -191,17 +192,21 @@ def init_menu_interface():
         print(m.name)
 
         for i in [['add', '添加', 1, "/" + m.name + "/"], ['delete', '删除', 3, "/" + m.name + "/{id}/"], ['put', '修改', 2, "/" + m.name + "/{id}/"], ['list', '查询', 0, "/" + m.name + "/"]]:
-            menu_interface.objects.create(name=m.label + '_' +i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
+            menu_interface.objects.create(
+                name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
 
 
 def init_role():
-    for i in [{"name": '管理员', "key": 'admin', 'is_admin': True, 'permission': 3}]:
+    for i in [{'id': 1, "name": '管理员', "key": 'admin', 'is_admin': True, 'permission': 3}]:
         r = role.objects.create(**i)
+    admin = user.objects.get(id=1)
+    admin.role = [1]
+    admin.save()
 
 
 def init_area():
-    from system.init.area import areas
     from django.db import connection
+    from system.init.area import areas
     with connection.cursor() as cursor:
         for i in areas.split(";"):
             print(i)
@@ -210,8 +215,8 @@ def init_area():
 
 
 def init_spider():
-    from system.init.spider import spider
     from django.db import connection
+    from system.init.spider import spider
     with connection.cursor() as cursor:
         for i in spider.split(";"):
             print(i)
@@ -220,13 +225,13 @@ def init_spider():
 
 
 def init():
-    # init_user()
-    # init_menu()
+    init_user()
+    init_menu()
     init_menu_interface()
-    # init_role()
-    # init_area()
-    # init_spider()
+    init_role()
+    init_area()
+    init_spider()
 
 
 if __name__ == '__main__':
-    init()  #TODO:初始化数据
+    init()  # TODO:初始化数据

@@ -1,11 +1,11 @@
 <script setup>
 // import { ref, reactive, watch } from 'vue';
 import { defineAsyncComponent } from 'vue';
-// import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import store from "../store/index";
-const MenuTree = defineAsyncComponent(() => import('./MenuTree.vue'))
-const route = useRoute() //当前路由
-const router = useRouter() //全局路由对象
+const MenuTree = defineAsyncComponent(() => import('./MenuTree.vue'));
+const route = useRoute(); //当前路由
+const router = useRouter(); //全局路由对象
 // const items = JSON.parse(sessionStorage.getItem('menu'))
 const items = store().menu
 
