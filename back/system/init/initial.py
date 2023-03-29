@@ -1,14 +1,14 @@
 # TODO:初始化数据
+from system.models import *
 import os
 import sys
 from pathlib import Path
 
 import django
-from system.models import *
 
 # TODO:通过倒推父级目录得到项目目录
 p = str(Path(__file__).resolve().parent.parent.parent).replace("\\", "/")
-
+print(p)
 # sys.path.append(r'/home/voc_python/backend')  # 将项目路径添加到系统搜寻路径当中
 sys.path.append(p)  # 将项目路径添加到系统搜寻路径当中
 os.environ['DJANGO_SETTINGS_MODULE'] = 'root.settings'  # 设置项目的配置文件
@@ -215,13 +215,14 @@ def init_area():
 
 
 def init_spider():
-    from django.db import connection
-    from system.init.spider import spider
-    with connection.cursor() as cursor:
-        for i in spider.split(";"):
-            print(i)
-            if len(i) > 5:
-                cursor.execute(i)
+    ...
+    # from django.db import connection
+    # from system.init.spider import spider
+    # with connection.cursor() as cursor:
+    #     for i in spider.split(";"):
+    #         print(i)
+    #         if len(i) > 5:
+    #             cursor.execute(i)
 
 
 def init():
@@ -230,7 +231,7 @@ def init():
     init_menu_interface()
     init_role()
     init_area()
-    init_spider()
+    # init_spider()
 
 
 if __name__ == '__main__':

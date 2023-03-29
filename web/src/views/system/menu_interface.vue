@@ -4,7 +4,8 @@
             <f-input v-model="form.name" label="名称" />
             <f-timerange v-model="special_form.range" />
             <el-cascader v-model="form.menu" :options="attrs.menus" @change="search_change" :filter-method="filter_method"
-                placeholder="菜单" :props="{ emitPath: false, value: 'id', label: 'label', }" filterable clearable />
+                :show-all-levels="false" :getCheckedNodes="true" placeholder="菜单"
+                :props="{ emitPath: false, checkStrictly: true, value: 'id', label: 'label', }" filterable clearable />
         </div>
         <div class="tool">
             <el-button size="small" type="danger"
@@ -149,5 +150,4 @@ get_all_interface_(attrs)
 
 </script>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>
