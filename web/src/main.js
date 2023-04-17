@@ -3,12 +3,12 @@ import "./style.scss";
 import "./element.scss";
 import "./initial.css";
 import "./assets/css/quill.snow.css";
-import "uno.css"; // npm i -D @unocss/vite (无预设安装)   还需要在vite.config.ts中配置  具体看->  https://github.com/unocss/unocss/tree/main/packages/vite
+// import "uno.css"; // npm i -D @unocss/vite (无预设安装)   还需要在vite.config.ts中配置  具体看->  https://github.com/unocss/unocss/tree/main/packages/vite
 import "animate.css";
 import "element-plus/dist/index.css"; //导入element样式文件
 import r from "./utils/request";
 
-import BaiduMap from "vue-baidu-map-3x"; //npm install vue-baidu-map-3x --save
+// import BaiduMap from "vue-baidu-map-3x"; //npm install vue-baidu-map-3x --save
 
 import * as ElementPlusIconsVue from "@element-plus/icons-vue"; //引入所有element图标
 
@@ -41,7 +41,7 @@ VMdPreview.use(githubTheme, {
 const app = createApp(App);
 app.use(route); //使用路由组件
 app.use(pinia);
-app.use(BaiduMap, { ak: "ium5InHYNhRUBiSlGWeak9i6ufZ5jdf3" });
+// app.use(BaiduMap, { ak: "ium5InHYNhRUBiSlGWeak9i6ufZ5jdf3" });
 app.use(vue3videoPlay);
 app.use(VMdEditor);
 app.use(VMdPreview);
