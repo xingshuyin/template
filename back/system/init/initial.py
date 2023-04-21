@@ -5,7 +5,7 @@ import sys
 
 import django
 import pandas as pd
-from faker import Faker
+# from faker import Faker
 # TODO:通过倒推父级目录得到项目目录
 p = str(Path(__file__).resolve().parent.parent.parent).replace("\\", "/")
 
@@ -191,7 +191,7 @@ def init_menu_interface():
         print(m.name)
 
         for i in [['add', '添加', 1, "/" + m.name + "/"], ['delete', '删除', 3, "/" + m.name + "/{id}/"], ['put', '修改', 2, "/" + m.name + "/{id}/"], ['list', '查询', 0, "/" + m.name + "/"]]:
-            menu_interface.objects.create(name=m.label + '_' +i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
+            menu_interface.objects.create(name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
 
 
 def init_role():
@@ -220,12 +220,12 @@ def init_spider():
 
 
 def init():
-    # init_user()
-    # init_menu()
+    init_user()
+    init_menu()
     init_menu_interface()
-    # init_role()
-    # init_area()
-    # init_spider()
+    init_role()
+    init_area()
+    init_spider()
 
 
 if __name__ == '__main__':

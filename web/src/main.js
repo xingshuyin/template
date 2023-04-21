@@ -23,28 +23,31 @@ import "vue3-video-play/dist/style.css"; // 引入css    npm i vue3-video-play -
 const views = import.meta.glob("./views/*/*.vue"); //TODO:动态路由-引入所有菜单路径,然后才能动态引入
 import route from "./route"; //引入路由组件
 
-import VMdEditor from "@kangc/v-md-editor";
-import "@kangc/v-md-editor/lib/style/base-editor.css";
-import githubTheme from "@kangc/v-md-editor/lib/theme/github.js";
-import "@kangc/v-md-editor/lib/theme/style/github.css";
-import VMdPreview from "@kangc/v-md-editor/lib/preview";
-import "@kangc/v-md-editor/lib/style/preview.css";
-// highlightjs
-import hljs from "highlight.js";
-VMdEditor.use(githubTheme, {
-  Hljs: hljs,
-});
-VMdPreview.use(githubTheme, {
-  Hljs: hljs,
-});
+// import VMdEditor from "@kangc/v-md-editor"; //pnpm i @kangc/v-md-editor@next -S
+// import "@kangc/v-md-editor/lib/style/base-editor.css";
+// import vuepressTheme from "@kangc/v-md-editor/lib/theme/vuepress.js";
+
+// import VMdPreview from "@kangc/v-md-editor/lib/preview";
+// import "@kangc/v-md-editor/lib/style/preview.css";
+// import githubTheme from "@kangc/v-md-editor/lib/theme/github.js";
+// import "@kangc/v-md-editor/lib/theme/style/github.css";
+// // highlightjs
+// import Prism from "prismjs";
+// import hljs from "highlight.js";
+// VMdEditor.use(vuepressTheme, {
+//   Prism,
+// });
+// VMdPreview.use(githubTheme, {
+//   Hljs: hljs,
+// });
 
 const app = createApp(App);
 app.use(route); //使用路由组件
 app.use(pinia);
 app.use(BaiduMap, { ak: "ium5InHYNhRUBiSlGWeak9i6ufZ5jdf3" });
 app.use(vue3videoPlay);
-app.use(VMdEditor);
-app.use(VMdPreview);
+// app.use(VMdEditor);
+// app.use(VMdPreview);
 
 app.mount("#app");
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
