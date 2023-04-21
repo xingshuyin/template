@@ -5,8 +5,9 @@ import vue from "@vitejs/plugin-vue";
 import Icons from "unplugin-icons/vite"; // npm i -D unplugin-icons              npm i -D @iconify/json
 import IconsResolver from "unplugin-icons/resolver";
 
-import Unocss from "@unocss/vite";
-import UnocssConfig from "./unocss.config";
+// import Unocss from "@unocss/vite";
+// import UnocssConfig from "./unocss.config";
+
 // import Inspect from "vite-plugin-inspect"; //https://github.com/antfu/vite-plugin-inspect
 //TODO:自动导入
 import AutoImport from "unplugin-auto-import/vite"; // npm install -D unplugin-vue-components unplugin-auto-import
@@ -60,7 +61,7 @@ export default ({ mode }) => {
     },
     plugins: [
       vue(),
-      Unocss(UnocssConfig), //TODO:unocss-安装unocss
+      // Unocss(UnocssConfig), //TODO:unocss-安装unocss
       AutoImport({
         // 自动导入 Vue,vue-router  相关函数，如：ref, reactive, toRef, useRoute, useRouter 等
         imports: ["vue", "vue-router"],

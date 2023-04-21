@@ -50,12 +50,15 @@ const remove = (file, files) => { //返回数据构造
     emits('update:modelValue', f)
 }
 const before_remove = async (file, files) => { //返回数据构造
-    let res = await remove_jfile_(file)
-    if (res.status == 200) {
-        return true
-    } else {
-        return false
+    if (file?.id || file?.response?.id) {
+        let res = await remove_jfile_(file)
+        if (res.status == 200) {
+            return true
+        } else {
+            return false
+        }
     }
+    return true
 }
 const before_upload = (file) => {
     if (props.size) {
@@ -95,5 +98,4 @@ watch(() => { return props.modelValue }, () => {
         </el-icon>
     </el-upload>
 </template>
-<style scoped lang='scss'>
-</style>
+<style scoped lang='scss'></style>

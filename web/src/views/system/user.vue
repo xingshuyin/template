@@ -72,7 +72,7 @@
 
 <script setup>
 
-import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_, get_all_role_, get_all_role_dict_, get_all_dept_tree_ } from '../../hooks/table_common'
+import { get_data_, select_, mult_delete_, sort_, submit_, get_all_role_, get_all_role_dict_, get_all_dept_tree_ } from '../../hooks/table_common'
 const form_dom = ref()
 const attrs = reactive({
     columns: [
@@ -144,5 +144,4 @@ get_all_role_dict_().then((res) => {
 })
 </script>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

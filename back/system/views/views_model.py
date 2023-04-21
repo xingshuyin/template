@@ -1,3 +1,5 @@
+# from tomlkit import datetime
+import datetime
 import time
 from itertools import chain
 from pathlib import Path
@@ -14,8 +16,7 @@ from rest_framework.request import HttpRequest
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
-# from tomlkit import datetime
-import datetime
+
 from ..models import *
 from ..permission import SuperPermisssion
 from ..utils import get_time
@@ -45,7 +46,8 @@ def to_dict(instance, deep=2):
                 v = [i.id for i in v] if v else []
         elif isinstance(f, ForeignKey):  # 外键序列化,使用它必须继承本模型
             if deep > 0:
-                v = f.related_model.objects.get(pk=v).model_to_dict(deep=deep - 1) if v else None
+                v = f.related_model.objects.get(pk=v).model_to_dict(
+                    deep=deep - 1) if v else None
             else:
                 pass
         if isinstance(f, DateTimeField):
@@ -70,7 +72,8 @@ def special_filter(request: HttpRequest, queryset: QuerySet, filter_dict):
         queryset = queryset.filter(parent__name=filter_dict['parent_name'])
         del filter_dict['parent_name']
     if 'create_start' in filter_dict.keys():
-        queryset = queryset.filter(create_time__gte=filter_dict['create_start'])
+        queryset = queryset.filter(
+            create_time__gte=filter_dict['create_start'])
         del filter_dict['create_start']
     if 'create_end' in filter_dict.keys():
         queryset = queryset.filter(create_time__lte=filter_dict['create_end'])
@@ -134,7 +137,8 @@ def deal_permission(request, queryset):
         for p in permission_list:
             if p == 4:
                 for i in request.user.role:
-                    dept_list.extend(role.objects.get(id=i).dept.values_list("dept__id", flat=True))
+                    dept_list.extend(role.objects.get(
+                        id=i).dept.values_list("dept__id", flat=True))
             elif p == 2:
                 dept_list.append(user_dept_id)
             elif p == 1:
@@ -148,7 +152,8 @@ def deal_permission(request, queryset):
 
 def get_extra_value(request, queryset):
     fields = [i.name for i in queryset.model._meta.fields]
-    model_name = queryset.model._meta.model_name  # queryset.model  TODO:获取queryset的model对象
+    # queryset.model  TODO:获取queryset的model对象
+    model_name = queryset.model._meta.model_name
     if 'parent' in fields:
         queryset = queryset.annotate(parent_name=F("parent__name"))
         fields.append('parent_name')
@@ -159,7 +164,8 @@ def get_extra_value(request, queryset):
         queryset = queryset.annotate(dept_name=F("dept__name"))
         fields.append('dept_name')
     if model_name in ['menu_interface']:
-        queryset = queryset.annotate(menu_name=F('menu__name'), menu_label=F('menu__label'))
+        queryset = queryset.annotate(menu_name=F(
+            'menu__name'), menu_label=F('menu__label'))
         fields.extend(['menu_name', 'menu_label'])
     if model_name in ['user']:
         if not request.user.is_super:
@@ -196,13 +202,13 @@ def list_common(self, request: HttpRequest, *args):
         queryset = queryset.filter(**filter_dict)
         queryset, fields = get_extra_value(request, queryset)
 
-        if 'values[]' in temp_dict.keys():  #TODO:选择字段
+        if 'values[]' in temp_dict.keys():  # TODO:选择字段
             values = request.GET.getlist('values[]')
             for i in values[:]:
                 if i not in fields:
                     values.remove(i)
             fields = values
-        if 'defer[]' in temp_dict.keys():  #TODO:排除字段
+        if 'defer[]' in temp_dict.keys():  # TODO:排除字段
             for i in request.GET.getlist('defer[]'):
                 if i in fields:
                     fields.remove(i)
@@ -348,9 +354,9 @@ def export(self, request: HttpRequest, *args, **kwargs):
 
 # 字段处理
 def deal_value(v):
-    if type(v) == datetime.datetime:  #TODO:request- 处理时间
+    if type(v) == datetime.datetime:  # TODO:request- 处理时间
         # v = timezone.localtime(v)  # 获取时区为当前时区的时间; 时间=时间值+时区
-        return timezone.datetime.strftime(v, "%Y-%m-%d %H:%M:%S")  #获取时间的时间值
+        return timezone.datetime.strftime(v, "%Y-%m-%d %H:%M:%S")  # 获取时间的时间值
     return v
 
 
@@ -372,13 +378,14 @@ class MyValuesIterable(BaseIterable):
         ]
         indexes = range(len(names))
         for row in compiler.results_iter(chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size):
-            yield {names[i] if '_id' not in names[i] else names[i].rstrip('_id'): deal_value(row[i]) for i in indexes}  #TODO:request-QuerySet修改values  去掉_id
+            # TODO:request-QuerySet修改values  去掉_id
+            yield {names[i] if '_id' not in names[i] else names[i].rstrip('_id'): deal_value(row[i]) for i in indexes}
 
 
 # 自定义queryset
 class MyQuerySet(QuerySet):
 
-    def values(self, *fields, **expressions):  #TODO:QuerySet-values实现
+    def values(self, *fields, **expressions):  # TODO:QuerySet-values实现
         fields += tuple(expressions)
         clone = self._values(*fields, **expressions)
         clone._iterable_class = MyValuesIterable
@@ -442,7 +449,8 @@ view_list = [
     {
         "url": "dept",  # restful链接基础url
         "label": "部门",
-        "viewset": model_viewset(dept, (ModelViewSet, ), (ModelSerializer, ))  # 对应视图集
+        # 对应视图集
+        "viewset": model_viewset(dept, (ModelViewSet, ), (ModelSerializer, ))
     },
     {
         "url": "file",
