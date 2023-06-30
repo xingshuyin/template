@@ -18,8 +18,8 @@ export default defineStore("counter", {
     // detail_data: null,
   }),
   getters: {
-    get_userinfo: state => {
-      return async not_cache => {
+    get_userinfo: (state) => {
+      return async (not_cache) => {
         if (!not_cache) {
           if (state.userinfo) {
             return state.userinfo;
@@ -35,8 +35,8 @@ export default defineStore("counter", {
         }
       };
     },
-    get_areas_tree: state => {
-      return async not_cache => {
+    get_areas_tree: (state) => {
+      return async (not_cache) => {
         if (!not_cache) {
           if (state.areas_tree) {
             return state.areas_tree;
@@ -44,7 +44,7 @@ export default defineStore("counter", {
         }
         let a = await r().get("/area/", { params: { page: 1, limit: 99999 } });
         if (a) {
-          state.areas_tree = Tree(a.data.data, "code", "pcode", null);
+          state.areas_tree = Tree(a.data.data, "code", "parent", null);
           return state.areas_tree;
         } else {
           localStorage.clear();

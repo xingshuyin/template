@@ -351,7 +351,9 @@ def export(self, request: HttpRequest, *args, **kwargs):
     d = pd.DataFrame(list(r), columns=[i['label'] for i in columns])
     p = str(Path(__file__).resolve().parent.parent.parent).replace("\\", "/")
     filename = queryset.model._meta.model_name + str(int(time.time() * 1000))
-    d.to_excel(f'{p}/media/export/{filename}.xlsx', encoding='gb18030')
+    if not os.path.exists(f'{p}/media/export/'):
+        os.makedirs(f'{p}/media/export/')
+    d.to_excel(f'{p}/media/export/{filename}.xlsx')
     return Response({'url': f'media/export/{filename}.xlsx'}, status=200)
 
 

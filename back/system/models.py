@@ -270,7 +270,7 @@ class area(models.Model):
     level = models.BigIntegerField(verbose_name="地区等级", help_text="地区等级(0省份 1城市 2区县 3乡级)")
     lat = models.CharField(max_length=10, help_text='纬度', verbose_name='纬度', null=True, blank=True)
     lng = models.CharField(max_length=10, help_text='经度', verbose_name='经度', null=True, blank=True)
-    pcode = models.ForeignKey(
+    parent = models.ForeignKey(
         to="self",
         verbose_name="父地区编码",
         to_field="code",

@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('level', models.BigIntegerField(help_text='地区等级(0省份 1城市 2区县 3乡级)', verbose_name='地区等级')),
                 ('lat', models.CharField(blank=True, help_text='纬度', max_length=10, null=True, verbose_name='纬度')),
                 ('lng', models.CharField(blank=True, help_text='经度', max_length=10, null=True, verbose_name='经度')),
-                ('pcode', models.ForeignKey(blank=True, db_constraint=False, help_text='父地区编码', null=True, on_delete=django.db.models.deletion.CASCADE, to='system.area', to_field='code', verbose_name='父地区编码')),
+                ('parent', models.ForeignKey(blank=True, db_constraint=False, help_text='父地区编码', null=True, on_delete=django.db.models.deletion.CASCADE, to='system.area', to_field='code', verbose_name='父地区编码')),
             ],
             options={
                 'verbose_name': '地区',
