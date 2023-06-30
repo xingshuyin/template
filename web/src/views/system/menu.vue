@@ -96,7 +96,7 @@ const attrs = reactive({
     columns: [
         { prop: 'label', type: 'text', label: '菜单名称', size: 'small', align: "left", show: true },
         { prop: 'icon', type: 'text', width: 150, label: '菜单图标', size: 'small', align: "center", show: true },
-        { prop: 'parent_name', type: 'text', width: 130, label: '父级菜单', size: 'small', align: "center", show: true },
+        { prop: 'parent_label', type: 'text', width: 130, label: '父级菜单', size: 'small', align: "center", show: true },
         { prop: 'name', type: 'text', width: 100, label: '路由名称', size: 'small', align: "center", show: true },
         { prop: 'sort', type: 'text', width: 100, label: '排序', size: 'small', align: "center", show: true },
         { prop: 'is_link', type: 'select', width: 150, label: '是否外链', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
@@ -143,5 +143,4 @@ get_data()
 
 </script>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

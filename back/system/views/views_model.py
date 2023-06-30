@@ -167,6 +167,9 @@ def get_extra_value(request, queryset):
         queryset = queryset.annotate(menu_name=F(
             'menu__name'), menu_label=F('menu__label'))
         fields.extend(['menu_name', 'menu_label'])
+    if model_name in ['menu']:
+        queryset = queryset.annotate(parent_label=F("parent__label"))
+        fields.append('parent_label')
     if model_name in ['user']:
         if not request.user.is_super:
             raise exceptions.AuthenticationFailed(
