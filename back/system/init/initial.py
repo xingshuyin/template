@@ -1,5 +1,3 @@
-# TODO:初始化数据
-from system.models import *
 import os
 import sys
 from pathlib import Path
@@ -14,7 +12,8 @@ print(p)
 sys.path.append(p)  # 将项目路径添加到系统搜寻路径当中
 os.environ['DJANGO_SETTINGS_MODULE'] = 'root.settings'  # 设置项目的配置文件
 django.setup()  # 加载项目配置
-
+# TODO:初始化数据
+from system.models import *
 
 def init_user():
     l = [
@@ -112,20 +111,9 @@ def init_menu():
             'is_link': False,
             'is_catalog': False
         },
+
         {
             'id': 7,
-            'parent_id': None,
-            'label': '企业管理',
-            'icon': 'Grid',
-            'component': 'admin/enterprise.vue',
-            'name': 'enterprise',
-            'path': 'enterprise',
-            'sort': 1,
-            'is_link': False,
-            'is_catalog': False
-        },
-        {
-            'id': 8,
             'parent_id': 1,
             'label': '登陆日志',
             'icon': 'List',
@@ -137,7 +125,7 @@ def init_menu():
             'is_catalog': False
         },
         {
-            'id': 9,
+            'id': 8,
             'parent_id': 1,
             'label': '文件管理',
             'icon': 'Folder',
@@ -147,6 +135,18 @@ def init_menu():
             'sort': 10,
             'is_link': False,
             'is_catalog': False
+        },
+        {
+            'id': 9,
+            'parent_id': None,
+            'label': '字典管理',
+            'icon': 'Operation',
+            'component': '',
+            'name': 'dict',
+            'path': 'dict',
+            'sort': 110,
+            'is_link': False,
+            'is_catalog': True
         },
         {
             'id': 10,
@@ -172,10 +172,22 @@ def init_menu():
             'is_link': False,
             'is_catalog': False
         },
+        {
+            'id': 12,
+            'parent_id': None,
+            'label': '企业管理',
+            'icon': 'Grid',
+            'component': 'admin/enterprise.vue',
+            'name': 'enterprise',
+            'path': 'enterprise',
+            'sort': 1,
+            'is_link': False,
+            'is_catalog': False
+        },
     ]
     for i in l:
         print(i)
-        menu.objects.create(**i)
+        menu.objects.get_or_create(defaults=i,**i)
 
 
 METHOD_CHOICES = (
@@ -193,26 +205,31 @@ def init_menu_interface():
         print(m.name)
 
         for i in [['add', '添加', 1, "/" + m.name + "/"], ['delete', '删除', 3, "/" + m.name + "/{id}/"], ['put', '修改', 2, "/" + m.name + "/{id}/"], ['list', '查询', 0, "/" + m.name + "/"]]:
-            menu_interface.objects.create(
+            menu_interface.objects.get_or_create(defaults={'name':m.label + '_' + i[1], 'key':m.name + '_' + i[0], 'method':i[2], 'path':i[3], 'menu':m},
                 name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
 
 
 def init_role():
     for i in [{'id': 1, "name": '管理员', "key": 'admin', 'is_admin': True, 'permission': 3}]:
-        r = role.objects.create(**i)
+        r = role.objects.get_or_create(defaults=i,**i)
+        if i['is_admin']:
+            r[0].menu_interface.set(menu_interface.objects.all())
     admin = user.objects.get(id=1)
     admin.role = [1]
     admin.save()
+    admin.role
 
 
 def init_area():
     from django.db import connection
     from system.init.area import areas
-    with connection.cursor() as cursor:
-        for i in areas.split(";"):
-            print(i)
-            if len(i) > 5:
-                cursor.execute(i)
+    from system.models import area
+    if area.objects.count()==0:
+        with connection.cursor() as cursor:
+            for i in areas.split(";"):
+                print(i)
+                if len(i) > 5:
+                    cursor.execute(i)
 
 
 def init_spider():

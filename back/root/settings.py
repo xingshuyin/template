@@ -8,9 +8,10 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
-"""
 
-# pip install pymysql
+
+pip install django pymysql daphne django_comment_migrate django-cors-headers drf-yasg djangorestframework-simplejwt openpyxl scrapy scrapy-splash requests user_agents pandas channels coreapi
+"""
 
 import os
 from pathlib import Path
