@@ -11,9 +11,12 @@ from django.contrib.auth.models import AnonymousUser
 from django.urls.resolvers import ResolverMatch
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from user_agents import parse
-
+from functools import wraps
+from django.conf import settings
+from django_ratelimit import ALL, UNSAFE
+from django_ratelimit.core import is_ratelimited
 from .models import log
-
+from rest_framework.response import Response
 
 def get_request_user(request):
     """
@@ -200,3 +203,26 @@ def get_time(f):
         return r
 
     return inner
+
+
+# TODO:访问频率限制 （django-ratelimit）
+def ratelimit(group=None, key=None, rate=None, method=ALL, block=True, msg='访问频率过快'):
+    def decorator(fn):
+        @wraps(fn)
+        def _wrapped(s,request, *args, **kw):
+            old_limited = getattr(request, 'limited', False)
+            ratelimited = is_ratelimited(request=request, group=group, fn=fn,
+                                         key=key, rate=rate, method=method,
+                                         increment=True)
+            request.limited = ratelimited or old_limited
+            if ratelimited and block:
+                # cls = getattr(
+                #     settings, 'RATELIMIT_EXCEPTION_CLASS', Ratelimited)
+                # print('-------------',cls)
+                return Response({'detail': msg, 'data': []}, 403)
+            return fn(s,request, *args, **kw)
+        return _wrapped
+    return decorator
+
+ratelimit.ALL = ALL
+ratelimit.UNSAFE = UNSAFE
