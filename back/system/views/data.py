@@ -8,11 +8,13 @@ LastEditTime : 2022-11-30 12:56:18
 Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
 '''
 from pathlib import Path
+import zipfile
 from django.forms import CharField, model_to_dict
 from system.models import *
 from django.utils._os import safe_join
+from django.utils.encoding import escape_uri_path
 from django.conf import settings
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet
 from rest_framework.request import Request
@@ -210,3 +212,15 @@ class Data(ViewSet):
         # r = open(zip_path, "rb")
         return FileResponse(open(zip_path, "rb"))
         # return HttpResponse(r.read(), content_type='image/jpg')
+        
+    # TODO:临时文件下载
+    @action(['get'], url_path='temp', url_name='temp', detail=True, permission_classes=[])
+    def temp(self, request :Request, pk):
+        response = HttpResponse(content_type='application/octet-stream')
+        zip_file = zipfile.ZipFile(response, 'w')
+        zip_file.write(r"D:\python\template\back\system\init\spider.xlsx", 'spider')
+        zip_file.write(r"D:\python\template\back\system\init\initial.py", 'initial')
+        zip_file.close()
+        response_name = 'spider' + '.zip'
+        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(escape_uri_path(response_name))
+        return response
