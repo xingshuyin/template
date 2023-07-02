@@ -13,7 +13,15 @@ const router = createRouter({
       // redirect: "index",
       component: () => import("../layout/index.vue"),
       meta: { title: import.meta.env.title, animate: "animate__fadeIn" },
-      children: [],
+      children: [
+        {
+          path: "userinfo",
+          name: "userinfo",
+          component: () => import("../views/system/user_message.vue"),
+          meta: { title: "个人信息", animate: "animate__fadeIn" },
+          children: [],
+        },
+      ],
     },
     {
       path: "/",
@@ -29,6 +37,7 @@ const router = createRouter({
       meta: { title: "文章", animate: "animate__fadeIn" },
       children: [],
     },
+
   ],
 });
 export default router;

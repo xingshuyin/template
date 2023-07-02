@@ -3,6 +3,8 @@ import store from "../store/index";
 import { add_menu_tab_ } from '../hooks/table_common'
 import { pinyin } from 'pinyin-pro';
 import { deep_search } from "../utils/tools";
+import r from "../utils/request";
+const changepassword_dom = ref()
 const router = useRouter()
 const logout = () => {
   // localStorage.clear()
@@ -12,7 +14,53 @@ const logout = () => {
   router.push('/login')
 }
 const username = ref(localStorage.getItem('username'))
-const centerDialogVisible = ref(false)
+const logout_show = ref(false)
+const changepassword_show = ref(false)
+const changepassword = ref({
+  old: '',
+  new: '',
+  new_repeat: ''
+})
+const changepassword_rules = reactive({
+  old: [
+    { required: true, message: '请填写旧密码', trigger: 'blur' },
+  ],
+  new: [
+    { required: true, message: '请填写新密码', trigger: 'blur' },
+  ],
+  new_repeat: [
+    { required: true, message: '请重复填写新密码', trigger: 'blur' },
+  ],
+})
+const changepassword_action = () => {
+  console.log('changepassword', changepassword, changepassword.value.new === changepassword.value.new_repeat)
+  if (changepassword.value.new === changepassword.value.new_repeat) {
+    changepassword_dom.value.validate((valid, fields) => {
+      if (valid) {
+        r().post('/data/change_password/', { new_password: changepassword.value.new, old_password: changepassword.value.old }).then((res) => {
+          console.log(res)
+          if (res.status == 200) {
+            changepassword_show.value = false;
+            ElMessage({
+              showClose: true,
+              message: "密码修改成功",
+              center: true,
+            });
+          }
+
+        })
+      }
+    })
+
+  } else {
+    ElMessage({
+      showClose: true,
+      message: "两次输入密码不一致",
+      center: true,
+    });
+  }
+
+}
 const search = ref(undefined)
 const search_change = (value) => {
   if (value != undefined) {
@@ -34,12 +82,31 @@ const env = import.meta.env
   <div class="head">
 
     <!-- 退出登陆弹窗 -->
-    <el-dialog v-model="centerDialogVisible" title="注销账户" width="300px" align-center center>
+    <el-dialog v-model="logout_show" title="注销账户" width="300px" align-center center>
       <div style="width: 100%;text-align: center">确定要注销当前用户吗</div>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="centerDialogVisible = false; logout()">确定</el-button>
-          <el-button type="primary" @click="centerDialogVisible = false">取消</el-button>
+          <el-button @click="logout_show = false; logout()">确定</el-button>
+          <el-button type="primary" @click="logout_show = false">取消</el-button>
+        </span>
+      </template>
+    </el-dialog>
+    <el-dialog v-model="changepassword_show" title="修改密码" width="300px" align-center center>
+      <el-form :model="changepassword" label-width="120px" ref="changepassword_dom" :rules="changepassword_rules">
+        <el-form-item label="旧密码" prop="old">
+          <el-input v-model="changepassword.old" />
+        </el-form-item>
+        <el-form-item label="新密码" prop="new">
+          <el-input show-password type="password" v-model="changepassword.new" />
+        </el-form-item>
+        <el-form-item label="再次输入新密码" prop="new_repeat">
+          <el-input show-password type="password" v-model="changepassword.new_repeat" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click=" changepassword_action()">确定</el-button>
+          <el-button type="primary" @click="changepassword_show = false">取消</el-button>
         </span>
       </template>
     </el-dialog>
@@ -73,8 +140,18 @@ const env = import.meta.env
         <span style="font-size: 16px; padding-right: 5px;">
           <span style="color: yellow ;">{{ username }}</span>
         </span>
-        <el-avatar class="avatar" size="small" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-          @click="centerDialogVisible = true" />
+        <el-dropdown size="large" type="primary">
+          <el-avatar class="avatar" size="small" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+            @click="logout_show = true" />
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="logout_show = true">注销</el-dropdown-item>
+              <el-dropdown-item @click="router.push({ name: 'userinfo' })">个人信息</el-dropdown-item>
+              <el-dropdown-item @click="changepassword_show = true">修改密码</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+
       </div>
 
     </div>

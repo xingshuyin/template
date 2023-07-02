@@ -1,12 +1,3 @@
-'''
-Filename     : data.py
-Description  : wjt-后端-非restful规范接口
-Author       : xingshuyin xingshuyin@outlook.com
-Date         : 2022-10-03 12:14:32
-LastEditors  : xingshuyin xingshuyin@outlook.com
-LastEditTime : 2022-11-30 12:56:18
-Copyright (c) 2022 by Research Center of Big Data and Social Computing DARG, All Rights Reserved.
-'''
 from pathlib import Path
 import zipfile
 from django.forms import CharField, model_to_dict

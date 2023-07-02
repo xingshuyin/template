@@ -16,6 +16,7 @@ from rest_framework.request import HttpRequest
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
+
 from ..utils import ratelimit
 from ..models import *
 from ..permission import SuperPermisssion
@@ -187,7 +188,7 @@ def prefetch_related(queryset: QuerySet):
 
 # 通用list方法
 # @get_time
-@ratelimit(key='ip', rate='1/s')
+@ratelimit(key='ip', rate='3/s')
 def list_common(self, request: HttpRequest, *args):
     page = int(request.GET.get('page'))
     limit = int(request.GET.get('limit'))
