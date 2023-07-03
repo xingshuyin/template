@@ -33,7 +33,7 @@ store().get_userinfo().then((res) => {
         </el-table-column>
         <!-- 单选用标签 -->
         <el-table-column v-else-if="i.type == 'select' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
-            :width="i.width">
+            :sortable="i.sortable" :width="i.width">
             <template #default="scope">
                 <el-tag effect="dark">
                     {{ i.option[scope.row[i.prop]] }}
@@ -42,7 +42,7 @@ store().get_userinfo().then((res) => {
         </el-table-column>
         <!-- 多选 -->
         <el-table-column v-else-if="i.type == 'list' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
-            :width="i.width">
+            :sortable="i.sortable" :width="i.width">
             <template #default="scope">
                 <el-tag effect="dark" v-for="v in scope.row[i.prop]">
                     {{ i.option[v].name }}
@@ -51,7 +51,7 @@ store().get_userinfo().then((res) => {
         </el-table-column>
         <!-- 文件 -->
         <el-table-column v-else-if="i.type == 'jfile' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
-            :width="i.width">
+            :sortable="i.sortable" :width="i.width">
             <template #default="scope">
                 <div class="form-files">
                     <div v-for="i in scope.row[i.prop]">
@@ -64,7 +64,7 @@ store().get_userinfo().then((res) => {
         </el-table-column>
         <!-- 图片 -->
         <el-table-column v-else-if="i.type == 'jimage' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
-            :width="i.width">
+            :sortable="i.sortable" :width="i.width">
             <template #default="scope">
                 <el-image v-if="scope.row[i.prop][0]" style="width: 70px; height: 70px" fit="cover" :z-index="30"
                     :src="`/api/data/${scope.row[i.prop][0]?.id}/zip_img/`"
@@ -75,7 +75,7 @@ store().get_userinfo().then((res) => {
         </el-table-column>
         <!-- 链接 -->
         <el-table-column v-else-if="i.type == 'link' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
-            :width="i.width">
+            :sortable="i.sortable" :width="i.width">
             <template #default="scope">
                 <a :href="scope.row[i.prop]" target="_blank">{{ scope.row[i.prop] }}</a>
             </template>
@@ -85,7 +85,7 @@ store().get_userinfo().then((res) => {
         <template #default="scope">
             <slot name="opt" :scope="scope"></slot>
             <el-button size="small" type="primary" v-if="attrs_.can_put"
-                @click="attrs.adding = true; attrs.add_form = scope.row; attrs.submit_type = 'update' ">编辑
+                @click="attrs.adding = true; attrs.add_form = scope.row; attrs.submit_type = 'update'">编辑
             </el-button>
             <!-- <el-button size="small" type="primary" @click="handleDelete(scope.$index, scope.row)">屏蔽</el-button> -->
             <el-popconfirm title="确定删除吗?" v-if="attrs_.can_delete"
@@ -98,5 +98,4 @@ store().get_userinfo().then((res) => {
         </template>
     </el-table-column>
 </template>
-<style scoped lang='scss'>
-</style>
+<style scoped lang='scss'></style>

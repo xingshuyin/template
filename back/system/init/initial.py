@@ -148,8 +148,20 @@ def init_menu():
             'is_link': False,
             'is_catalog': True
         },
-        {
+            {
             'id': 10,
+            'parent_id': 9,
+            'label': '区域管理',
+            'icon': 'Operation',
+            'component': 'dict/area.vue',
+            'name': 'area',
+            'path': 'area',
+            'sort': 1,
+            'is_link': False,
+            'is_catalog': False
+        },
+        {
+            'id': 10001,
             'parent_id': None,
             'label': '文章管理',
             'icon': 'Document',
@@ -161,7 +173,7 @@ def init_menu():
             'is_catalog': False
         },
         {
-            'id': 11,
+            'id': 10002,
             'parent_id': None,
             'label': '爬虫管理',
             'icon': 'Document',
@@ -173,7 +185,7 @@ def init_menu():
             'is_catalog': False
         },
         {
-            'id': 12,
+            'id': 10003,
             'parent_id': None,
             'label': '企业管理',
             'icon': 'Grid',

@@ -49,3 +49,11 @@ export const permission_type = {
   3: "全部数据权限",
   4: "自定数据权限",
 };
+
+
+export const area_level = {
+  0:'省份',
+  1: "城市",
+  2: "区县",
+  3: "乡镇"
+}
