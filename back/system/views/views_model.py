@@ -7,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 from django.db import models
 from django.db.models import F, QuerySet
+from django.contrib.auth.models import AnonymousUser
 from django.db.models.fields.related import ForeignKey, ManyToManyField
 from django.db.models.query import BaseIterable
 from django.utils import timezone
@@ -100,6 +101,8 @@ def deal_permission(request, queryset):
     """
     判断是否为超级管理员:
     """
+    if type(request.user) == AnonymousUser:
+        return queryset
     if not request.user.is_super:
         # 0. 获取用户的部门id，没有部门则返回空
         user_dept_id = getattr(request.user, "dept_id", None)
@@ -244,6 +247,13 @@ def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
+        fields = []
+        for field in instance._meta.fields:
+            fields.append(field.name)
+        if "dept_belong" in fields:
+            instance.dept_belong = dept_belong
+        if "creator" in fields:
+            instance.creator = request.user.id
         if instance._meta.object_name == 'user':
             instance.set_password(instance.password)
             headers = self.get_success_headers(serializer.data)

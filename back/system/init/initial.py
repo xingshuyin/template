@@ -15,6 +15,7 @@ django.setup()  # 加载项目配置
 # TODO:初始化数据
 from system.models import *
 
+
 def init_user():
     l = [
         {
@@ -148,7 +149,7 @@ def init_menu():
             'is_link': False,
             'is_catalog': True
         },
-            {
+        {
             'id': 10,
             'parent_id': 9,
             'label': '区域管理',
@@ -199,7 +200,7 @@ def init_menu():
     ]
     for i in l:
         print(i)
-        menu.objects.get_or_create(defaults=i,**i)
+        menu.objects.get_or_create(defaults=i, **i)
 
 
 METHOD_CHOICES = (
@@ -217,13 +218,14 @@ def init_menu_interface():
         print(m.name)
 
         for i in [['add', '添加', 1, "/" + m.name + "/"], ['delete', '删除', 3, "/" + m.name + "/{id}/"], ['put', '修改', 2, "/" + m.name + "/{id}/"], ['list', '查询', 0, "/" + m.name + "/"]]:
-            menu_interface.objects.get_or_create(defaults={'name':m.label + '_' + i[1], 'key':m.name + '_' + i[0], 'method':i[2], 'path':i[3], 'menu':m},
-                name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
+            menu_interface.objects.get_or_create(defaults={'name': m.label + '_' + i[1], 'key': m.name + '_' + i[0], 'method': i[2], 'path': i[3], 'menu': m},
+                                                 name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
 
 
 def init_role():
-    for i in [{'id': 1, "name": '管理员', "key": 'admin', 'is_admin': True, 'permission': 3}]:
-        r = role.objects.get_or_create(defaults=i,**i)
+    for i in [{'id': 1, "name": '管理员', "key": 'admin', 'is_admin': True, 'permission': 3},
+              {'id': 2, "name": '匿名用户', "key": 'AnonymousUser', 'is_admin': False, 'permission': 0}]:
+        r = role.objects.get_or_create(defaults=i, **i)
         if i['is_admin']:
             r[0].menu_interface.set(menu_interface.objects.all())
     admin = user.objects.get(id=1)
@@ -236,7 +238,7 @@ def init_area():
     from django.db import connection
     from system.init.area import areas
     from system.models import area
-    if area.objects.count()==0:
+    if area.objects.count() == 0:
         with connection.cursor() as cursor:
             for i in areas.split(";"):
                 print(i)

@@ -71,7 +71,7 @@ def get_dept_permission(request, dept_id, permission):
 class Data(ViewSet):
     # 文件上传接口
     @action(['post'], url_path='upload', url_name='upload', detail=False, permission_classes=[LoginPermisssion])
-    def upload(self, request: Request):  #TODO:文件上传-上传接口
+    def upload(self, request: Request):  # TODO:文件上传-上传接口
         print(request.FILES['file'].name)  # 上传文件以file为key值
         form = FileForm({'name': request.FILES['file'].name}, request.FILES)
         if form.is_valid():
@@ -203,10 +203,10 @@ class Data(ViewSet):
         # r = open(zip_path, "rb")
         return FileResponse(open(zip_path, "rb"))
         # return HttpResponse(r.read(), content_type='image/jpg')
-        
+
     # TODO:临时文件下载
     @action(['get'], url_path='temp', url_name='temp', detail=True, permission_classes=[])
-    def temp(self, request :Request, pk):
+    def temp(self, request: Request, pk):
         response = HttpResponse(content_type='application/octet-stream')
         zip_file = zipfile.ZipFile(response, 'w')
         zip_file.write(r"D:\python\template\back\system\init\spider.xlsx", 'spider')
@@ -215,3 +215,14 @@ class Data(ViewSet):
         response_name = 'spider' + '.zip'
         response['Content-Disposition'] = 'attachment;filename="{0}"'.format(escape_uri_path(response_name))
         return response
+
+    # 生成接口
+    @action(['get'], url_path='init_permision', detail=False, url_name='init_permision', permission_classes=[SuperPermisssion])
+    def init_permision(self, request: Request):
+        menus = menu.objects.all()
+        for m in menus:
+            n = m._meta.object_name
+            for i in [['add', '添加', 1, "/" + m.name + "/"], ['delete', '删除', 3, "/" + m.name + "/{id}/"], ['put', '修改', 2, "/" + m.name + "/{id}/"], ['list', '查询', 0, "/" + m.name + "/"]]:
+                menu_interface.objects.update_or_create(defaults={'name': m.label + '_' + i[1], 'key': m.name + '_' + i[0], 'method': i[2]},
+                                                        name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
+        return Response({'detail': '接口初始化成功'}, status=200)

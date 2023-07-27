@@ -12,6 +12,7 @@
                 @click="mult_delete_(`/${attrs.base_url}/mult_destroy/`, attrs.selects, get_data)"
                 v-if="attrs.selects.length > 0">批量删除
             </el-button>
+            <el-button icon="Refresh" circle @click="init_permision" />
             <el-button icon="Plus" circle
                 @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'; attrs.submit_type = 'add'" />
             <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
@@ -142,6 +143,9 @@ const edit = (scope) => {
     attrs.add_form = temp;
     attrs.submit_type = 'update';
 
+}
+const init_permision = () => {
+    r().get('/data/init_permision/')
 }
 get_all_role_(attrs)
 get_all_menu_tree_(attrs)

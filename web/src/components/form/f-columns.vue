@@ -80,6 +80,13 @@ store().get_userinfo().then((res) => {
                 <a :href="scope.row[i.prop]" target="_blank">{{ scope.row[i.prop] }}</a>
             </template>
         </el-table-column>
+        <!-- JSON -->
+        <el-table-column v-else-if="i.type == 'json' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
+            :width="i.width">
+            <template #default="scope">
+                {{ JSON.stringify(scope.row[i.prop]) }}
+            </template>
+        </el-table-column>
     </template>
     <el-table-column label="操作" fixed="right" :width="opt_width ? opt_width : 150" align="center">
         <template #default="scope">

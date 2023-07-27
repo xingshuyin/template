@@ -1,11 +1,12 @@
 from rest_framework import permissions
+from django.contrib.auth.models import AnonymousUser
 import re
 from .models import user, role
 
 white_api = ['/']
 
 
-#TODO:自定义接口权限
+# TODO:自定义接口权限
 class UrlPermisssion(permissions.BasePermission):
     """
     Custom permission to only allow owners of an object to edit it.
@@ -20,9 +21,12 @@ class UrlPermisssion(permissions.BasePermission):
         # ip = request.META.get('REMOTE_ADDR')  #TODO:获取ip
         if request.path in white_api:
             return True
-        if request.user.is_super:
+        if type(request.user) == AnonymousUser:
+            roles = role.objects.filter(key='AnonymousUser')
+        elif request.user.is_super:
             return True
-        roles = role.objects.filter(id__in=request.user.role)
+        else:
+            roles = role.objects.filter(id__in=request.user.role)
         for i in roles:
             for j in i.menu_interface.all():
                 if re.match(j.path.replace('{id}', '.*?'), request.path.lower()):  # 之所以id用{id}代表是因为drf_yasg生成的接口数据就是这样的
