@@ -29,7 +29,7 @@ from system.views.login import MyTokenRefreshView
 
 schema_view = get_schema_view(  # TODO:swagger-创建view
     openapi.Info(
-        title="微镜头接口文档",  # 必传
+        title="接口文档",  # 必传
         default_version="v1",  # 必传
     ),
     public=True,
@@ -41,5 +41,5 @@ urlpatterns = [
     path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),  # TODO:JWT--引入token视图
     path('refresh/', MyTokenRefreshView.as_view(), name='token_refresh'),  # TODO:JWT--引入refresh视图
 ]
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  #TODO:添加文件路由
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # TODO:添加文件路由
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_URL)
