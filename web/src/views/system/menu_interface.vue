@@ -3,8 +3,8 @@
         <div class="search">
             <f-input v-model="form.name" label="名称" />
             <f-timerange v-model="special_form.range" />
-            <el-cascader v-model="form.menu" :options="attrs.menus" @change="search_change" :filter-method="filter_method"
-                :show-all-levels="false" :getCheckedNodes="true" placeholder="菜单"
+            <el-cascader v-model="form.menu" :options="attrs.menus" :filter-method="filter_method" :show-all-levels="false"
+                :getCheckedNodes="true" placeholder="菜单"
                 :props="{ emitPath: false, checkStrictly: true, value: 'id', label: 'label', }" filterable clearable />
         </div>
         <div class="tool">
@@ -74,6 +74,7 @@
 
 <script setup>
 import store from '../../store';
+import r from '../../utils/request';
 import { get_data_, select_, mult_delete_, sort_, submit_, get_all_role_, get_all_menu_tree_, get_all_interface_ } from '../../hooks/table_common'
 const form_dom = ref()
 const attrs = reactive({
@@ -145,7 +146,13 @@ const edit = (scope) => {
 
 }
 const init_permision = () => {
-    r().get('/data/init_permision/')
+    r().get('/data/init_permision/').then((res) => {
+        ElMessage({
+            showClose: true,
+            message: res.data.detail,
+            center: true,
+        });
+    })
 }
 get_all_role_(attrs)
 get_all_menu_tree_(attrs)
