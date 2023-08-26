@@ -58,3 +58,29 @@ Content-Disposition: form-data; name="file"; filename="a.mp4"
 
 < "D:\下载\bandicam 2023-04-04 19-08-42-408.mp4"
 --fileboundary--
+
+
+
+
+
+###创建
+POST  http://121.89.199.142/tool/correct/  HTTP/1.1
+Content-Type: application/json
+
+{
+    "data": "我是中国仁"
+}
+
+###
+POST  http://121.89.199.142/tool/filter/  HTTP/1.1
+Content-Type: application/json
+
+{
+    "data": ["法轮功大法好有个针孔摄像机放在盒子里", "针孔摄像机装在冰箱里", "售假人民币所以单独立了个项目备份一下", "传世私服 所以单独立了个项目备份一下加微"]
+}
+
+###
+GET http://121.89.199.142/tool/correct/?data=我是中国仁 HTTP/1.1
+
+###
+GET http://121.89.199.142/tool/filter/?data=我是中国仁 HTTP/1.1

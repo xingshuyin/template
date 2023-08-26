@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # pip install django_comment_migrate
-    'django_comment_migrate',  # TODO:setting-安装这个包才会迁移数据库的注释
+    # 'django_comment_migrate',  # TODO:setting-安装这个包才会迁移数据库的注释,4.2以后不需要了 db_table_comment(表) db_comment(字段)
     'system',
     # https://github.com/adamchainz/django-cors-headers
     # pip install django-cors-headers

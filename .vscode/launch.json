@@ -32,6 +32,7 @@
       "justMyCode": true
     },
     {
+      // 运行python 文件
       "name": "collectstatic",
       "type": "python",
       "request": "launch",
@@ -55,11 +56,22 @@
       "cwd": "${workspaceFolder}/web"
     },
     {
+      // 运行命令行命令. 没有python环境
       "command": "fresh",
       "name": "fresh",
       "request": "launch",
       "type": "node-terminal",
       "cwd": "${workspaceFolder}/back-go"
+    },
+    {
+      // 运行python库的命令  scrapy crawl spider
+      "name": "spider",
+      "type": "python",
+      "request": "launch",
+      "module": "scrapy",
+      "justMyCode": true,
+      "args": ["crawl", "spider"],
+      "cwd": "${workspaceFolder}/spider"
     }
   ]
 }
