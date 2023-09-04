@@ -174,6 +174,11 @@ def get_extra_value(request, queryset):
     if model_name in ['menu']:
         queryset = queryset.annotate(parent_label=F("parent__label"))
         fields.append('parent_label')
+    if 'extra[]' in request.GET.dict():  # TODO:获取额外字段
+        extra = request.GET.getlist('extra[]')
+        for i in extra:
+            queryset = queryset.annotate(**{i: F(i)})
+            fields.append(i)
     if model_name in ['user']:
         if not request.user.is_super:
             raise exceptions.AuthenticationFailed(
@@ -201,7 +206,7 @@ def list_common(self, request: HttpRequest, *args):
     queryset = deal_permission(request, queryset)
     if (page and limit):
         for k, v in temp_dict.items():
-            if v == '' or v == 'null' or v == 'undefined':  # s删除无用过滤字段
+            if v == '' or v == 'null' or v == 'undefined':  # 删除无用过滤字段
                 del filter_dict[k]
         for i in ['page', 'limit', 'values[]', 'defer[]']:
             if i in filter_dict.keys():
