@@ -1,4 +1,5 @@
 from hashlib import md5
+import re
 import scrapy
 import json
 import os
@@ -19,22 +20,36 @@ image_rule = {
     're_page': 'https://taotuhome.com/category/.*?',  # 分页链接正则(必填)
     're_item': 'https://taotuhome.com/\d+.html.*',  # 内容链接正则(必填)
 }
-article_rule = {
-    'name': 'taotuhome_dietutu',
-    'start_urls': 'https://taotuhome.com',  # 开始页(逗号分隔)
-    'allowed_domains': 'taotuhome.com',
+
+
+job_rule = {
+    'name': 'job.hebust',
+    'start_urls': 'https://job.hebust.edu.cn/teachin',  # 开始页(逗号分隔)
+    'allowed_domains': 'hebust.edu.cn',
     'get_page': '//body',  # 分页链接提取区域xpath(必填)
     'get_item': '//body',  # 内容链接提取区域xpath(必填)
-    'get_img': '//div[@class="single-content"]//img/@src',
-    'get_title': '//div[@class="single-content"]//img/@src',
-    'get_content': '//div[@class="single-content"]//img/@src',
-    'get_author': '//div[@class="single-content"]//img/@src',
-    'get_time': '//div[@class="single-content"]//img/@src',
-    're_page': 'https://taotuhome.com/category/.*?',  # 分页链接正则(必填)
-    're_item': 'https://taotuhome.com/\d+.html.*',  # 内容链接正则(必填)
+    'contentrule': {
+        # 'img': {'xpath':'//div[@class="single-content"]//img/@src', 're': ''},
+        '标题': {'xpath': '//div[@class="title-message"]//h5/text()', 're': ""},
+        '文章': {'xpath': '//div[@class="info"]//text()', 're': ""},
+        '单位': {'xpath': '//div[@class="title-message"]//a/text()', 're': ""},
+        '单位性质': {'xpath': '//div[@class="details-list"]/ul[1]/li[1]/span//text()', 're': ""},
+        '单位行业': {'xpath': '//div[@class="details-list"]/ul[2]/li[1]/span//text()', 're': ""},
+        '单位规模': {'xpath': '//div[@class="details-list"]/ul[3]/li[1]/span//text()', 're': ""},
+        '宣讲时间': {'xpath': '//div[@class="details-list"]/ul[2]/li[1]/span//text()', 're': ""},
+        '举办地址': {'xpath': '//div[@class="details-list"]/ul[2]/li[2]/span//text()', 're': ""},
+        '宣讲学校': {'xpath': '//div[@class="details-list"]/ul[2]/li[3]/span//text()', 're': ""},
+        '宣讲类别': {'xpath': '//div[@class="details-list"]/ul[2]/li[4]/span//text()', 're': ""},
+        '简历投递邮箱': {'xpath': '//div[@class="details-list"]/ul[2]/li[5]/span//text()', 're': ""},
+        '招聘部门电话': {'xpath': '//div[@class="details-list"]/ul[2]/li[6]/span//text()', 're': ""},
+    },
+    're_page': '.*?teachin/index.*',  # 分页链接正则(必填)
+    're_item': '.*?teachin/view/id/\d+',  # 内容链接正则(必填)
 }
 args = {'wait': 2, 'lua_source': script}
 args_shot = {'wait': 0.5, 'lua_source': script_shot}
+
+output = r"/mnt/d/python/template/spider"
 
 
 def get_all(response, xpath):
@@ -53,7 +68,7 @@ class FullSpider(CrawlSpider):
     }
 
     def __init__(self):
-        self.rule = image_rule
+        self.rule = job_rule
         self.allowed_domains = self.rule.get('allowed_domains', '*')
         self.name = self.rule['name']
         self.start_urls = self.rule['start_urls'].split(",")
@@ -71,22 +86,25 @@ class FullSpider(CrawlSpider):
     def start_requests(self):
         print('start_urls', self.start_urls)
         for url in self.start_urls:
-            yield SplashRequest(url,
-                                endpoint='execute',
-                                args=args,
-                                dont_filter=True)
+            # yield SplashRequest(url,
+            #                     endpoint='execute',
+            #                     args=args,
+            #                     dont_filter=True)
+            yield scrapy.Request(url, meta={"playwright": True}, dont_filter=True)
 
     def process_page(self, request, response):
-        request.priority = 10  # 设置请求权重
+        # request.priority = 1  # 设置请求权重
         return request
 
     def process_item(self, request, response):
-        request.priority = 1
+        # print(response.text)
+        # request.priority = 1
         return request
 
     def _requests_to_follow(self, response):
-        if not isinstance(response, SplashTextResponse):
-            return
+        # print(response.text)
+        # if not isinstance(response, SplashTextResponse):
+        #     return
 
         for rule_index, rule in enumerate(self._rules):
             links = [
@@ -103,43 +121,47 @@ class FullSpider(CrawlSpider):
 
     def _build_request(self, rule_index, link):
         print(link.url)
-        return SplashRequest(
-            url=link.url,
-            callback=self._callback,
-            errback=self._errback,
-            meta=dict(rule=rule_index, link_text=link.text),
-            endpoint='execute',
-            args=args,
-            dont_filter=True)
+        return scrapy.Request(link.url, callback=self._callback, errback=self._errback, meta=dict(rule=rule_index, link_text=link.text, playwright=True), dont_filter=True)
+        # return SplashRequest(
+        #     url=link.url,
+        #     callback=self._callback,
+        #     errback=self._errback,
+        #     meta=dict(rule=rule_index, link_text=link.text),
+        #     endpoint='execute',
+        #     args=args,
+        #     dont_filter=True)
 
     def parse_item(self, response):
-        # imgs = response.xpath('//div[@class="album"]//div[@class="img-holder"]//img/@src').getall()
-
-        if self.rule['get_content']:
-            article = {}
-            article['title'] = get_all(response, self.rule['get_title'])
-            article['content'] = get_all(response, self.rule['get_content'])
-            article['author'] = get_all(response, self.rule['get_author'])
-            article['pubtime'] = get_all(response, self.rule['get_time'])
-            if self.rule['get_img']:
-                imgs = response.xpath(self.rule['get_img']).getall()
-                article['image'] = imgs
-            self.article_data.append(article)
-        elif self.rule['get_img']:
+        if 'get_img' in self.rule.keys():
             imgs = response.xpath(self.rule['get_img']).getall()
             print('item ', response.url, len(imgs))
             self.image_data.extend(imgs)
             if time.time() - self.start > 60 * 5:
                 self.start = time.time()
                 print('共有', len(self.image_data), '个')
-                with open(f'D:/python/viewer/src/renderer/src/assets/json_source/{self.rule["name"]}.json', 'w') as f:
+                with open(os.path.join(output, f'{self.rule["name"]}.json'), 'w') as f:
                     f.write(json.dumps(self.image_data))
+        elif 'contentrule' in self.rule.keys():
+            article = {}
+            for k, v in self.rule['contentrule'].items():
+                if k == 'img':
+                    article[k] = response.xpath(v['xpath']).getall()
+                else:
+                    article[k] = get_all(response, v['xpath'])
+                    if v['re']:
+                        article[k] = re.search(v['re'], article[k]).groups()
+            print('article', article['标题'])
+
+            self.article_data.append(article)
 
     @staticmethod
     def close(spider, reason):
-        with open(f'D:/python/viewer/src/renderer/src/assets/json_source/{spider.rule["name"]}.json', 'w') as f:
+        with open(os.path.join(output, f'{spider.rule["name"]}_article.json'), 'w') as f:
+            f.write(json.dumps(spider.article_data))
+            print('共有', '文章', len(spider.article_data), '个')
+        with open(os.path.join(output, f'{spider.rule["name"]}_img.json'), 'w') as f:
             f.write(json.dumps(spider.image_data))
-        print('共有', len(spider.data), '个')
+            print('共有', '图片', len(spider.image_data), '个')
         closed = getattr(spider, "closed", None)
         if callable(closed):
             return closed(reason)

@@ -101,6 +101,9 @@ def deal_permission(request, queryset):
     """
     判断是否为超级管理员:
     """
+    if (queryset.model.public):
+        return queryset
+
     if type(request.user) == AnonymousUser:
         return queryset
     if not request.user.is_super:

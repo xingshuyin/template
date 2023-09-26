@@ -81,15 +81,16 @@ def mark(html, words):
     return html
 
 
-script = """
+scripta = """
 function main(splash, args)
     headers = {
         ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
     }
     splash:set_custom_headers(headers)
+    splash.private_mode_enabled = false
     assert(splash:go(args.url))
     assert(splash:wait(1))
-  return splash:html()
+    return splash:html()
 end
 """
 script = """
@@ -119,7 +120,7 @@ end
 
 splash_args = {
     'wait': 0.5,
-    'lua_source': script,
+    'lua_source': scripta,
     'timeout': 90,
     'resource_timeout': 10
 }

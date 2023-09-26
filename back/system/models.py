@@ -27,7 +27,7 @@ class base_model(models.Model):
     update_time = models.DateTimeField(auto_now=True, db_comment='更新时间', null=True)
     dept_belong = models.IntegerField(db_comment='所属部门id', null=True, blank=True)
     creator = models.IntegerField(db_comment='创建人id', null=True, blank=True)
-
+    public = False
     class Meta:
         abstract = True
         ordering = ('-create_time', )
