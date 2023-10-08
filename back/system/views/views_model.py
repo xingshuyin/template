@@ -119,10 +119,10 @@ def deal_permission(request, queryset):
     """
     判断是否为超级管理员:
     """
-    if (queryset.model.public):
+    if (queryset.model.public_model):
         return queryset
 
-    if type(request.user) == AnonymousUser:
+    if type(request.user) == AnonymousUser:  # 匿名用户不受部门限制,但受特定的角色的接口限制
         return queryset
     if not getattr(request.user, 'is_super', None):
         # 0. 获取用户的部门id，没有部门则返回空

@@ -27,7 +27,7 @@ class base_model(models.Model):
     update_time = models.DateTimeField(auto_now=True, db_comment='更新时间', null=True)
     dept_belong = models.IntegerField(db_comment='所属部门id', null=True, blank=True)
     creator = models.IntegerField(db_comment='创建人id', null=True, blank=True)
-    public = False  # 是否公开, 公开数据不受角色和部门限制
+    public_model = False  # 是否公开, 公开数据list查询不受部门限制, 但受角色的接口
 
     class Meta:
         abstract = True
@@ -280,6 +280,7 @@ class area(models.Model):
         blank=True,
         db_comment="父地区编码",
     )
+    public_model = True
 
     class Meta:
         db_table = "area"

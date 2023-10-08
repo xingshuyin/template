@@ -21,6 +21,7 @@ import r from '../../utils/request'
 //const emits = defineEmits(['onclick']); // emits 触发父组件函数
 //const map = ref(null); //获取ref值为map的元素
 //defineExpose({ map,}); //暴露组件的内容, 父组件通过组件对象(如ref)的value获取暴露的对象
+const attrs = reactive({ captcha: null });
 const form = reactive({
   username: null,
   password: null,
@@ -59,13 +60,11 @@ const login = () => { //TODO:登录
     } else {
       ElMessage({
         showClose: true,
-        message: '请填写账号或密码',
+        message: Object.values(fields)[0][0]['message'],
         center: true,
       });
     }
   })
-
-
 }
 /**
  * @description: 刷新token令牌
@@ -101,10 +100,10 @@ const signin = () => {
 const get_captcha = () => {
   r().get('/data/captcha/').then((res) => {
     console.log(res);
-    attrs.captha = res.data.data
+    attrs.captcha = res.data.data
   })
 }
-
+get_captcha()
 const env = import.meta.env
 </script>
 <template>
@@ -143,8 +142,8 @@ const env = import.meta.env
                   <el-input @keyup.enter="login" v-model="form.captcha" size="large" autocomplete="off" />
                 </el-col>
                 <el-col :span="8" @click="get_captcha">
-                  <el-image style=" height: 40px" :src="'data:image/gif;base64,' + attrs.captha" fit="contain" />
-                  <!-- <img @click="get_captcha" :src="'data:image/gif;base64,' + attrs.captha" alt="" /> -->
+                  <el-image style=" height: 40px" :src="'data:image/gif;base64,' + attrs.captcha" fit="contain" />
+                  <!-- <img @click="get_captcha" :src="'data:image/gif;base64,' + attrs.captcha" alt="" /> -->
                 </el-col>
               </el-row>
 
@@ -239,7 +238,7 @@ const env = import.meta.env
           }
 
           .el-form-item__content {
-            border-radius: 10px;
+            // border-radius: 10px;
             overflow: hidden;
           }
         }
