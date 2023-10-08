@@ -1,4 +1,5 @@
 # from tomlkit import datetime
+import copy
 import datetime
 import time
 from itertools import chain
@@ -17,6 +18,8 @@ from rest_framework.request import HttpRequest
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
+
+from ..authentication import MyJWTAuthentication
 
 from ..utils import ratelimit
 from ..models import *
@@ -59,35 +62,6 @@ def to_dict(instance, deep=2):
     return data
 
 
-# 处理特殊搜索参数
-def special_filter(request: HttpRequest, queryset: QuerySet, filter_dict):
-    fields = [i.name for i in queryset.model._meta.fields]
-    model_name = queryset.model._meta.model_name
-
-    if 'sort' in filter_dict.keys():
-        queryset = queryset.order_by(filter_dict['sort'])
-        del filter_dict['sort']
-    if 'order' in filter_dict.keys():
-        queryset = queryset.order_by(filter_dict['order'])
-        del filter_dict['order']
-    if 'parent_name' in filter_dict.keys():
-        queryset = queryset.filter(parent__name=filter_dict['parent_name'])
-        del filter_dict['parent_name']
-    if 'create_start' in filter_dict.keys():
-        queryset = queryset.filter(
-            create_time__gte=filter_dict['create_start'])
-        del filter_dict['create_start']
-    if 'create_end' in filter_dict.keys():
-        queryset = queryset.filter(create_time__lte=filter_dict['create_end'])
-        del filter_dict['create_end']
-
-    for i in ['name', 'project', 'city', 'county', 'legal_person', 'leader', 'industry']:  # 所有字符串包含类型的过滤
-        if i in filter_dict.keys():
-            queryset = queryset.filter(**{i + '__contains': filter_dict[i]})
-            del filter_dict[i]
-    return queryset, filter_dict
-
-
 def get_all_sub_dept(dept_id):
     r = [dept_id]
     childern = dept.objects.filter(parent__id=dept_id)
@@ -95,6 +69,50 @@ def get_all_sub_dept(dept_id):
         for i in childern:
             r.extend(get_all_sub_dept(i.id))
     return r
+
+
+def get_depts(request, instance):
+    user_dept_id = getattr(request.user, "dept_id", None)
+    if not user_dept_id:  # 用户没有部门, 就不受部门限制
+        return True
+    if not getattr(instance, "dept_belong", None):  # 数据没有部门, 就不受部门限制
+        return True
+    if instance.dept_belong == None:  # 数据没有部门, 就不受部门限制
+        return True
+    if not hasattr(request.user, "role"):
+        return [user_dept_id]
+
+    # 3. 根据所有角色 获取所有权限范围
+    # (0, "仅本人数据权限"),
+    # (1, "本部门及以下数据权限"),
+    # (2, "本部门数据权限"),
+    # (3, "全部数据权限"),
+    # (4, "自定数据权限")
+    role_list = request.user.role
+    permission_list = []  # 权限范围列表
+    for role in role_list:
+        # 判断用户是否为超级管理员角色/如果拥有[全部数据权限]则返回所有数据
+        role = role.objects.get(id=role)
+        if 3 == role.permission or role.is_admin == True:
+            return True
+        permission_list.append(role.permission)
+    permission_list = list(set(permission_list))
+    # 4. 只为仅本人数据权限时只返回过滤本人数据，并且部门为自己本部门(考虑到用户会变部门，只能看当前用户所在的部门数据)
+    if 0 in permission_list:
+        return []
+
+    # 5. 自定数据权限 获取部门，根据部门过滤
+    dept_list = []
+    for p in permission_list:
+        if p == 4:
+            for i in request.user.role:
+                dept_list.extend(role.objects.get(
+                    id=i).dept.values_list("dept__id", flat=True))
+        elif p == 2:
+            dept_list.append(user_dept_id)
+        elif p == 1:
+            dept_list.extend(get_all_sub_dept(user_dept_id))
+    return dept_list
 
 
 def deal_permission(request, queryset):
@@ -106,7 +124,7 @@ def deal_permission(request, queryset):
 
     if type(request.user) == AnonymousUser:
         return queryset
-    if not request.user.is_super:
+    if not getattr(request.user, 'is_super', None):
         # 0. 获取用户的部门id，没有部门则返回空
         user_dept_id = getattr(request.user, "dept_id", None)
         if not user_dept_id:
@@ -157,6 +175,51 @@ def deal_permission(request, queryset):
         return queryset
 
 
+# 处理特殊搜索参数
+def special_filter(request: HttpRequest, queryset: QuerySet, filter_dict):
+    fields = [i.name for i in queryset.model._meta.fields]
+    model_name = queryset.model._meta.model_name
+    or_filter = None
+    filter_dict_ = copy.deepcopy(filter_dict)
+    for i in filter_dict_.keys():
+        if '__in' in i:  # 列表包含查询
+            filter_dict[i.strip('[]')] = request.GET.getlist(i)
+            print(filter_dict)
+            del filter_dict[i]
+        if 'or[' in i:  # 多条件或者
+            value = request.GET.get(i)
+            key = i.replace('or[', '').replace(']', '')
+            if or_filter != None:
+                or_filter = or_filter | Q(**{key: value})
+            else:
+                or_filter = Q(**{key: value})
+            del filter_dict[i]
+    if or_filter != None:
+        queryset = queryset.filter(or_filter)
+    if 'sort' in filter_dict.keys():
+        queryset = queryset.order_by(filter_dict['sort'])
+        del filter_dict['sort']
+    if 'order' in filter_dict.keys():
+        queryset = queryset.order_by(filter_dict['order'])
+        del filter_dict['order']
+    if 'parent_name' in filter_dict.keys():
+        queryset = queryset.filter(parent__name=filter_dict['parent_name'])
+        del filter_dict['parent_name']
+    if 'create_start' in filter_dict.keys():
+        queryset = queryset.filter(
+            create_time__gte=filter_dict['create_start'])
+        del filter_dict['create_start']
+    if 'create_end' in filter_dict.keys():
+        queryset = queryset.filter(create_time__lte=filter_dict['create_end'])
+        del filter_dict['create_end']
+
+    for i in ['name', 'project', 'city', 'county', 'legal_person', 'leader', 'industry']:  # 所有字符串包含类型的过滤
+        if i in filter_dict.keys():
+            queryset = queryset.filter(**{i + '__contains': filter_dict[i]})
+            del filter_dict[i]
+    return queryset, filter_dict
+
+
 def get_extra_value(request, queryset):
     fields = [i.name for i in queryset.model._meta.fields]
     # queryset.model  TODO:获取queryset的model对象
@@ -183,7 +246,7 @@ def get_extra_value(request, queryset):
             queryset = queryset.annotate(**{i: F(i)})
             fields.append(i)
     if model_name in ['user']:
-        if not request.user.is_super:
+        if not getattr(request.user, 'is_super', None):
             raise exceptions.AuthenticationFailed(
                 '用户不存在',
                 "no_active_account",
@@ -201,6 +264,9 @@ def prefetch_related(queryset: QuerySet):
 # @get_time
 @ratelimit(key='ip', rate='3/s')
 def list_common(self, request: HttpRequest, *args):
+    # jwt = MyJWTAuthentication()
+    # user = jwt.authenticate(request)[0] # 手动验证用户, 用于 authentication_classes=[] 的接口
+
     page = int(request.GET.get('page'))
     limit = int(request.GET.get('limit'))
     filter_dict = request.GET.dict()
@@ -228,7 +294,9 @@ def list_common(self, request: HttpRequest, *args):
             for i in request.GET.getlist('defer[]'):
                 if i in fields:
                     fields.remove(i)
+        # print(queryset.query) # TODO:查看查询语句
         r = queryset.values(*fields)
+
         total = r.count()
         r = r[(page - 1) * limit:page * limit]
         if r is not None:
@@ -251,41 +319,24 @@ def retrieve(self, request, *args, **kwargs):
 
 # 创建方法
 def create(self, request, *args, **kwargs):
-    if request.user.is_super:
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        instance = serializer.save()
-        fields = []
-        for field in instance._meta.fields:
-            fields.append(field.name)
-        if "dept_belong" in fields:
-            instance.dept_belong = dept_belong
-        if "creator" in fields:
-            instance.creator = request.user.id
-        if instance._meta.object_name == 'user':
-            instance.set_password(instance.password)
-            headers = self.get_success_headers(serializer.data)
-        instance.save()
-        headers = self.get_success_headers(serializer.data)
-        print('返回')
-        return Response(serializer.data, status=201, headers=headers)
-
     dept_belong = getattr(request.user, 'dept_belong', None)
-    if not dept_belong:
-        return Response({'detail': '没有数据权限'}, status=400, headers=headers)
     serializer = self.get_serializer(data=request.data)
     serializer.is_valid(raise_exception=True)
+
+    user = request.user
+    user_id = getattr(user, 'id', None)
+    model_name = serializer.Meta.model.__name__
+
+    fields = serializer.__dict__['fields'].keys()
+    if 'dept_belong' in fields:
+        serializer.validated_data['dept_belong'] = dept_belong
+    if 'creator' in fields:
+        serializer.validated_data['creator'] = user_id
+
     instance = serializer.save()
-    fields = []
-    for field in instance._meta.fields:
-        fields.append(field.name)
-    if "dept_belong" in fields:
-        instance.dept_belong = dept_belong
-    if "creator" in fields:
-        instance.creator = request.user.id
     if instance._meta.object_name == 'user':
         instance.set_password(instance.password)
-    instance.save()
+        instance.save()
     headers = self.get_success_headers(serializer.data)
     return Response(serializer.data, status=201, headers=headers)
 
@@ -296,47 +347,25 @@ def update(self, request, *args, **kwargs):
     instance = self.get_object()
     serializer = self.get_serializer(instance, data=request.data, partial=True)
     serializer.is_valid(raise_exception=True)
-    if request.user.is_super:
+    depts = get_depts(request, instance)
+    if getattr(request.user, 'is_super', None) or depts == True or instance.dept_belong in depts:
         self.perform_update(serializer)
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
         return Response(serializer.data, status.HTTP_200_OK)
     else:
-        user = request.user
-        roles = user.role.all()
-        depts = set()
-        for i in roles:
-            for j in i.dept.all():
-                print(j)
-                depts.add(j.i)
-        if instance.dept_belong in depts:
-            self.perform_update(serializer)
-            if getattr(instance, '_prefetched_objects_cache', None):
-                instance._prefetched_objects_cache = {}
-            return Response(serializer.data, 200)
-        else:
-            return Response({'detail': '没有修改权限'}, 400)
+        return Response({'detail': '没有修改权限'}, 400)
 
 
 # 删除方法
 def destroy(self, request, *args, **kwargs):
     instance = self.get_object()
-    if request.user.is_super:
+    depts = get_depts(request, instance)
+    if getattr(request.user, 'is_super', None) or depts == True or instance.dept_belong in depts:
         self.perform_destroy(instance)
         return Response({'detail': '删除成功'}, 200)
     else:
-        user = request.user
-        roles = user.role.all()
-        depts = set()
-        for i in roles:
-            for j in i.dept.all():
-                print(j)
-                depts.add(j.i)
-        if instance.dept_belong in depts:
-            self.perform_destroy(instance)
-            return Response({'detail': '删除成功'}, 200)
-        else:
-            return Response({'detail': '没有删除权限'}, 400)
+        return Response({'detail': '没有删除权限'}, 400)
 
 
 # 多项更新
@@ -401,10 +430,12 @@ class MyValuesIterable(BaseIterable):
             *query.values_select,
             *query.annotation_select,
         ]
+        # TODO:request-QuerySet修改values  去掉_id
+        names = [i.rstrip('_id') if i.endswith("_id") else i for i in names]  # 貌似新版已经不需要了
         indexes = range(len(names))
         for row in compiler.results_iter(chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size):
             # TODO:request-QuerySet修改values  去掉_id
-            yield {names[i] if '_id' not in names[i] else names[i].rstrip('_id'): deal_value(row[i]) for i in indexes}
+            yield {names[i]: deal_value(row[i]) for i in indexes}
 
 
 # 自定义queryset

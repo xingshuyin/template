@@ -5,6 +5,7 @@ from system.models import *
 from django.utils._os import safe_join
 from django.utils.encoding import escape_uri_path
 from django.conf import settings
+from django.core.cache import cache
 from django.http import FileResponse, HttpResponse
 from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet
@@ -19,6 +20,12 @@ from .views_model import MyQuerySet
 import os
 import hashlib
 from ..permission import SuperPermisssion, UrlPermisssion, LoginPermisssion
+from io import BytesIO
+from PIL import Image
+import base64
+from captcha.image import ImageCaptcha
+from random import randint
+from ..utils import ratelimit
 
 
 def ranges():
@@ -226,3 +233,48 @@ class Data(ViewSet):
                 menu_interface.objects.update_or_create(defaults={'name': m.label + '_' + i[1], 'key': m.name + '_' + i[0], 'method': i[2]},
                                                         name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
         return Response({'detail': '接口初始化成功'}, status=200)
+
+    # 注册
+    @action(['post'], url_path='signin', url_name='signin', detail=False, permission_classes=[], authentication_classes=[])
+    def signin(self, request: Request):
+        captcha = request.data.get("captcha")
+        if captcha and captcha.lower() == cache.get('captcha-' + request.META.get('REMOTE_ADDR')).lower():
+            username = request.data.get("username")
+            password = request.data.get("password")
+            user_ = user.objects.filter(username=username).first()
+            if user_:
+                return Response({"detail": "用户已存在"}, status=400)
+            else:
+                u = user.objects.create(username=username, password=password)
+                u.set_password(u.password)
+                u.name = u.username
+                u.role.add(role.objects.get(key='normal'))
+                u.save()
+                return Response({"detail": "注册成功"}, status=200)
+        else:
+            return Response({"detail": "验证码错误"}, status=400)
+
+    # 生成验证码
+    @ratelimit(key='ip', rate='1/s')
+    @action(['get'], url_path='captcha', url_name='captcha', detail=False, permission_classes=[], authentication_classes=[])
+    def captcha(self, request: Request):
+
+        list = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+        chars = ''
+        for i in range(4):
+            chars += list[randint(0, len(list) - 1)]
+        cache.set('captcha-' + request.META.get('REMOTE_ADDR'), chars, 60)
+        image = ImageCaptcha(font_sizes=(42, 40, 46)).generate(chars)
+        # 将图片写入BytesIO
+        # img_io = BytesIO()
+        # image.save(img_io, 'JPEG')  # 保存图片
+
+        # # 从BytesIO中获取图片数据
+        # img_byte = img_io.getvalue()
+
+        # 将图片转换为base64格式
+        img_base64 = base64.b64encode(image.getvalue())
+        print(chars)
+        return Response({"data": img_base64, 'detail': '成功'}, status=200)

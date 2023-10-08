@@ -24,12 +24,14 @@ import r from '../../utils/request'
 const form = reactive({
   username: null,
   password: null,
+  captcha: null,
   // openid: '1234567890',
 })
 const form_dom = ref()
 const rules = reactive({
   username: [{ required: true, message: '请填写账号', trigger: 'blur' }],
-  password: [{ required: true, message: '请填写密码', trigger: 'blur' }]
+  password: [{ required: true, message: '请填写密码', trigger: 'blur' }],
+  captcha: [{ required: true, message: '请填写验证码', trigger: 'blur' }],
 })
 const router = useRouter();
 
@@ -83,6 +85,26 @@ const refresh = () => {
   }).catch((err) => {
   })
 }
+
+const signin = () => {
+  r().post('/data/signin/', { ...toRaw(form) }).then((res) => {
+    if (res.status == 200) {
+      ElMessage({
+        showClose: true,
+        message: '注册成功',
+        center: true,
+      });
+    }
+
+  })
+}
+const get_captcha = () => {
+  r().get('/data/captcha/').then((res) => {
+    console.log(res);
+    attrs.captha = res.data.data
+  })
+}
+
 const env = import.meta.env
 </script>
 <template>
@@ -108,17 +130,30 @@ const env = import.meta.env
       <div class="right">
         <div class="title">{{ env.VITE_TITLE }}</div>
         <div class="form">
-          <el-form ref="form_dom" :model="form" status-icon :rules="rules" label-width="60px">
+          <el-form ref="form_dom" :model="form" status-icon :rules="rules" label-width="65px" label-position="left">
             <el-form-item label="账号" prop="username">
               <el-input @keyup.enter="login" v-model="form.username" size="large" autocomplete="off" />
             </el-form-item>
             <el-form-item label="密码" prop="password">
               <el-input @keyup.enter="login" v-model="form.password" type="password" size="large" autocomplete="off" />
             </el-form-item>
+            <el-form-item label="验证码" prop="captcha">
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-input @keyup.enter="login" v-model="form.captcha" size="large" autocomplete="off" />
+                </el-col>
+                <el-col :span="8" @click="get_captcha">
+                  <el-image style=" height: 40px" :src="'data:image/gif;base64,' + attrs.captha" fit="contain" />
+                  <!-- <img @click="get_captcha" :src="'data:image/gif;base64,' + attrs.captha" alt="" /> -->
+                </el-col>
+              </el-row>
+
+            </el-form-item>
           </el-form>
         </div>
         <div class="btn">
           <el-button class="login-btn" type="primary" @click="login">登录</el-button>
+          <el-button class="login-btn" type="primary" @click="signin">注册</el-button>
         </div>
       </div>
 
