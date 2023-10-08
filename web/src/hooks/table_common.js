@@ -114,6 +114,7 @@ export const get_all_menu_tree_ = (attrs) => {
       .get("/data/GetAllMenu/")
       .then((res) => {
         attrs.menus = Tree(res.data);
+        console.log(attrs.menus);
         store().all_menu = attrs.menus;
       });
   }

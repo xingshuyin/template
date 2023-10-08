@@ -76,8 +76,10 @@ def get_dept_permission(request, dept_id, permission):
 
 
 class Data(ViewSet):
+    model_name = "数据"
     # 文件上传接口
-    @action(['post'], url_path='upload', url_name='upload', detail=False, permission_classes=[LoginPermisssion])
+
+    @action(['post'], url_path='upload', url_name='文件上传', detail=False, permission_classes=[LoginPermisssion])
     def upload(self, request: Request):  # TODO:文件上传-上传接口
         print(request.FILES['file'].name)  # 上传文件以file为key值
         form = FileForm({'name': request.FILES['file'].name}, request.FILES)
@@ -106,25 +108,25 @@ class Data(ViewSet):
     #             return Response({'msg': '格式验证失败', 'data': {}})
 
     # 获取所有菜单 及对应接口
-    @action(['get'], url_path='GetAllMenu', url_name='GetAllMenu', detail=False, permission_classes=[SuperPermisssion])
+    @action(['get'], url_path='GetAllMenu', url_name='获取所有菜单', detail=False, permission_classes=[SuperPermisssion])
     def GetAllMenu(self, request: Request):
-        interfaces = MyQuerySet(menu_interface)
+        interfaces = MyQuerySet(interface)
         menus = list(MyQuerySet(menu).values())
-        for i in menus:
-            i['interfaces'] = list(interfaces.filter(menu__id=i['id']).values())
+        # for i in menus:
+        #     i['interfaces'] = list(interfaces.filter(menu__id=i['id']).values())
         return Response(menus, status=200)
 
     # 获取角色权限 及接口权限
-    @action(['get'], url_path='GetRolePermision', url_name='GetRolePermision', detail=False, permission_classes=[LoginPermisssion])
+    @action(['get'], url_path='GetRolePermision', url_name='获取角色权限', detail=False, permission_classes=[LoginPermisssion])
     def GetRolePermision(self, request: Request):
         role_id = request.GET.get('role_id')
         ro = role.objects.get(id=role_id)
         menus = [i.id for i in ro.menu.all()]
-        interfaces = [i.id for i in ro.menu_interface.all()]
+        interfaces = [i.id for i in ro.interface.all()]
         return Response({'interfaces': interfaces, 'menus': menus, 'permission': ro.permission}, status=200)
 
     # 设置角色权限
-    @action(['post'], url_path='SetRolePermision', url_name='SetRolePermision', detail=False, permission_classes=[SuperPermisssion, UrlPermisssion])
+    @action(['post'], url_path='SetRolePermision', url_name='设置角色权限', detail=False, permission_classes=[SuperPermisssion, UrlPermisssion])
     def SetRolePermision(self, request: Request):
         interfaces = request.data['interfaces']
         permission = request.data['permission']
@@ -133,12 +135,12 @@ class Data(ViewSet):
         ro = role.objects.get(id=role_id)
         ro.permission = permission
         ro.menu.set(menus)  # TODO:request-多对多 覆盖值
-        ro.menu_interface.set(interfaces)
+        ro.interface.set(interfaces)
         ro.save()
         return Response({'detail': '设置成功'}, status=200)
 
     # 获取菜单
-    @action(['get'], url_path='GetMenu', url_name='GetMenu', detail=False, permission_classes=[LoginPermisssion])
+    @action(['get'], url_path='GetMenu', url_name='获取菜单', detail=False, permission_classes=[LoginPermisssion])
     def GetMenu(self, request: Request):
         # try:
         user = request.user
@@ -155,7 +157,7 @@ class Data(ViewSet):
         return Response(list(menus), status=200)
 
     # 获取角色列表
-    @action(['get'], url_path='GetAllRoleDict', url_name='GetAllRoleDict', detail=False, permission_classes=[LoginPermisssion])
+    @action(['get'], url_path='GetAllRoleDict', url_name='获取角色列表', detail=False, permission_classes=[LoginPermisssion])
     def GetAllRoleDict(self, request: Request):
         filter_dict = request.GET.dict()
         roles = MyQuerySet(role).filter(**filter_dict).values(
@@ -165,7 +167,7 @@ class Data(ViewSet):
         return Response({i['id']: i for i in list(roles)}, 200)
 
     # 获取用户信息
-    @action(['get'], url_path='get_userinfo', url_name='get_userinfo', detail=False, permission_classes=[LoginPermisssion])
+    @action(['get'], url_path='get_userinfo', url_name='获取用户信息', detail=False, permission_classes=[LoginPermisssion])
     def get_userinfo(self, request: Request):
         user = request.user
         r = model_to_dict(user)
@@ -174,7 +176,7 @@ class Data(ViewSet):
         for role_ in role_list:
             # 判断用户是否为超级管理员角色/如果拥有[全部数据权限]则返回所有数据
             role_item = role.objects.get(id=role_)
-            interfaces.extend(list(role_item.menu_interface.all().values_list('key')))
+            interfaces.extend(list(role_item.interface.all().values_list('key')))
         interfaces = list(set([i[0] for i in interfaces]))
         r['interfaces'] = interfaces
         del r['password']
@@ -182,7 +184,7 @@ class Data(ViewSet):
         return Response(r, status=200)
 
     # 修改密码
-    @action(['post'], url_path='change_password', url_name='change_password', detail=False, permission_classes=[LoginPermisssion])
+    @action(['post'], url_path='change_password', url_name='修改密码', detail=False, permission_classes=[LoginPermisssion])
     def change_password(self, request: Request):
         user = request.user
         new_password = request.data.get("new_password")
@@ -197,7 +199,7 @@ class Data(ViewSet):
             return Response({'detail': '旧密码错误'}, status=400)
 
     # 获取压缩图片
-    @action(['get'], url_path='zip_img', url_name='zip_img', detail=True, permission_classes=[])
+    @action(['get'], url_path='zip_img', url_name='获取压缩图片', detail=True, permission_classes=[])
     def zip_img(self, request: Request, pk):
         p = str(Path(__file__).resolve().parent.parent.parent).replace("\\", "/")
         zip_path = f'{p}/media/img_zip/{pk}.jpg'
@@ -212,7 +214,7 @@ class Data(ViewSet):
         # return HttpResponse(r.read(), content_type='image/jpg')
 
     # TODO:临时文件下载
-    @action(['get'], url_path='temp', url_name='temp', detail=True, permission_classes=[])
+    @action(['get'], url_path='temp', url_name='临时文件下载', detail=True, permission_classes=[])
     def temp(self, request: Request, pk):
         response = HttpResponse(content_type='application/octet-stream')
         zip_file = zipfile.ZipFile(response, 'w')
@@ -224,18 +226,18 @@ class Data(ViewSet):
         return response
 
     # 生成接口
-    @action(['get'], url_path='init_permision', detail=False, url_name='init_permision', permission_classes=[SuperPermisssion])
+    @action(['get'], url_path='init_permision', detail=False, url_name='生成接口', permission_classes=[SuperPermisssion])
     def init_permision(self, request: Request):
         menus = menu.objects.all()
         for m in menus:
             n = m._meta.object_name
             for i in [['add', '添加', 1, "/" + m.name + "/"], ['delete', '删除', 3, "/" + m.name + "/{id}/"], ['put', '修改', 2, "/" + m.name + "/{id}/"], ['list', '查询', 0, "/" + m.name + "/"]]:
-                menu_interface.objects.update_or_create(defaults={'name': m.label + '_' + i[1], 'key': m.name + '_' + i[0], 'method': i[2]},
-                                                        name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
+                interface.objects.update_or_create(defaults={'name': m.label + '_' + i[1], 'key': m.name + '_' + i[0], 'method': i[2]},
+                                                   name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
         return Response({'detail': '接口初始化成功'}, status=200)
 
     # 注册
-    @action(['post'], url_path='signin', url_name='signin', detail=False, permission_classes=[], authentication_classes=[])
+    @action(['post'], url_path='signin', url_name='注册', detail=False, permission_classes=[], authentication_classes=[])
     def signin(self, request: Request):
         captcha = request.data.get("captcha")
         if captcha and captcha.lower() == cache.get('captcha-' + request.META.get('REMOTE_ADDR')).lower():
@@ -256,7 +258,7 @@ class Data(ViewSet):
 
     # 生成验证码
     @ratelimit(key='ip', rate='1/s')
-    @action(['get'], url_path='captcha', url_name='captcha', detail=False, permission_classes=[], authentication_classes=[])
+    @action(['get'], url_path='captcha', url_name='生成验证码', detail=False, permission_classes=[], authentication_classes=[])
     def captcha(self, request: Request):
 
         list = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',

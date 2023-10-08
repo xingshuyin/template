@@ -14,6 +14,11 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'root.settings'  # 设置项目的配置�
 django.setup()  # 加载项目配置
 # TODO:初始化数据
 from system.models import *
+from system.views.data import Data
+from system.urls import urlpatterns
+from django.urls import get_resolver, resolve
+# resolver = get_resolver()
+# patterns = resolver.url_patterns
 
 
 def init_user():
@@ -81,9 +86,9 @@ def init_menu():
             'parent_id': 1,
             'label': '接口管理',
             'icon': 'WindPower',
-            'component': 'system/menu_interface.vue',
-            'name': 'menu_interface',
-            'path': 'menu_interface',
+            'component': 'system/interface.vue',
+            'name': 'interface',
+            'path': 'interface',
             'sort': 54,
             'is_link': False,
             'is_catalog': False
@@ -200,7 +205,7 @@ def init_menu():
     ]
     for i in l:
         print(i)
-        menu.objects.get_or_create(defaults=i, **i)
+        menu.objects.update_or_create(defaults=i, **i)
 
 
 METHOD_CHOICES = (
@@ -210,24 +215,74 @@ METHOD_CHOICES = (
     (3, "DELETE"),
 )
 
+METHOD_NAMES = {
+    'get': '查询',
+    'post': '添加',
+    'put': '修改',
+}
+METHOD_NAMES_DETAIL = {
+    'get': '获取',
+    'put': '修改',
+    'delete': '删除',
+}
+METHOD_NUMS = {
+    'get': 0,
+    'put': 2,
+    'post': 1,
+    'delete': 3,
+}
 
-def init_menu_interface():
+
+def init_interface():
+    # print(urlpatterns[0].pattern,urlpatterns[0].name )
+
+    for pattern in urlpatterns:
+        # print(pattern.callback.cls.model_name)
+        # match = resolve(pattern.pattern)
+        if "(?P<pk>[^/.]+)" in str(pattern.pattern):
+            names = METHOD_NAMES_DETAIL
+        else:
+            names = METHOD_NAMES
+
+        if pattern.callback.cls == Data:
+            for i in pattern.callback.actions.keys():
+                method_num = METHOD_NUMS[i]
+                model_name_ = 'data'
+                print(pattern.name, model_name_ + '-' + pattern.callback.actions[i], pattern.pattern, pattern.callback.cls.model_name, method_num)
+
+                interface.objects.update_or_create(defaults={'name': pattern.name, 'key': model_name_ + '-' + pattern.callback.actions[i], 'method': method_num, 'path': pattern.pattern, 'model': model_name_, 'model_name': pattern.callback.cls.model_name},
+                                                   name=pattern.name, key=model_name_ + '-' + pattern.callback.actions[i], method=method_num, path=pattern.pattern, model=model_name_)
+        else:
+            for i in pattern.callback.actions.keys():
+                if i in names.keys():
+                    if 'list' in pattern.name or 'detail' in pattern.name:
+                        method_name = names[i]
+                    else:
+                        method_name = pattern.name.split('-')[-1]
+                    method_num = METHOD_NUMS[i]
+                    model_name = pattern.callback.cls.model_name
+                    model_name_ = pattern.callback.cls.queryset.model._meta.model_name
+                    print(model_name + '-' + method_name, model_name_ + '-' + pattern.callback.actions[i], pattern.pattern, model_name, method_num)
+                    interface.objects.update_or_create(defaults={'name': model_name + '-' + method_name, 'key': model_name_ + '-' + pattern.callback.actions[i], 'method': method_num, 'path': pattern.pattern, 'model': model_name_, 'model_name': model_name},
+                                                       name=model_name + '-' + method_name, key=model_name_ + '-' + pattern.callback.actions[i], method=method_num, path=pattern.pattern, model=model_name_)
+
+    return
     menus = menu.objects.all()
     for m in menus:
         n = m._meta.object_name
         print(m.name)
 
         for i in [['add', '添加', 1, "/" + m.name + "/"], ['delete', '删除', 3, "/" + m.name + "/{id}/"], ['put', '修改', 2, "/" + m.name + "/{id}/"], ['list', '查询', 0, "/" + m.name + "/"]]:
-            menu_interface.objects.get_or_create(defaults={'name': m.label + '_' + i[1], 'key': m.name + '_' + i[0], 'method': i[2], 'path': i[3], 'menu': m},
-                                                 name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
+            interface.objects.update_or_create(defaults={'name': m.label + '_' + i[1], 'key': m.name + '_' + i[0], 'method': i[2], 'path': i[3], 'menu': m},
+                                               name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
 
 
 def init_role():
     for i in [{'id': 1, "name": '管理员', "key": 'admin', 'is_admin': True, 'permission': 3},
               {'id': 2, "name": '匿名用户', "key": 'AnonymousUser', 'is_admin': False, 'permission': 0}]:
-        r = role.objects.get_or_create(defaults=i, **i)
+        r = role.objects.update_or_create(defaults=i, **i)
         if i['is_admin']:
-            r[0].menu_interface.set(menu_interface.objects.all())
+            r[0].interface.set(interface.objects.all())
     admin = user.objects.get(id=1)
     admin.role = [1]
     admin.save()
@@ -258,11 +313,12 @@ def init_spider():
 
 
 def init():
-    init_user()
-    init_menu()
-    init_menu_interface()
-    init_role()
-    init_area()
+
+    # init_user()
+    # init_menu()
+    init_interface()
+    # init_role()
+    # init_area()
     # init_spider()
 
 

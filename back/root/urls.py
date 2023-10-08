@@ -15,7 +15,7 @@ Including another URLconf
 """
 from root import settings
 from django.conf.urls.static import static
-from django.urls import path, include
+from django.urls import path, include, URLPattern
 
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi

@@ -10,7 +10,8 @@
                 @click="mult_delete_(`/${attrs.base_url}/mult_destroy/`, attrs?.selects, get_data)"
                 v-if="attrs?.selects?.length > 0">批量删除
             </el-button>
-            <el-button icon="Plus" circle @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'" />
+            <el-button v-if="attrs.can_create" icon="Plus" circle
+                @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'" />
             <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
         </div>
     </div>
@@ -68,6 +69,15 @@
 import { Tree } from '../../utils/data';
 import { get_data_, select_, mult_delete_, delete_item_, sort_, submit_ } from '../../hooks/table_common'
 import rest from '../../utils/rest';
+import store from '../../store';
+store().get_userinfo().then((res) => {
+    if (res.interfaces.indexOf(attrs.base_url + '-mult_update') != -1) {
+        attrs.can_mult_update = true
+    }
+    if (res.interfaces.indexOf(attrs.base_url + '-create') != -1) {
+        attrs.can_create = true
+    }
+})
 const attrs = reactive({
     columns: [
         { prop: 'name', type: 'text', label: '部门名称', size: 'small', align: "left", show: true },
@@ -85,6 +95,8 @@ const attrs = reactive({
     adding: false,
     expandedRowKeys: [],
     add_form: {},
+    can_create: false,
+    can_mult_update: false,
 })
 const special_form = reactive({
     range: [undefined, undefined],

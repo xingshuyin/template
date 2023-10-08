@@ -13,7 +13,7 @@
                 v-if="attrs.selects.length > 0">批量删除
             </el-button>
             <el-button icon="Refresh" circle @click="init_permision" />
-            <el-button icon="Plus" circle
+            <el-button v-if="attrs.can_create" icon="Plus" circle
                 @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'; attrs.submit_type = 'add'" />
             <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
         </div>
@@ -55,10 +55,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="菜单">
-                <el-cascader :options="attrs.menus" v-model="attrs.add_form.menu"
-                    :props="{ checkStrictly: true, value: 'id', label: 'label' }" checkStrictly clearable
-                    :show-all-levels="false" :getCheckedNodes="true"
-                    @change="(value) => { attrs.add_form.menu = value.slice(-1)[0] }" />
+                <el-input v-model="attrs.add_form.menu" />
             </el-form-item>
         </el-form>
         <template #footer>
@@ -73,9 +70,17 @@
 </template>
 
 <script setup>
-import store from '../../store';
 import r from '../../utils/request';
 import { get_data_, select_, mult_delete_, sort_, submit_, get_all_role_, get_all_menu_tree_, get_all_interface_ } from '../../hooks/table_common'
+import store from '../../store';
+store().get_userinfo().then((res) => {
+    if (res.interfaces.indexOf(attrs.base_url + '-mult_update') != -1) {
+        attrs.can_mult_update = true
+    }
+    if (res.interfaces.indexOf(attrs.base_url + '-create') != -1) {
+        attrs.can_create = true
+    }
+})
 const form_dom = ref()
 const attrs = reactive({
     columns: [
@@ -91,10 +96,10 @@ const attrs = reactive({
             }
         },
         { prop: 'path', type: 'text', width: 180, label: '接口地址', size: 'small', align: "center", show: true },
-        { prop: 'menu_label', type: 'text', width: 150, label: '菜单', size: 'small', align: "center", show: true },
+        { prop: 'menu', type: 'text', width: 150, label: '菜单', size: 'small', align: "center", show: true },
         { prop: 'create_time', type: 'text', width: 160, label: '创建时间', size: 'small', align: "center", show: true },
     ],
-    base_url: 'menu_interface',
+    base_url: 'interface',
     selects: [],
     data: [],
     total: 0,
@@ -102,6 +107,8 @@ const attrs = reactive({
     adding: false,
     expandedRowKeys: [],
     add_form: {},
+    can_create: false,
+    can_mult_update: false,
 })
 const special_form = reactive({
     range: [undefined, undefined],

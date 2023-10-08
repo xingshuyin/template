@@ -178,7 +178,7 @@ class menu(base_model):
         ordering = ("sort", )
 
 
-class menu_interface(base_model):
+class interface(base_model):
     name = models.CharField(max_length=50, db_comment='接口名称')
     key = models.CharField(max_length=50, db_comment="标识符", null=True)
     METHOD_CHOICES = (
@@ -189,11 +189,12 @@ class menu_interface(base_model):
     )
     method = models.IntegerField(choices=METHOD_CHOICES, db_comment='请求方式')
     path = models.CharField(max_length=100, db_comment="接口地址")
-    menu = models.ForeignKey(menu, on_delete=models.CASCADE)
+    model = models.CharField(max_length=100, db_comment="接口模型")
+    model_name = models.CharField(max_length=100, db_comment="接口模型名称")
 
     class Meta:
-        db_table = "menu_interface"
-        verbose_name = "菜单接口"
+        db_table = "interface"
+        verbose_name = "接口"
         db_table_comment = verbose_name
 
 
@@ -209,7 +210,7 @@ class role(base_model):
     )
     permission = models.IntegerField(choices=PERMISSION_CHOICES, db_comment="数据权限范围", default=0)
     menu = models.ManyToManyField(menu, blank=True)
-    menu_interface = models.ManyToManyField(menu_interface, blank=True)
+    interface = models.ManyToManyField(interface, blank=True)
     is_admin = models.BooleanField(default=False, db_comment='是否为管理员')
 
     class Meta:

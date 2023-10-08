@@ -67,17 +67,16 @@
         <el-cascader v-if="permission == 4" v-model="custom_dept" :options="attrs.all_dept" clearable
             :show-all-levels="false"
             :props="{ emitPath: false, multiple: true, checkStrictly: true, value: 'id', label: 'name', }" />
-        <h3 style="margin-top: 20px;">接口权限</h3>
         <div class="permissions-body common-scroll">
-            <el-tree ref="interface_tree" :data="attrs.interfaces_tree" node-key="id" show-checkbox check-strictly
-                default-expand-all @check="check">
+            <el-tree ref="tree" :data="attrs.menus" node-key="id" show-checkbox check-strictly default-expand-all
+                @check="check">
                 <template #default="{ node, data }">
                     <div class="permission-item">
-                        <div class="permission-item-label">{{ data.name }}</div>
+                        <div class="permission-item-label">{{ data.label }}</div>
                         <div class="permission-item-gap">|</div>
                         <div class="permission-item-interface">
-                            <el-checkbox-group v-model="interface_">
-                                <el-checkbox v-for="i in data.childrens" :key="i.id" :label="i.id">
+                            <el-checkbox-group v-model="interface">
+                                <el-checkbox v-for="i in data.interfaces" :key="i.id" :label="i.id">
                                     {{ i.name }}
                                 </el-checkbox>
                             </el-checkbox-group>
@@ -86,15 +85,7 @@
                 </template>
             </el-tree>
         </div>
-        <el-divider />
-        <h3>菜单权限</h3>
-        <el-tree ref="menu_tree" :data="attrs.menus" node-key="id" show-checkbox check-strictly default-expand-all>
-            <template #default="{ node, data }">
-                <div class="permission-item">
-                    <div class="permission-item-label">{{ data.label }}</div>
-                </div>
-            </template>
-        </el-tree>
+
         <template #footer>
             <span class="dialog-footer">
                 <el-button @click="attrs.show_permissions = false">取消</el-button>
@@ -111,7 +102,6 @@
 import { get_data_, select_, mult_delete_, sort_, submit_, get_all_menu_tree_, get_all_dept_tree_ } from '../../hooks/table_common'
 import { Tree, permission_type } from '../../utils/data';
 import r from '../../utils/request';
-import rest from '../../utils/rest';
 import store from '../../store';
 store().get_userinfo().then((res) => {
     if (res.interfaces.indexOf(attrs.base_url + '-mult_update') != -1) {
@@ -137,12 +127,10 @@ const attrs = reactive({
     adding: false,
     show_permissions: false,
 
-
     expandedRowKeys: [],
     add_form: {},
     can_create: false,
     can_mult_update: false,
-    interfaces_tree: [],
 })
 const special_form = reactive({
     range: [undefined, undefined],
@@ -165,7 +153,6 @@ watch([form, special_form], () => {
     }
     get_data()
 })
-
 const get_data = () => {
     get_data_(`/${attrs.base_url}/`, { create_start: special_form.range[0], create_end: special_form.range[1], ...form }, attrs, (a) => { a.data = Tree(a.data) })
 }
@@ -179,54 +166,23 @@ const validate = () => {
         }
     })
 }
-rest.list('interface', { page: 1, limit: 999999 }, null, null, (res) => {
-    let d = res.data.data
-    let menus = {}
-    for (let i = 0; i < d.length; i++) {
-        if (Object.keys(menus).indexOf(d[i].model) == -1) {
-            menus[d[i].model] = { id: d[i].model, name: d[i].model_name }
-        }
-    }
-    menus = Object.values(menus)
-    let r = []
-    for (let i = 0; i < menus.length; i++) {
-        let menu = {
-            id: menus[i].id,
-            name: menus[i].name,
-            childrens: [],
-        }
-        for (let j = 0; j < d.length; j++) {
-            if (d[j].model == menu.id) {
-                menu.childrens.push({
-                    id: d[j].id,
-                    name: d[j].name,
-                    checked: false,
-                    disabled: false,
-                })
-            }
-        }
-        r.push(menu)
-    }
-    attrs.interfaces_tree = r
-    console.log(r);
-})
 
-const interface_tree = ref()
-const menu_tree = ref()
-const interface_ = ref([])
+
+const tree = ref()
+const interface = ref([])
 const permission = ref()
 const custom_dept = ref()
 const GetRolePermision = () => {
     r().get('/data/GetRolePermision/', { params: { role_id: attrs.role_id } }).then((res) => {
         console.log('setCheckedKeys')
-        menu_tree.value.setCheckedKeys(res.data.menus, true)
-        interface_.value = res.data.interfaces
+        tree.value.setCheckedKeys(res.data.menus, true)
+        interface.value = res.data.interfaces
         permission.value = res.data.permission
     })
 }
 
 const SetRolePermision = () => {
-    r().post('/data/SetRolePermision/', { custom_dept: custom_dept.value, menus: menu_tree.value.getCheckedKeys(), interfaces: interface_.value, role_id: attrs.role_id, permission: permission.value }).then((res) => {
+    r().post('/data/SetRolePermision/', { custom_dept: custom_dept.value, menus: tree.value.getCheckedKeys(), interfaces: interface.value, role_id: attrs.role_id, permission: permission.value }).then((res) => {
         attrs.show_permissions = false
         if (res.status == 200) {
             ElMessage({
@@ -239,23 +195,22 @@ const SetRolePermision = () => {
 }
 
 const check = (node) => {
-    let checked = interface_tree.value.getCheckedKeys()
-    console.log(node, checked, interface_)
+    let checked = tree.value.getCheckedKeys()
+    console.log(node, checked)
     if (checked.indexOf(node.id) != -1) {
-        node.childrens.forEach(i => {
-            if (interface_.value.indexOf(i.id) == -1) {
-                interface_.value.push(i.id)
+        node.interfaces.forEach(i => {
+            if (interface.value.indexOf(i.id) == -1) {
+                interface.value.push(i.id)
             }
         });
     } else {
-        node.childrens.forEach(i => {
-            interface_.value.splice(interface_.value.indexOf(i.id), 1)
+        node.interfaces.forEach(i => {
+            interface.value.splice(interface.value.indexOf(i.id), 1)
         });
     }
-    // console.log(interface_);
 
 }
-// get_all_dept_tree_(attrs)
+get_all_dept_tree_(attrs)
 get_all_menu_tree_(attrs)
 
 
@@ -263,16 +218,11 @@ get_all_menu_tree_(attrs)
 
 <style scoped lang="scss">
 :deep(.el-tree-node__content) {
-    min-height: 50px;
-    height: fit-content;
-
-    .el-checkbox {
-        // align-items: flex-start;
-    }
+    height: 50px;
 }
 
 .permissions-body {
-    // height: 100%;
+    height: 100%;
     width: 100%;
     overflow: auto;
 
@@ -293,17 +243,6 @@ get_all_menu_tree_(attrs)
             display: flex;
             align-items: center;
             padding-right: 10px;
-        }
-
-        .permission-item-interface {
-            :deep(.el-checkbox-group) {
-                display: flex;
-                flex-direction: row;
-                // align-items: center;
-                // justify-content: center;
-                flex-wrap: wrap;
-            }
-
         }
     }
 }

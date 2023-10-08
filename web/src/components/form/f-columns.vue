@@ -13,10 +13,10 @@ const attrs_ = reactive({
     can_put: false,
 })
 store().get_userinfo().then((res) => {
-    if (res.interfaces.indexOf(props.attrs.base_url + '_delete') != -1) {
+    if (res.interfaces.indexOf(props.attrs.base_url + '-destroy') != -1) {
         attrs_.can_delete = true
     }
-    if (res.interfaces.indexOf(props.attrs.base_url + '_put') != -1) {
+    if (res.interfaces.indexOf(props.attrs.base_url + '-update') != -1) {
         attrs_.can_put = true
     }
 })

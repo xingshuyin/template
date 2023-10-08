@@ -72,7 +72,7 @@ type MenuInterface struct {
 }
 
 func (u *MenuInterface) TableName() string { // 数据库表名
-	return "menu_interface"
+	return "interface"
 }
 
 type Role struct {
@@ -80,7 +80,7 @@ type Role struct {
 	Key           string          `gorm:"size:255;not null;comment:角色标识;"`
 	Permisson     int             `gorm:"size:255;comment:请求方式;"`
 	Menu          []Menu          `gorm:"many2many:role_menu;"`
-	MenuInterface []MenuInterface `gorm:"many2many:role_menu_interface;"`
+	MenuInterface []MenuInterface `gorm:"many2many:role_interface;"`
 	IsAdmin       bool            `gorm:"default:false;comment:是否管理员;"`
 	Model
 }

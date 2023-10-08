@@ -28,7 +28,7 @@ class UrlPermisssion(permissions.BasePermission):
         else:
             roles = role.objects.filter(id__in=request.user.role)
         for i in roles:
-            for j in i.menu_interface.all():
+            for j in i.interface.all():
                 if re.match(j.path.replace('{id}', '.*?'), request.path.lower()):  # 之所以id用{id}代表是因为drf_yasg生成的接口数据就是这样的
                     return True
         return False

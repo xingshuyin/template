@@ -19,7 +19,8 @@
                 @click="mult_delete_(`/${attrs.base_url}/mult_destroy/`, attrs?.selects, get_data)"
                 v-if="attrs?.selects?.length > 0">批量删除
             </el-button>
-            <el-button @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'" icon="Plus" circle />
+            <el-button v-if="attrs.can_create" @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'"
+                icon="Plus" circle />
             <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
             <el-button icon="Download" circle
                 @click="export_data_(attrs.base_url, { create_start: special_form.range[0], create_end: special_form.range[1], ...form })" />
@@ -75,7 +76,15 @@
 <script setup>
 import { get_data_, select_, mult_delete_, sort_, submit_, export_data_ } from '../../hooks/table_common'
 import r from '../../utils/request';
-import store from "../../store/index";
+import store from '../../store';
+store().get_userinfo().then((res) => {
+    if (res.interfaces.indexOf(attrs.base_url + '-mult_update') != -1) {
+        attrs.can_mult_update = true
+    }
+    if (res.interfaces.indexOf(attrs.base_url + '-create') != -1) {
+        attrs.can_create = true
+    }
+})
 const attrs = reactive({
     columns: [
         { type: 'text', label: '名称', prop: 'name', align: "left", show: true },
@@ -94,6 +103,8 @@ const attrs = reactive({
 
     expandedRowKeys: [],
     add_form: {},
+    can_create: false,
+    can_mult_update: false,
 })
 const special_form = reactive({
     range: [undefined, undefined],

@@ -233,10 +233,6 @@ def get_extra_value(request, queryset):
     if 'dept' in fields:
         queryset = queryset.annotate(dept_name=F("dept__name"))
         fields.append('dept_name')
-    if model_name in ['menu_interface']:
-        queryset = queryset.annotate(menu_name=F(
-            'menu__name'), menu_label=F('menu__label'))
-        fields.extend(['menu_name', 'menu_label'])
     if model_name in ['menu']:
         queryset = queryset.annotate(parent_label=F("parent__label"))
         fields.append('parent_label')
@@ -369,7 +365,7 @@ def destroy(self, request, *args, **kwargs):
 
 
 # 多项更新
-@action(['PUT'], url_path='mult_update', url_name='mult_update', detail=False)
+@action(['PUT'], url_path='mult_update', url_name='多项更新', detail=False)
 def mult_update(self, request: HttpRequest, *args, **kwargs):
     id_list = request.GET.getlist('id[]')
     querys = request.POST.dict()
@@ -380,7 +376,7 @@ def mult_update(self, request: HttpRequest, *args, **kwargs):
 
 
 # TODO:数据导出
-@action(['POST'], url_path='export', url_name='export', detail=False)
+@action(['POST'], url_path='export', url_name='数据导出', detail=False)
 def export(self, request: HttpRequest, *args, **kwargs):
     filter_dict = request.data
     temp_dict = request.data
@@ -506,56 +502,56 @@ view_list = [
         "url": "dept",  # restful链接基础url
         "label": "部门",
         # 对应视图集
-        "viewset": model_viewset(dept, (ModelViewSet, ), (ModelSerializer, ))
+        "viewset": model_viewset(dept, (ModelViewSet, ), (ModelSerializer, ), model_name="部门")
     },
     {
         "url": "file",
         "label": "文件",
-        "viewset": model_viewset(file, (ModelViewSet, ), (ModelSerializer, ))
+        "viewset": model_viewset(file, (ModelViewSet, ), (ModelSerializer, ), model_name="文件")
     },
     {
         "url": "menu",
         "label": "菜单",
-        "viewset": model_viewset(menu, (ModelViewSet, ), (ModelSerializer, ))
+        "viewset": model_viewset(menu, (ModelViewSet, ), (ModelSerializer, ), model_name="菜单")
     },
     {
         "url": "role",
         "label": "角色",
-        "viewset": model_viewset(role, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[SuperPermisssion])
+        "viewset": model_viewset(role, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[SuperPermisssion], model_name="角色")
     },
     {
         "url": "user",
         "label": "用户",
-        "viewset": model_viewset(user, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[SuperPermisssion])
+        "viewset": model_viewset(user, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[SuperPermisssion], model_name="用户")
     },
     {
         "url": "log",
         "label": "日志",
-        "viewset": model_viewset(log, (ModelViewSet, ), (ModelSerializer, ))
+        "viewset": model_viewset(log, (ModelViewSet, ), (ModelSerializer, ), model_name="日志")
     },
     {
         "url": "area",
         "label": "区域",
-        "viewset": model_viewset(area, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[])
+        "viewset": model_viewset(area, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[], model_name="区域")
     },
     {
-        "url": "menu_interface",
+        "url": "interface",
         "label": "接口",
-        "viewset": model_viewset(menu_interface, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[SuperPermisssion])
+        "viewset": model_viewset(interface, (ModelViewSet, ), (ModelSerializer, ), permission_classes=[SuperPermisssion], model_name="接口")
     },
     {
         "url": "enterprise",
         "label": "企业",
-        "viewset": model_viewset(enterprise, (ModelViewSet, ), (ModelSerializer, ))
+        "viewset": model_viewset(enterprise, (ModelViewSet, ), (ModelSerializer, ), model_name="企业")
     },
     {
         "url": "article",
         "label": "文章",
-        "viewset": model_viewset(article, (ModelViewSet, ), (ModelSerializer, ))
+        "viewset": model_viewset(article, (ModelViewSet, ), (ModelSerializer, ), model_name="文章")
     },
     {
         "url": "spider",
         "label": "爬虫",
-        "viewset": model_viewset(spider, (ModelViewSet, ), (ModelSerializer, ))
+        "viewset": model_viewset(spider, (ModelViewSet, ), (ModelSerializer, ), model_name="爬虫")
     },
 ]
