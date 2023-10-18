@@ -2,7 +2,7 @@ from rest_framework import permissions
 from django.contrib.auth.models import AnonymousUser
 import re
 from .models import user, role
-
+from .utils import METHOD_NUMS
 white_api = ['/']
 
 
@@ -23,13 +23,13 @@ class UrlPermisssion(permissions.BasePermission):
             return True
         if type(request.user) == AnonymousUser:
             roles = role.objects.filter(key='AnonymousUser')
-        elif request.user.is_super:
-            return True
+        # elif request.user.is_super:
+        #     return True
         else:
             roles = role.objects.filter(id__in=request.user.role)
         for i in roles:
             for j in i.interface.all():
-                if re.match(j.path.replace('{id}', '.*?'), request.path.lower()):  # 之所以id用{id}代表是因为drf_yasg生成的接口数据就是这样的
+                if re.match(j.path, request.path.lower().lstrip('/'), re.IGNORECASE) and j.method == METHOD_NUMS[request.method.lower()]:
                     return True
         return False
 

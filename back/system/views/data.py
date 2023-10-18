@@ -1,5 +1,6 @@
 from pathlib import Path
 import zipfile
+from django.db.models import Q, F
 from django.forms import CharField, model_to_dict
 from system.models import *
 from django.utils._os import safe_join
@@ -25,7 +26,9 @@ from PIL import Image
 import base64
 from captcha.image import ImageCaptcha
 from random import randint
-from ..utils import ratelimit
+from ..utils import METHOD_NAMES, METHOD_NAMES_DETAIL, METHOD_NUMS, ratelimit
+import system.urls as urls
+from django.db import transaction
 
 
 def ranges():
@@ -170,7 +173,8 @@ class Data(ViewSet):
     @action(['get'], url_path='get_userinfo', url_name='获取用户信息', detail=False, permission_classes=[LoginPermisssion])
     def get_userinfo(self, request: Request):
         user = request.user
-        r = model_to_dict(user)
+        user_info_ = user_info.objects.filter(user=user).first()
+        user_info_ = user_info_.model_to_dict(deep=0)
         role_list = user.role
         interfaces = []
         for role_ in role_list:
@@ -178,10 +182,10 @@ class Data(ViewSet):
             role_item = role.objects.get(id=role_)
             interfaces.extend(list(role_item.interface.all().values_list('key')))
         interfaces = list(set([i[0] for i in interfaces]))
-        r['interfaces'] = interfaces
-        del r['password']
-        del r['role']
-        return Response(r, status=200)
+        user_info_['interfaces'] = interfaces
+        user_info_['is_super'] = user.is_super
+        user_info_['username'] = user.username
+        return Response(user_info_, status=200)
 
     # 修改密码
     @action(['post'], url_path='change_password', url_name='修改密码', detail=False, permission_classes=[LoginPermisssion])
@@ -226,14 +230,51 @@ class Data(ViewSet):
         return response
 
     # 生成接口
+    @transaction.atomic
     @action(['get'], url_path='init_permision', detail=False, url_name='生成接口', permission_classes=[SuperPermisssion])
     def init_permision(self, request: Request):
-        menus = menu.objects.all()
-        for m in menus:
-            n = m._meta.object_name
-            for i in [['add', '添加', 1, "/" + m.name + "/"], ['delete', '删除', 3, "/" + m.name + "/{id}/"], ['put', '修改', 2, "/" + m.name + "/{id}/"], ['list', '查询', 0, "/" + m.name + "/"]]:
-                interface.objects.update_or_create(defaults={'name': m.label + '_' + i[1], 'key': m.name + '_' + i[0], 'method': i[2]},
-                                                   name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
+
+
+        for pattern in urls.urlpatterns:
+            # print(pattern.callback.cls.model_name)
+            # match = resolve(pattern.pattern)
+            if "(?P<pk>[^/.]+)" in str(pattern.pattern):
+                names = METHOD_NAMES_DETAIL
+            else:
+                names = METHOD_NAMES
+
+            if pattern.callback.cls == Data:
+                print(pattern.callback.actions)
+                for i in pattern.callback.actions.keys():
+                    if i in names.keys():
+                        method_num = METHOD_NUMS[i]
+                        model_name_ = 'data'
+                        print(pattern.name, model_name_ + '-' + pattern.callback.actions[i],
+                              pattern.pattern, pattern.callback.cls.model_name, method_num)
+
+                        interface.objects.update_or_create(defaults={'name': pattern.name, 'key': model_name_ + '-' + pattern.callback.actions[i], 'method': method_num, 'path': pattern.pattern, 'model': model_name_, 'model_name': pattern.callback.cls.model_name},
+                                                           name=pattern.name, key=model_name_ + '-' + pattern.callback.actions[i], method=method_num, path=pattern.pattern, model=model_name_)
+            else:
+                for i in pattern.callback.actions.keys():
+                    if i in names.keys():
+                        if 'list' in pattern.name or 'detail' in pattern.name:
+                            method_name = names[i]
+                        else:
+                            method_name = pattern.name.split('-')[-1]
+                        method_num = METHOD_NUMS[i]
+                        model_name = pattern.callback.cls.model_name
+                        model_name_ = pattern.callback.cls.queryset.model._meta.model_name
+                        print(model_name + '-' + method_name, model_name_ + '-' +
+                              pattern.callback.actions[i], pattern.pattern, model_name, method_num)
+                        interface.objects.update_or_create(defaults={'name': model_name + '-' + method_name, 'key': model_name_ + '-' + pattern.callback.actions[i], 'method': method_num, 'path': pattern.pattern, 'model': model_name_, 'model_name': model_name},
+                                                           name=model_name + '-' + method_name, key=model_name_ + '-' + pattern.callback.actions[i], method=method_num, path=pattern.pattern, model=model_name_)
+
+        # menus = menu.objects.all()
+        # for m in menus:
+        #     n = m._meta.object_name
+        #     for i in [['add', '添加', 1, "/" + m.name + "/"], ['delete', '删除', 3, "/" + m.name + "/{id}/"], ['put', '修改', 2, "/" + m.name + "/{id}/"], ['list', '查询', 0, "/" + m.name + "/"]]:
+        #         interface.objects.update_or_create(defaults={'name': m.label + '_' + i[1], 'key': m.name + '_' + i[0], 'method': i[2]},
+        #                                             name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
         return Response({'detail': '接口初始化成功'}, status=200)
 
     # 注册
@@ -248,6 +289,7 @@ class Data(ViewSet):
                 return Response({"detail": "用户已存在"}, status=400)
             else:
                 u = user.objects.create(username=username, password=password)
+                u_info= user_info.objects.create(user=u)
                 u.set_password(u.password)
                 u.name = u.username
                 u.role.add(role.objects.get(key='normal'))
@@ -280,3 +322,93 @@ class Data(ViewSet):
         img_base64 = base64.b64encode(image.getvalue())
         print(chars)
         return Response({"data": img_base64, 'detail': '成功'}, status=200)
+
+
+    @action(['get'], url_path='follow', detail=False, url_name='follow', permission_classes=[])
+    def follow(self, request: Request):
+        user = request.user
+
+        type_ = request.GET.get('type')
+        followed = request.GET.get('followed')
+        print(followed, type(followed))
+        id = request.GET.get('id')
+        if type_ == 'user':
+            if followed == 'false':
+                user.user_info.follow_user.add(id)
+            elif followed == 'true':
+                user.follow_user.remove(id)
+
+        
+        return Response({'data': 'success'}, 200)
+    @action(['get'], url_path='view', detail=False, url_name='view', permission_classes=[])
+    def view(self, request: Request):
+        type_ = request.GET.get('type')
+        id = request.GET.get('id')
+        if type_ == 'article':
+            article_ = article.objects.get(id=id)
+            article_.view = article_.view + 1
+            article_.save()
+            return Response({'data': article_.view}, 200)
+        
+    @action(['get'], url_path='like', detail=False, url_name='like', permission_classes=[])
+    def like(self, request: Request):
+        user = request.user
+        type_ = request.GET.get('type')
+        liked = request.GET.get('liked')
+        id = request.GET.get('id')
+        if type_ == 'article':
+            if liked == 'false':
+                user.user_info.article_like.add(id)
+            elif liked == 'true':
+                user.user_info.article_like.remove(id)
+            return Response({'data': 'success'}, 200)   
+        else:
+            return Response({'data': 'like faild'}, 200)  
+    @action(['get'], url_path='collect', detail=False, url_name='collect', permission_classes=[])
+    def collect(self, request: Request):
+        user = request.user
+        type_ = request.GET.get('type')
+        collected = request.GET.get('collected')
+        id = request.GET.get('id')
+        if type_ == 'article':
+            if collected == 'false':
+                user.user_info.article_collect.add(id)
+            elif collected == 'true':
+                user.user_info.article_collect.remove(id)
+            return Response({'data': 'success'}, 200)       
+        else:
+            return Response({'data': 'collect faild'}, 200)  
+        
+
+    @action(['get'], url_path='article_comment', url_name='article_comment', detail=False, permission_classes=[], authentication_classes=[])
+    def article_comment(self, request: Request): # 评论列表
+        vid = request.GET.get('id')
+        page = int(request.GET.get('page'))
+        limit = int(request.GET.get('limit'))
+        queryset = MyQuerySet(article_comment).filter(article__id=vid, root=None).annotate(user_name=F('user__name'), user_icon=F('user__icon')).order_by(
+            '-create_time',
+            'root',
+        )
+        total = queryset.count()
+        queryset = queryset[(page - 1) * limit:page * limit]
+        r = []
+        for i in list(queryset.values()):
+            replys = MyQuerySet(article_comment).filter(root__id=i['id']).annotate(user_name=F('user__name'),
+                                                                                   user_icon=F('user__icon'),
+                                                                                   reply_user_name=F('reply__user__name'),
+                                                                                   reply_user_avatar=F('reply__user__icon')).order_by('-create_time')
+            i['replys'] = list(replys.values())
+            r.append(i)
+        return Response({'data': r, 'total': total})
+    
+    @action(['get'], url_path='comment', url_name='comment', detail=False, permission_classes=[])
+    def comment(self, request: Request): # 评论
+        user = request.user
+        filter_dict = request.GET.dict()
+        del filter_dict['media_type']
+        del filter_dict['media_id']
+        media_type = request.GET.get('media_type')
+        media_id = request.GET.get('media_id')
+        if media_type == 'article':
+            article_comment.objects.create(user_id=user.user_info.id, article_id=media_id, **filter_dict)
+        return Response({})

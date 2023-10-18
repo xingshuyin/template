@@ -43,12 +43,39 @@
 
     <el-dialog v-model="attrs.adding" class="add_form" :title="attrs.submit_type == 'add' ? '新增' : '编辑'" width="80%"
         :modal="false" fullscreen append-to-body>
-        <el-form :model="attrs.add_form" label-width="60px" :rules="rules" ref="form_dom">
+        <el-form :model="attrs.add_form" label-width="80px" :rules="rules" ref="form_dom">
             <el-form-item label="名称" prop="name">
                 <el-input v-model="attrs.add_form.name" />
             </el-form-item>
             <el-form-item label="标签" prop="tag">
                 <el-input v-model="attrs.add_form.tag" />
+            </el-form-item>
+            <el-form-item label="浏览数" prop="view">
+                <el-input v-model="attrs.add_form.view" />
+            </el-form-item>
+            <el-form-item label="点赞数" prop="like">
+                <el-input v-model="attrs.add_form.like" />
+            </el-form-item>
+            <el-form-item label="评论数" prop="comment">
+                <el-input v-model="attrs.add_form.comment" />
+            </el-form-item>
+            <el-form-item label="收藏数" prop="collect">
+                <el-input v-model="attrs.add_form.collect" />
+            </el-form-item>
+            <el-form-item label="是否删除" prop="is_delete">
+                <el-switch v-model="attrs.add_form.is_delete" />
+            </el-form-item>
+            <el-form-item label="是否置顶" prop="is_top">
+                <el-switch v-model="attrs.add_form.is_top" />
+            </el-form-item>
+            <el-form-item label="是否热门" prop="is_hot">
+                <el-switch v-model="attrs.add_form.is_hot" />
+            </el-form-item>
+            <el-form-item label="是否原创" prop="is_original">
+                <el-switch v-model="attrs.add_form.is_original" />
+            </el-form-item>
+            <el-form-item label="是否推荐" prop="is_recommend">
+                <el-switch v-model="attrs.add_form.is_recommend" />
             </el-form-item>
             <el-form-item label="文件" prop="file">
                 <f-jfile v-model="attrs.add_form.file" :limit="10" :size="3" />
@@ -89,8 +116,16 @@ const attrs = reactive({
     columns: [
         { type: 'text', label: '名称', prop: 'name', align: "left", show: true },
         { type: 'link', width: 350, label: '链接', prop: 'url', align: "center", show: true },
-        { type: 'text', width: 160, label: '发布时间', prop: 'pub_time', align: "center", show: true, sortable: true },
         { type: 'text', width: 100, label: '标签', prop: 'tag', align: "left", show: true },
+        { type: 'text', width: 100, label: '浏览数', prop: 'view', align: "left", show: true },
+        { type: 'text', width: 100, label: '点赞数', prop: 'like', align: "left", show: true },
+        { type: 'text', width: 100, label: '评论数', prop: 'comment', align: "left", show: true },
+        { type: 'text', width: 100, label: '收藏数', prop: 'collect', align: "left", show: true },
+        { type: 'text', width: 100, label: '是否删除', prop: 'is_delete', align: "left", show: true },
+        { type: 'text', width: 100, label: '是否置顶', prop: 'is_top', align: "left", show: true },
+        { type: 'text', width: 100, label: '是否热门', prop: 'is_hot', align: "left", show: true },
+        { type: 'text', width: 100, label: '是否原创', prop: 'is_original', align: "left", show: true },
+        { type: 'text', width: 100, label: '是否推荐', prop: 'is_recommend', align: "left", show: true },
         { type: 'jfile', width: 150, label: '文件', prop: 'file', align: "center", show: true },
         { type: 'text', width: 160, label: '创建时间', prop: 'create_time', align: "center", show: true, sortable: true },
     ],

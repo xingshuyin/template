@@ -18,6 +18,7 @@ from django_ratelimit.core import is_ratelimited
 from .models import log
 from rest_framework.response import Response
 
+
 def get_request_user(request):
     """
     获取请求user
@@ -161,7 +162,8 @@ def get_verbose_name(queryset=None, view=None, model=None):
 
 
 def get_ip_analysis(ip):
-    data = {"continent": "", "country": "", "province": "", "city": "", "district": "", "isp": "", "area_code": "", "country_english": "", "country_code": "", "longitude": "", "latitude": ""}
+    data = {"continent": "", "country": "", "province": "", "city": "", "district": "", "isp": "",
+            "area_code": "", "country_english": "", "country_code": "", "longitude": "", "latitude": ""}
     if ip != 'unknown' and ip:
         if getattr(settings, 'ENABLE_LOGIN_ANALYSIS_LOG', True):
             try:
@@ -209,7 +211,7 @@ def get_time(f):
 def ratelimit(group=None, key=None, rate=None, method=ALL, block=True, msg='访问频率过快'):
     def decorator(fn):
         @wraps(fn)
-        def _wrapped(s,request, *args, **kw):
+        def _wrapped(s, request, *args, **kw):
             old_limited = getattr(request, 'limited', False)
             ratelimited = is_ratelimited(request=request, group=group, fn=fn,
                                          key=key, rate=rate, method=method,
@@ -220,9 +222,28 @@ def ratelimit(group=None, key=None, rate=None, method=ALL, block=True, msg='访�
                 #     settings, 'RATELIMIT_EXCEPTION_CLASS', Ratelimited)
                 # print('-------------',cls)
                 return Response({'detail': msg, 'data': []}, 403)
-            return fn(s,request, *args, **kw)
+            return fn(s, request, *args, **kw)
         return _wrapped
     return decorator
 
+
 ratelimit.ALL = ALL
 ratelimit.UNSAFE = UNSAFE
+
+
+METHOD_NAMES = {
+    'get': '查询',
+    'post': '添加',
+    'put': '修改',
+}
+METHOD_NAMES_DETAIL = {
+    'get': '获取',
+    'put': '修改',
+    'delete': '删除',
+}
+METHOD_NUMS = {
+    'get': 0,
+    'put': 2,
+    'post': 1,
+    'delete': 3,
+}

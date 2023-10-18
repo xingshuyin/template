@@ -1,7 +1,14 @@
 import axios from "axios";
 import { parse_token } from "./tools";
+import store from "../store";
 export const get_token = () => {
-  return "Bearer " + localStorage.getItem("token");
+  let t = localStorage.getItem("token");
+  if (t != null) {
+    store().is_login = true;
+  } else {
+    store.is_login = false;
+  }
+  return "Bearer " + t;
 };
 
 // TODO:axios-自定义请求对象
@@ -15,14 +22,14 @@ const r = () => {
   });
   //TODO:axios-拦截器
   r_.interceptors.request.use(
-    config => {
+    (config) => {
       console.log(config.url);
       if (config.url.startsWith("/admin")) {
         parse_token();
       }
       return config; //必须返回
     },
-    error => {
+    (error) => {
       // if (error?.response?.data?.code == "token_not_valid") {
       //   localStorage.removeItem("token"); //token无效了必须删除token
       //   window.location = "/#/login"; //token失效跳转登录页
@@ -31,10 +38,10 @@ const r = () => {
     }
   );
   r_.interceptors.response.use(
-    res => {
+    (res) => {
       return res; //必须返回
     },
-    error => {
+    (error) => {
       console.log("error", error);
       if (error?.response?.status == 401) {
         ElMessage({

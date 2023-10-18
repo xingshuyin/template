@@ -1,7 +1,7 @@
 from django.urls import path, get_resolver
 from .views.views_model import view_list
 from rest_framework.routers import SimpleRouter, Route, DynamicRoute
-from .views.data import Data
+import system.views.data as data_
 
 
 class MyRouter(SimpleRouter):
@@ -52,7 +52,7 @@ class MyRouter(SimpleRouter):
 router = MyRouter()  # TODO:DRF-创建router
 for view in view_list:
     router.register(view['url'], view['viewset'], view['label'])  # TODO:DRF-注册路由
-router.register(prefix='data', viewset=Data, basename='数据')
+router.register(prefix='data', viewset=data_.Data, basename='数据')
 urlpatterns = [
     # path('sign/', signin)
 ]

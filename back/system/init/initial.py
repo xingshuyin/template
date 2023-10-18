@@ -39,7 +39,8 @@ def init_user():
         },
     ]  #
     for i in l:
-        user.objects.create_user(**i)
+        u = user.objects.create_user(**i)
+        user_info.objects.create(user=u)
 
 
 # 所有菜单路由都是子路由, 所以path不加/ (element-plus的menu组件)

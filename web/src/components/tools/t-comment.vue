@@ -1,7 +1,7 @@
 <!--
  * @Filename     : CommentTree.vue
  * @Description  : wjt-前端-评论树
-                    data => [{id: 1,user_avatar: 'a',create_time: '2121',...},...]
+                    data => [{id: 1,user_icon: 'a',create_time: '2121',...},...]
  * @Author       : xingshuyin xingshuyin@outlook.com
  * @Date         : 2022-10-07 14:41:30
  * @LastEditors  : xingshuyin xingshuyin@outlook.com
@@ -15,13 +15,13 @@
 //const router = useRouter() //全局路由对象
 const props = defineProps({
     data: {},
-    user_avatar: { default: 'user_avatar' },
-    user_name: { default: 'user_nick_name' },
+    user_icon: { default: 'user_icon' },
+    user_name: { default: 'user_name' },
     create_time: { default: 'create_time' },
     content: { default: 'content' },
     replys: { default: 'replys' },
-    reply_user_avatar: { default: 'reply_user_avatar' },
-    reply_user_name: { default: 'reply_user_nick_name' },
+    reply_user_icon: { default: 'reply_user_icon' },
+    reply_user_name: { default: 'reply_user_name' },
 }); // defineProps的参数, 可以直接使用
 //const emits = defineEmits(['onclick']); // emits 触发父组件函数
 //const map = ref(null); //获取ref值为map的元素
@@ -30,7 +30,7 @@ const props = defineProps({
 <template>
     <div class="comment" v-for="i in data" :key="i.id">
         <div class="left">
-            <el-avatar shape="circle" :src="i[user_avatar]"></el-avatar>
+            <el-avatar shape="circle" :src="i[user_icon]"></el-avatar>
         </div>
         <div class="right">
             <div class="title">
@@ -44,7 +44,7 @@ const props = defineProps({
             <div class="replys" v-if="i?.[replys]?.length">
                 <div class="reply" v-for="reply in i[replys]">
                     <div class="reply-left">
-                        <el-avatar shape="circle" :src="r[reply_user_avatar]"></el-avatar>
+                        <el-avatar shape="circle" :src="r[reply_user_icon]"></el-avatar>
                     </div>
                     <div class="reply-right">
                         <div class="title">

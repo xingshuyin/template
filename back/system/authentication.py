@@ -9,11 +9,14 @@ class MyJWTAuthentication(JWTAuthentication):
 
     def authenticate(self, request, force=False):  # force=True 强制返回用户不报错, 没有用户就返回AnonymousUser, 用于手动验证用户(可能没有token), 'authentication_classes': [] 的接口
         header = self.get_header(request)
+        force_header = request.headers.get('Http-Force', 'false') # 前端通过设置Http-Force的请求头为true来绕过登录验证, 相当于用匿名用户访问需要登录验证的接口,可以设置匿名用户角色(key=AnonymousUser)的权限以控制接口
+        if force_header == 'true':
+            force = True
         if header is None:
             return None
 
         raw_token = self.get_raw_token(header)
-        if raw_token is None:
+        if raw_token is None and not force:
             return None
 
         validated_token = self.get_validated_token(raw_token, force)

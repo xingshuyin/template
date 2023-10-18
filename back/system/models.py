@@ -243,14 +243,11 @@ class UserManager(BaseUserManager):
 
 
 class user(AbstractBaseUser, base_model):
-    name = models.CharField(max_length=100, db_comment='用户名', verbose_name='用户名', null=True)
     openid = models.CharField(max_length=100, db_comment='微信openid', verbose_name='微信openid', unique=True, null=True)
     username = models.CharField(max_length=100, db_comment='账号', verbose_name='账号', unique=True)
     role = models.JSONField(default=list, db_comment='角色', verbose_name='角色')
     type = models.IntegerField(choices=((1, '前端'), (2, '后端')), default=1, db_comment='类型', verbose_name='类型')
     dept = models.ForeignKey(dept, on_delete=models.PROTECT, null=True, db_comment="部门", verbose_name='部门')
-    email = models.EmailField(db_comment="邮箱", verbose_name='邮箱', null=True)
-    phone = models.CharField(max_length=12, db_comment="电话", verbose_name='电话', null=True)
     USERNAME_FIELD = 'username'
     objects = UserManager()
     is_super = models.BooleanField(default=False, db_comment='是否为超级管理员', verbose_name='是否为超级管理员')
@@ -263,8 +260,23 @@ class user(AbstractBaseUser, base_model):
         db_table = "user"
         verbose_name = "用户"
         db_table_comment = verbose_name
-
-
+        
+class user_info(base_model):
+    icon = models.CharField(max_length=100, db_comment='头像', verbose_name='头像', null=True)
+    birthday = models.DateField(db_comment='生日', verbose_name='生日', null=True)
+    signature = models.CharField(max_length=100, db_comment='个性签名', verbose_name='个性签名', null=True)
+    user = models.OneToOneField(user, on_delete=models.CASCADE, null=True, db_comment="用户", verbose_name='用户')
+    name = models.CharField(max_length=100, db_comment='姓名', verbose_name='姓名', null=True)
+    gender = models.IntegerField(choices=((1, '男'), (2, '女'), (0, '未知')), default=0, db_comment='性别', verbose_name='性别', null=True)
+    email = models.EmailField(db_comment="邮箱", verbose_name='邮箱', null=True)
+    phone = models.CharField(max_length=12, db_comment="电话", verbose_name='电话', null=True)
+    follow_user = models.ManyToManyField('self', symmetrical=False, verbose_name='关注用户')
+    article_like = models.ManyToManyField('article', related_name='like_user', verbose_name='点赞文章')
+    article_collect = models.ManyToManyField('article', related_name='collect_user', verbose_name='收藏文章')
+    class Meta:
+        db_table = "user_info"
+        verbose_name = "用户信息"
+        db_table_comment = verbose_name
 class area(models.Model):
     name = models.CharField(max_length=100, verbose_name="名称", db_comment="名称")
     code = models.CharField(max_length=20, verbose_name="地区编码", db_comment="地区编码", unique=True, db_index=True)
@@ -324,24 +336,25 @@ class spider(base_model):
     name = models.CharField(max_length=50, db_comment='规则名称-')
     allowed_domains = models.CharField(max_length=800, db_comment='域名列表(逗号分隔)', null=True, blank=True)
     start_urls = models.CharField(max_length=200, db_comment='开始页(逗号分隔)', null=True, blank=True)
-    start_page_num = models.IntegerField(db_comment='分页页数开头', null=True, blank=True)
-    max_page_num = models.IntegerField(db_comment='分页页数最大值', null=True, blank=True)
-    re_page_num = models.CharField(max_length=200, db_comment='分页页数正则', null=True, blank=True)
-    page_format = models.CharField(max_length=200, db_comment='分页链接格式化字符', null=True, blank=True)
-    page_format_shift = models.CharField(max_length=200, db_comment='分页链接页码转换(传入num判断并修改)', null=True, blank=True)
-    re_page = models.CharField(max_length=200, db_comment='分页链接正则', null=True, blank=True)
-    re_item = models.CharField(max_length=200, db_comment='内容链接正则', null=True, blank=True)
-    xpath_page_restrict = models.CharField(max_length=200, db_comment='分页链接提取区域xpath', null=True, blank=True)
-    xpath_item_restrict = models.CharField(max_length=200, db_comment='内容链接提取区域xpath', null=True, blank=True)
-    xpath_name = models.CharField(max_length=200, db_comment='标题xpath', null=True, blank=True)
-    xpath_time = models.CharField(max_length=200, db_comment='时间xpath', null=True, blank=True)
-    re_time = models.CharField(max_length=200, db_comment='时间正则', null=True, blank=True)
-    xpath_cover = models.CharField(max_length=200, db_comment='封面xpath', null=True, blank=True)
-    xpath_content = models.CharField(max_length=200, db_comment='内容xpath', null=True, blank=True)
-    xpath_source = models.CharField(max_length=200, db_comment='来源xpath', null=True, blank=True)
-    re_source = models.CharField(max_length=200, db_comment='来源正则', null=True, blank=True)
+
+    type = models.IntegerField(choices=((1, '普通分页爬虫'), (2, 'json分页爬虫')), db_comment='类型', default=1)
+
+    page_min = models.IntegerField(db_comment='页数最小值', null=True, blank=True)
+    page_max = models.IntegerField(db_comment='页数最大值', null=True, blank=True)
+    page_shift = models.CharField(max_length=200, db_comment='页码转换', null=True, blank=True)
+
+    get_page = models.CharField(max_length=200, db_comment='分页提取', null=True, blank=True)
+    get_item = models.CharField(max_length=200, db_comment='内容提取', null=True, blank=True)
+    re_page = models.CharField(max_length=200, db_comment='分页过滤', null=True, blank=True)
+    re_item = models.CharField(max_length=200, db_comment='内容过滤', null=True, blank=True)
+
+    path_name = models.CharField(max_length=200, db_comment='标题获取', null=True, blank=True)
+    path_time = models.CharField(max_length=200, db_comment='时间获取', null=True, blank=True)
+    path_source = models.CharField(max_length=200, db_comment='来源获取', null=True, blank=True)
+    path_content = models.CharField(max_length=200, db_comment='文章获取', null=True, blank=True)
+    re_time = models.CharField(max_length=200, db_comment='时间提取', null=True, blank=True)
+    re_source = models.CharField(max_length=200, db_comment='来源提取', null=True, blank=True)
     enable = models.BooleanField(db_comment="是否启用", default=True)
-    category = models.IntegerField(db_comment='类型', null=True, blank=True)
 
     class Meta:
         db_table = 'spider'
@@ -377,10 +390,32 @@ class article(base_model):
     file = models.JSONField(default=list, db_comment="文件", verbose_name='文件', null=True)
     url = models.CharField(max_length=100, db_comment='文章链接', verbose_name='文章链接', null=True, blank=True)
     url_hash = models.CharField(max_length=255, unique=True, db_index=True, null=True, blank=True)
-    pub_time = models.DateTimeField(db_comment='抓取文章的发布时间', null=True, blank=True)
     type = models.IntegerField(default=1, choices=((1, '发布'), (2, '抓取')), db_comment='文章类型(1 发布, 2 抓取)')
+
+    view = models.IntegerField(db_comment="浏览数", default=0)
+    like = models.IntegerField(db_comment="点赞数", default=0)
+    comment = models.IntegerField(db_comment="评论数", default=0)
+    collect = models.IntegerField(db_comment="收藏数", default=0)
+    is_delete = models.BooleanField(default=False, db_comment='是否删除')
+    is_top = models.BooleanField(default=False, db_comment='是否置顶')
+    is_hot = models.BooleanField(default=False, db_comment='是否热门')
+    is_original = models.BooleanField(default=False, db_comment='是否原创')
+    is_recommend = models.BooleanField(default=False, db_comment='是否推荐')
 
     class Meta:
         db_table = "article"
         verbose_name = "文章"
         db_table_comment = verbose_name
+
+
+class article_comment(base_model):
+    user = models.ForeignKey(user_info, on_delete=models.PROTECT)
+    article = models.ForeignKey(article, on_delete=models.PROTECT)
+    content = models.CharField(max_length=1000, help_text='评论内容')
+    reply = models.ForeignKey(to='self', help_text='回复对象', verbose_name='回复对象', null=True, blank=True, on_delete=models.DO_NOTHING, related_name='reply_set')
+    root = models.ForeignKey(to='self', help_text='根评论对象', verbose_name='根评论对象', null=True, blank=True, on_delete=models.DO_NOTHING, related_name='root_set')
+
+    class Meta:
+        db_table = 'article_comment'
+        db_table_comment = '文章评论'
+        verbose_name = "文章评论"

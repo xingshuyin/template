@@ -41,75 +41,64 @@
             <el-form-item label="规则名称">
                 <el-input v-model="attrs.add_form.name" />
             </el-form-item>
-            <el-form-item label="域名列表(逗号分隔)">
+            <el-form-item label="类型">
+                <el-select v-model="attrs.add_form.type" class="m-2" placeholder="" clearable collapse-tags
+                    collapse-tags-tooltip style="width: 150px;float: left; margin-right: 20px;">
+                    <el-option v-for="v, k in spider_type" :key="k" :label="v" :value="k" />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="域名列表">
                 <el-input v-model="attrs.add_form.allowed_domains" placeholder="能够访问的域名范围可用逗号分割多个" />
             </el-form-item>
-            <el-form-item label="开始页(逗号分隔)">
-                <el-input v-model="attrs.add_form.start_urls" placeholder="开始爬取页的链接" />
+            <el-form-item label="开始页">
+                <el-input v-model="attrs.add_form.start_urls" placeholder="开始爬取页的链接(逗号分隔)" />
             </el-form-item>
             <el-divider />
-            <el-form-item label="分页页数开头">
-                <el-input v-model="attrs.add_form.start_page_num" placeholder="分页页数起始值" />
+            <el-form-item label="页数最小值">
+                <el-input v-model="attrs.add_form.page_min" placeholder="分页页数起始值" />
             </el-form-item>
-            <el-form-item label="分页页数最大值">
-                <el-input v-model="attrs.add_form.max_page_num" placeholder="分页页数起始值" />
+            <el-form-item label="页数最大值">
+                <el-input v-model="attrs.add_form.page_max" placeholder="分页页数起始值" />
             </el-form-item>
-            <el-form-item label="分页页数正则">
-                <el-input v-model="attrs.add_form.re_page_num" placeholder="分页是动态生成的时侯可以用正则匹配(第一个组为所需要的值)" />
-            </el-form-item>
-            <el-form-item label="分页链接格式化字符">
-                <el-input v-model="attrs.add_form.page_format" placeholder="页数相关字符会替换链接中的{}  (只能有一个{})" />
-            </el-form-item>
-            <el-form-item label="分页链接页码转换">
-                <el-input v-model="attrs.add_form.page_format_shift"
-                    placeholder="页码格式转换->  '_'+str(num) if num > 0 else '' -> num 就是传入的页数 " />
-            </el-form-item>
-            <el-divider>
-                上下紧邻两个取一个方法
-            </el-divider>
-            <el-form-item label="分页链接提取区域xpath">
-                <el-input v-model="attrs.add_form.xpath_page_restrict" placeholder="分页链接所在元素的xpath(减少链接搜索范围)" />
-            </el-form-item>
-            <el-form-item label="分页链接正则">
-                <el-input v-model="attrs.add_form.re_page" placeholder="不用分页页数正则时就会使用它, 正则匹配需要的分页链接链接" />
+            <el-form-item label="页码转换">
+                <el-input v-model="attrs.add_form.page_shift"
+                    placeholder="页码转换->  '_'+str(num) if num > 0 else '' -> num 就是传入的页数 " />
             </el-form-item>
             <el-divider />
-            <el-form-item label="内容链接正则">
-                <el-input v-model="attrs.add_form.re_item" placeholder="文章链接正则匹配" />
+            <el-form-item label="分页提取">
+                <el-input v-model="attrs.add_form.get_page" placeholder="分页提取" />
             </el-form-item>
-            <el-form-item label="内容链接提取区域xpath">
-                <el-input v-model="attrs.add_form.xpath_item_restrict" placeholder="文章链接所在元素xpath(减少链接搜索范围)" />
+            <el-form-item label="内容提取">
+                <el-input v-model="attrs.add_form.get_item" placeholder="内容提取" />
             </el-form-item>
+            <el-form-item label="分页过滤">
+                <el-input v-model="attrs.add_form.re_page" placeholder="分页过滤" />
+            </el-form-item>
+            <el-form-item label="内容过滤">
+                <el-input v-model="attrs.add_form.re_item" placeholder="内容过滤" />
+            </el-form-item>
+
             <el-divider />
-            <el-form-item label="标题xpath">
-                <el-input v-model="attrs.add_form.xpath_name" placeholder="文章标题xpath" />
+            <el-form-item label="标题获取">
+                <el-input v-model="attrs.add_form.path_name" placeholder="标题获取" />
             </el-form-item>
-            <el-form-item label="时间xpath">
-                <el-input v-model="attrs.add_form.xpath_time" placeholder="时间xpath" />
+            <el-form-item label="时间获取">
+                <el-input v-model="attrs.add_form.path_time" placeholder="时间获取" />
             </el-form-item>
-            <el-form-item label="时间正则">
-                <el-input v-model="attrs.add_form.re_time" placeholder="包含时间的元素不止包含时间时,正则匹配的第一个组为时间" />
+            <el-form-item label="来源获取">
+                <el-input v-model="attrs.add_form.path_source" placeholder="来源获取" />
             </el-form-item>
-            <el-form-item label="封面xpath">
-                <el-input v-model="attrs.add_form.xpath_cover" placeholder="查找封面图片的范围" />
+            <el-form-item label="文章获取">
+                <el-input v-model="attrs.add_form.path_content" placeholder="文章获取" />
             </el-form-item>
-            <el-form-item label="内容xpath">
-                <el-input v-model="attrs.add_form.xpath_content" placeholder="包含所有文章内容的元素的xpath (到元素即至止,不要text())" />
+            <el-form-item label="时间提取">
+                <el-input v-model="attrs.add_form.re_time" placeholder="时间提取" />
             </el-form-item>
-            <el-form-item label="来源xpath">
-                <el-input v-model="attrs.add_form.xpath_source" placeholder="来源xpath" />
-            </el-form-item>
-            <el-form-item label="来源正则">
-                <el-input v-model="attrs.add_form.re_source" placeholder="包含来源的元素不止包含来源时,正则匹配的第一个组为来源" />
+            <el-form-item label="来源提取">
+                <el-input v-model="attrs.add_form.re_source" placeholder="来源提取" />
             </el-form-item>
             <el-form-item label="是否生效">
                 <el-switch v-model="attrs.add_form.enable" inline-prompt active-text="是" inactive-text="否" />
-            </el-form-item>
-            <el-form-item label="类型">
-                <el-select v-model="attrs.add_form.category_id" class="m-2" placeholder="" clearable collapse-tags
-                    collapse-tags-tooltip style="width: 150px;float: left; margin-right: 20px;">
-                    <el-option v-for="item in attrs.categorys" :key="item.id" :label="item.name" :value="item.id" />
-                </el-select>
             </el-form-item>
 
         </el-form>
@@ -127,6 +116,7 @@
 <script setup>
 import { get_data_, select_, mult_delete_, sort_, submit_, export_data_ } from '../../hooks/table_common'
 import r from '../../utils/request';
+import { spider_type } from '../../utils/data';
 import store from '../../store';
 store().get_userinfo().then((res) => {
     if (res.interfaces.indexOf(attrs.base_url + '-mult_update') != -1) {
@@ -141,23 +131,24 @@ const attrs = reactive({
         { type: 'text', label: '规则名称', prop: 'name', align: "left", show: true },
         { type: 'text', label: '域名列表', prop: 'allowed_domains', align: "center", show: true },
         { type: 'link', label: '开始页', prop: 'start_urls', width: 200, align: "center", show: true },
-        { type: 'text', label: '分页页数开头', prop: 'start_page_num', width: 115, align: "center", show: true },
-        { type: 'text', label: '分页页数最大值', prop: 'max_page_num', width: 135, align: "center", show: true },
-        { type: 'text', label: '分页页数正则', prop: 're_page_num', width: 115, align: "center", show: true },
-        { type: 'text', label: '分页链接格式化字符', prop: 'page_format', width: 155, align: "center", show: true },
-        { type: 'text', label: '分页链接页码转换', prop: 'page_format_shift', width: 150, align: "center", show: true },
-        { type: 'text', label: '分页链接正则', prop: 're_page', width: 115, align: "center", show: true },
-        { type: 'text', label: '内容链接正则', prop: 're_item', width: 115, align: "center", show: true },
-        { type: 'text', label: '分页链接提取区域xpath', prop: 'xpath_page_restrict', width: 180, align: "center", show: true },
-        { type: 'text', label: '内容链接提取区域xpath', prop: 'xpath_item_restrict', width: 180, align: "center", show: true },
-        { type: 'text', label: '标题xpath', prop: 'xpath_name', width: 100, align: "center", show: true },
-        { type: 'text', label: '时间xpath', prop: 'xpath_time', width: 100, align: "center", show: true },
-        { type: 'text', label: '时间正则', prop: 're_time', align: "center", show: true },
-        { type: 'text', label: '封面xpath', prop: 'xpath_cover', width: 100, align: "center", show: true },
-        { type: 'text', label: '内容xpath', prop: 'xpath_content', width: 100, align: "center", show: true },
-        { type: 'text', label: '来源xpath', prop: 'xpath_source', width: 100, align: "center", show: true },
-        { type: 'text', label: '来源正则', prop: 're_source', align: "center", show: true },
-        { type: 'text', label: '创建时间', prop: 'create_time', align: "center", show: true },
+        { type: 'select', label: '类型', prop: 'type', width: 200, align: "center", show: true, option: spider_type },
+
+        { type: 'text', label: '页数最小值', prop: 'page_min', width: 115, align: "center", show: true },
+        { type: 'text', label: '页数最大值', prop: 'page_max', width: 135, align: "center", show: true },
+        { type: 'text', label: '页码转换', prop: 'page_shift', width: 150, align: "center", show: true },
+
+        { type: 'text', label: '分页过滤', prop: 're_page', width: 115, align: "center", show: true },
+        { type: 'text', label: '内容过滤', prop: 're_item', width: 115, align: "center", show: true },
+        { type: 'text', label: '分页提取', prop: 'get_page', width: 180, align: "center", show: true },
+        { type: 'text', label: '内容提取', prop: 'get_item', width: 180, align: "center", show: true },
+
+        { type: 'text', label: '标题获取', prop: 'path_name', width: 100, align: "center", show: true },
+        { type: 'text', label: '时间获取', prop: 'path_time', width: 100, align: "center", show: true },
+        { type: 'text', label: '来源获取', prop: 'path_source', width: 100, align: "center", show: true },
+        { type: 'text', label: '文本获取', prop: 'path_content', width: 100, align: "center", show: true },
+        { type: 'text', label: '时间提取', prop: 're_time', width: 100, align: "center", show: true },
+        { type: 'text', label: '来源提取', prop: 're_source', width: 100, align: "center", show: true },
+        { type: 'text', label: '创建时间', prop: 'create_time', width: 100, align: "center", show: true },
     ],
     base_url: 'spider',
     selects: [],

@@ -19,9 +19,9 @@ from rest_framework import serializers, exceptions
 from django.contrib.auth import authenticate
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.core.cache import cache
 from ..models import user, log
 from ..utils import save_login_log
-from django.core.cache import cache
 
 
 class MyAccessToken(AccessToken):
@@ -108,9 +108,11 @@ class MyTokenObtainSerializer(TokenObtainSerializer):
         request = self.context.get("request")  # 获取请求对象
         request.user = self.user
         if 'captcha' in attrs.keys():
-            print('captcha', attrs['captcha'], cache.get('captcha-' + request.META.get('REMOTE_ADDR')))
-            if attrs['captcha'] and attrs['captcha'].lower() != cache.get('captcha-' + request.META.get('REMOTE_ADDR')).lower():
-                raise exceptions.AuthenticationFailed('验证码错误')
+            if cache.get('captcha-' + request.META.get('REMOTE_ADDR')):
+                if attrs['captcha'] and attrs['captcha'].lower() != cache.get('captcha-' + request.META.get('REMOTE_ADDR')).lower():
+                    raise exceptions.AuthenticationFailed('验证码错误')
+            else:
+                raise exceptions.AuthenticationFailed('验证码已失效')
             del attrs['captcha']
         t1 = threading.Thread(target=login_log, args=(request, ))
         t1.start()

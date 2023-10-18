@@ -323,7 +323,7 @@ def create(self, request, *args, **kwargs):
     user_id = getattr(user, 'id', None)
     model_name = serializer.Meta.model.__name__
 
-    fields = serializer.__dict__['fields'].keys()
+    fields = serializer.fields.keys()
     if 'dept_belong' in fields:
         serializer.validated_data['dept_belong'] = dept_belong
     if 'creator' in fields:
@@ -427,7 +427,7 @@ class MyValuesIterable(BaseIterable):
             *query.annotation_select,
         ]
         # TODO:request-QuerySet修改values  去掉_id
-        names = [i.rstrip('_id') if i.endswith("_id") else i for i in names]  # 貌似新版已经不需要了
+        names = [i.rstrip('_id') if i.endswith("_id") else i for i in names]
         indexes = range(len(names))
         for row in compiler.results_iter(chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size):
             # TODO:request-QuerySet修改values  去掉_id

@@ -1,7 +1,7 @@
 export const TreeMenu = (data, parent) => {
   //TODO:生成树状结构
   let d = [];
-  data.forEach(item => {
+  data.forEach((item) => {
     if (item.parent == parent) {
       d.push({
         name: item.name,
@@ -20,7 +20,7 @@ export const Tree = (data, key, parent_key, parent) => {
   parent_key = parent_key ? parent_key : "parent";
   parent = parent ? parent : null;
   let r = [];
-  data.forEach(item => {
+  data.forEach((item) => {
     if (item[parent_key] == parent) {
       let t = item;
       t.children = Tree(data, key, parent_key, item[key]);
@@ -50,10 +50,14 @@ export const permission_type = {
   4: "自定数据权限",
 };
 
-
 export const area_level = {
-  0:'省份',
+  0: "省份",
   1: "城市",
   2: "区县",
-  3: "乡镇"
-}
+  3: "乡镇",
+};
+
+export const spider_type = {
+  1: "分页爬虫",
+  2: "json分页爬虫",
+};
