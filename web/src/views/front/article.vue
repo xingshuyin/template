@@ -1,5 +1,5 @@
 <template>
-    <div class="article">
+    <div class="article" @click.self="hdie_comment" @scroll="handleScroll">
         <v-md-preview v-if="attrs.item" :text="attrs.item.content">
 
         </v-md-preview>
@@ -9,10 +9,9 @@
 
         <el-button v-if="attrs.collected" @click="collect">取消收藏</el-button>
         <el-button v-else @click="collect">收藏</el-button>
-        <el-input v-model="store().comment.content" :rows="2" type="textarea" @click="store().comment_root = true;"
-            placeholder="善言善语, 以理服人" />
-        <el-button @click="comment">评论</el-button>
-        <t-comment :data="attrs.comments"></t-comment>
+        <!-- <t-comment :callback="comment"></t-comment> -->
+        <t-comments :data="attrs.comments" :callback="get_comment_" :media_id="route.params.id"
+            :media_type="attrs.base_url"></t-comments>
 
     </div>
 </template>
@@ -26,11 +25,32 @@ const route = useRoute()
 import store from '../../store';
 //const emits = defineEmits(['update:modelValue']); // emits 触发父组件函数
 const attrs = reactive({
+    base_url: 'article',
     comments: [],
     liked: false,
     collected: false,
+    comment_end: false,
 })
-rest.item('article', route.params.id, attrs)
+
+rest.item(attrs.base_url, route.params.id, attrs)
+const handleScroll = (e) => {
+    if (attrs.comment_end == false) {
+        // console.log('sssssssss', e);
+        // 变量scrollTop是滚动条滚动时，距离顶部的距离
+        let scrollTop = e.target.scrollTop
+        //变量windowHeight是可视区的高度
+        let windowHeight = e.target.clientHeight
+        //变量scrollHeight是滚动条的总高度
+        let scrollHeight = e.target.scrollHeight
+        //滚动条到底部的条件
+        // console.log('scrollTop', scrollTop, 'windowHeight', windowHeight, 'scrollTop + windowHeight', scrollTop + windowHeight, 'scrollHeight', scrollHeight);
+        if (scrollTop + windowHeight >= scrollHeight) {
+            console.log('bottom');
+            get_comment_()
+        }
+    }
+
+}
 onBeforeMount(() => {
     if (store().is_login) {
         store().get_userinfo(true).then((info) => {
@@ -59,16 +79,18 @@ onBeforeMount(() => {
             attrs.collected = temp
         })
     }
-    store().comment.media_id = route.params.id
-    store().comment.media_type = "article"
     get_comment_()
+    window.addEventListener('scroll', handleScroll)//监听函数
 })
+
 
 const get_comment_ = async (replace) => {
     //获取评论
+    if (replace) attrs.comment_page = 1;
     attrs.comment_page ? 1 : (attrs.comment_page = 1);
     attrs.comment_limit ? 1 : (attrs.comment_limit = 10);
     attrs.comment_total ? 1 : (attrs.comment_total = 0);
+
     await r().get('/data/article_comment/', { params: { page: attrs.comment_page, limit: attrs.comment_limit, id: route.params.id } }).then(res => {
         if (res.data.data.length > 0) {
             if (replace) {
@@ -78,33 +100,15 @@ const get_comment_ = async (replace) => {
             }
             attrs.comment_total = res.data.total;
             attrs.comment_page++
+        } else {
+            attrs.comment_end = true
         }
-
     });
 };
 
-const comment = () => {
-    if (store().is_login) {
-        store().get_userinfo().then(() => {
-            if (store().comment_root) {
-                store().comment.reply_id = undefined;
-                store().comment.root_id = undefined;
-            }
-            r().get("/data/comment/", { params: store().comment }).then(res => {
-                attrs.comment_page = 1;
-                store().comment.content = null
-                get_comment_(true);
-                store().comment_show = false;
-            })
-        })
-    } else {
-        ElMessage({
-            showClose: true,
-            message: '请登录',
-            center: true,
-        });
-    }
-}
+
+
+
 const like = () => {
     r().get('/data/like/', { params: { type: 'article', id: route.params.id, liked: attrs.liked } }).then(() => {
         store().get_userinfo(true).then((info) => {
@@ -141,11 +145,15 @@ const collect = () => {
         })
     })
 }
+
+
+
+
 </script>
 <style scoped lang='scss'>
 .article {
     background-color: aliceblue;
-    width: 70%;
+    width: 50%;
     height: 100%;
     overflow: auto;
     margin: auto;

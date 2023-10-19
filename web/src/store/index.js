@@ -14,17 +14,6 @@ export default defineStore("counter", {
     hasmenu: false,
     toggle_side: false,
     is_login: false,
-
-    comment: {
-      media_type: null,
-      media_id: null,
-      content: undefined,
-      reply: undefined,
-      root: undefined,
-    },
-    comment_show: false,
-    comment_root: true,
-    comment_reply: null,
   }),
   getters: {
     get_userinfo: (state) => {

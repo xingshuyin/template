@@ -79,11 +79,10 @@ onBeforeMount(() => {
     <div class="menu-tab">
         <!-- TODO:菜单标签 -->
         <el-tabs v-model="store().current_menu" type="card" @tab-remove="menu_tab_remove" @tab-click="menu_tab_change">
-            <el-tab-pane key="enterprise" label="企业管理" name="enterprise" :closable="false">
+            <el-tab-pane key="aritcle" label="文章管理" name="enterprise" :closable="false">
                 <!-- {{ item.content }} -->
             </el-tab-pane>
-            <el-tab-pane v-for="item in store().menu_tab" :key="item.name" :label="item.label" :name="item.name"
-                closable>
+            <el-tab-pane v-for="item in store().menu_tab" :key="item.name" :label="item.label" :name="item.name" closable>
                 <!-- {{ item.content }} -->
             </el-tab-pane>
             <!-- <el-button type="danger">Danger</el-button> -->

@@ -396,7 +396,7 @@ class Data(ViewSet):
             replys = MyQuerySet(article_comment).filter(root__id=i['id']).annotate(user_name=F('user__name'),
                                                                                    user_icon=F('user__icon'),
                                                                                    reply_user_name=F('reply__user__name'),
-                                                                                   reply_user_avatar=F('reply__user__icon')).order_by('-create_time')
+                                                                                   reply_user_icon=F('reply__user__icon')).order_by('-create_time')
             i['replys'] = list(replys.values())
             r.append(i)
         return Response({'data': r, 'total': total})
@@ -405,6 +405,16 @@ class Data(ViewSet):
     def comment(self, request: Request): # 评论
         user = request.user
         filter_dict = request.GET.dict()
+        if 'reply_id' in filter_dict.keys():
+            if filter_dict['reply_id']:
+                filter_dict['reply_id'] = int(filter_dict['reply_id'])
+            else:
+                filter_dict['reply_id'] = None
+        if 'root_id' in filter_dict.keys():
+            if  filter_dict['root_id']:
+                filter_dict['root_id'] = int(filter_dict['root_id'])
+            else:
+                filter_dict['root_id'] = None
         del filter_dict['media_type']
         del filter_dict['media_id']
         media_type = request.GET.get('media_type')
