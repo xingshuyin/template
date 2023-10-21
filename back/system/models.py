@@ -260,7 +260,8 @@ class user(AbstractBaseUser, base_model):
         db_table = "user"
         verbose_name = "用户"
         db_table_comment = verbose_name
-        
+
+
 class user_info(base_model):
     icon = models.CharField(max_length=100, db_comment='头像', verbose_name='头像', null=True)
     birthday = models.DateField(db_comment='生日', verbose_name='生日', null=True)
@@ -273,10 +274,13 @@ class user_info(base_model):
     follow_user = models.ManyToManyField('self', symmetrical=False, verbose_name='关注用户')
     article_like = models.ManyToManyField('article', related_name='like_user', verbose_name='点赞文章')
     article_collect = models.ManyToManyField('article', related_name='collect_user', verbose_name='收藏文章')
+
     class Meta:
         db_table = "user_info"
         verbose_name = "用户信息"
         db_table_comment = verbose_name
+
+
 class area(models.Model):
     name = models.CharField(max_length=100, verbose_name="名称", db_comment="名称")
     code = models.CharField(max_length=20, verbose_name="地区编码", db_comment="地区编码", unique=True, db_index=True)
@@ -385,7 +389,7 @@ class enterprise(base_model):
 class article(base_model):
     name = models.CharField(max_length=200, verbose_name="名称", db_comment='名称')
     source = models.CharField(max_length=200, verbose_name="来源", db_comment='来源', null=True)
-    tag = models.IntegerField(verbose_name="标签", db_comment='标签', null=True)
+    tag = models.JSONField(default=list, verbose_name="标签", db_comment='标签', null=True)
     content = models.TextField(verbose_name="内容", db_comment='内容')
     file = models.JSONField(default=list, db_comment="文件", verbose_name='文件', null=True)
     url = models.CharField(max_length=100, db_comment='文章链接', verbose_name='文章链接', null=True, blank=True)
@@ -412,8 +416,10 @@ class article_comment(base_model):
     user = models.ForeignKey(user_info, on_delete=models.PROTECT)
     article = models.ForeignKey(article, on_delete=models.PROTECT)
     content = models.CharField(max_length=1000, help_text='评论内容')
-    reply = models.ForeignKey(to='self', help_text='回复对象', verbose_name='回复对象', null=True, blank=True, on_delete=models.DO_NOTHING, related_name='reply_set')
-    root = models.ForeignKey(to='self', help_text='根评论对象', verbose_name='根评论对象', null=True, blank=True, on_delete=models.DO_NOTHING, related_name='root_set')
+    reply = models.ForeignKey(to='self', help_text='回复对象', verbose_name='回复对象', null=True,
+                              blank=True, on_delete=models.DO_NOTHING, related_name='reply_set')
+    root = models.ForeignKey(to='self', help_text='根评论对象', verbose_name='根评论对象', null=True,
+                             blank=True, on_delete=models.DO_NOTHING, related_name='root_set')
 
     class Meta:
         db_table = 'article_comment'

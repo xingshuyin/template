@@ -22,8 +22,9 @@ import os
 import hashlib
 from ..permission import SuperPermisssion, UrlPermisssion, LoginPermisssion
 from io import BytesIO
-from PIL import Image
+# from PIL import Image
 import base64
+import gvcode
 from captcha.image import ImageCaptcha
 from random import randint
 from ..utils import METHOD_NAMES, METHOD_NAMES_DETAIL, METHOD_NUMS, ratelimit
@@ -81,6 +82,7 @@ def get_dept_permission(request, dept_id, permission):
 class Data(ViewSet):
     model_name = "数据"
     # 文件上传接口
+    # -------------------------------系统相关--------------------------------
 
     @action(['post'], url_path='upload', url_name='文件上传', detail=False, permission_classes=[LoginPermisssion])
     def upload(self, request: Request):  # TODO:文件上传-上传接口
@@ -234,7 +236,6 @@ class Data(ViewSet):
     @action(['get'], url_path='init_permision', detail=False, url_name='生成接口', permission_classes=[SuperPermisssion])
     def init_permision(self, request: Request):
 
-
         for pattern in urls.urlpatterns:
             # print(pattern.callback.cls.model_name)
             # match = resolve(pattern.pattern)
@@ -289,7 +290,7 @@ class Data(ViewSet):
                 return Response({"detail": "用户已存在"}, status=400)
             else:
                 u = user.objects.create(username=username, password=password)
-                u_info= user_info.objects.create(user=u)
+                u_info = user_info.objects.create(user=u)
                 u.set_password(u.password)
                 u.name = u.username
                 u.role.add(role.objects.get(key='normal'))
@@ -302,29 +303,16 @@ class Data(ViewSet):
     @ratelimit(key='ip', rate='1/s')
     @action(['get'], url_path='captcha', url_name='生成验证码', detail=False, permission_classes=[], authentication_classes=[])
     def captcha(self, request: Request):
+        s, v = gvcode.generate()
+        output_buffer = BytesIO()
+        s.save(output_buffer, format='JPEG')
+        byte_data = output_buffer.getvalue()
+        base64_str = base64.b64encode(byte_data)
+        return Response({"data": base64_str, 'detail': '成功'}, status=200)
 
-        list = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
-        chars = ''
-        for i in range(4):
-            chars += list[randint(0, len(list) - 1)]
-        cache.set('captcha-' + request.META.get('REMOTE_ADDR'), chars, 60)
-        image = ImageCaptcha(font_sizes=(42, 40, 46)).generate(chars)
-        # 将图片写入BytesIO
-        # img_io = BytesIO()
-        # image.save(img_io, 'JPEG')  # 保存图片
+    # -----------------------------文章相关----------------------------
 
-        # # 从BytesIO中获取图片数据
-        # img_byte = img_io.getvalue()
-
-        # 将图片转换为base64格式
-        img_base64 = base64.b64encode(image.getvalue())
-        print(chars)
-        return Response({"data": img_base64, 'detail': '成功'}, status=200)
-
-
-    @action(['get'], url_path='follow', detail=False, url_name='follow', permission_classes=[])
+    @action(['get'], url_path='follow', detail=False, url_name='关注', permission_classes=[])
     def follow(self, request: Request):
         user = request.user
 
@@ -338,9 +326,9 @@ class Data(ViewSet):
             elif followed == 'true':
                 user.follow_user.remove(id)
 
-        
         return Response({'data': 'success'}, 200)
-    @action(['get'], url_path='view', detail=False, url_name='view', permission_classes=[])
+
+    @action(['get'], url_path='view', detail=False, url_name='查看', permission_classes=[])
     def view(self, request: Request):
         type_ = request.GET.get('type')
         id = request.GET.get('id')
@@ -349,8 +337,8 @@ class Data(ViewSet):
             article_.view = article_.view + 1
             article_.save()
             return Response({'data': article_.view}, 200)
-        
-    @action(['get'], url_path='like', detail=False, url_name='like', permission_classes=[])
+
+    @action(['get'], url_path='like', detail=False, url_name='点赞', permission_classes=[])
     def like(self, request: Request):
         user = request.user
         type_ = request.GET.get('type')
@@ -361,10 +349,11 @@ class Data(ViewSet):
                 user.user_info.article_like.add(id)
             elif liked == 'true':
                 user.user_info.article_like.remove(id)
-            return Response({'data': 'success'}, 200)   
+            return Response({'data': 'success'}, 200)
         else:
-            return Response({'data': 'like faild'}, 200)  
-    @action(['get'], url_path='collect', detail=False, url_name='collect', permission_classes=[])
+            return Response({'data': 'like faild'}, 200)
+
+    @action(['get'], url_path='collect', detail=False, url_name='收藏', permission_classes=[])
     def collect(self, request: Request):
         user = request.user
         type_ = request.GET.get('type')
@@ -375,13 +364,12 @@ class Data(ViewSet):
                 user.user_info.article_collect.add(id)
             elif collected == 'true':
                 user.user_info.article_collect.remove(id)
-            return Response({'data': 'success'}, 200)       
+            return Response({'data': 'success'}, 200)
         else:
-            return Response({'data': 'collect faild'}, 200)  
-        
+            return Response({'data': 'collect faild'}, 200)
 
-    @action(['get'], url_path='article_comment', url_name='article_comment', detail=False, permission_classes=[], authentication_classes=[])
-    def article_comment(self, request: Request): # 评论列表
+    @action(['get'], url_path='article_comment', url_name='获取文章评论', detail=False, permission_classes=[], authentication_classes=[])
+    def article_comment(self, request: Request):  # 评论列表
         vid = request.GET.get('id')
         page = int(request.GET.get('page'))
         limit = int(request.GET.get('limit'))
@@ -400,9 +388,9 @@ class Data(ViewSet):
             i['replys'] = list(replys.values())
             r.append(i)
         return Response({'data': r, 'total': total})
-    
-    @action(['get'], url_path='comment', url_name='comment', detail=False, permission_classes=[])
-    def comment(self, request: Request): # 评论
+
+    @action(['get'], url_path='comment', url_name='评论', detail=False, permission_classes=[])
+    def comment(self, request: Request):  # 评论
         user = request.user
         filter_dict = request.GET.dict()
         if 'reply_id' in filter_dict.keys():
@@ -411,7 +399,7 @@ class Data(ViewSet):
             else:
                 filter_dict['reply_id'] = None
         if 'root_id' in filter_dict.keys():
-            if  filter_dict['root_id']:
+            if filter_dict['root_id']:
                 filter_dict['root_id'] = int(filter_dict['root_id'])
             else:
                 filter_dict['root_id'] = None

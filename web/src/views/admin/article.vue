@@ -48,7 +48,11 @@
                 <el-input v-model="attrs.add_form.name" />
             </el-form-item>
             <el-form-item label="标签" prop="tag">
-                <el-input v-model="attrs.add_form.tag" />
+                <!-- <el-input v-model="attrs.add_form.tag" /> -->
+                <el-select v-model="attrs.add_form.tag" multiple filterable allow-create default-first-option
+                    :reserve-keyword="false" placeholder="添加标签">
+                    <!-- <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" /> -->
+                </el-select>
             </el-form-item>
             <el-form-item label="浏览数" prop="view">
                 <el-input v-model="attrs.add_form.view" />
@@ -116,16 +120,16 @@ const attrs = reactive({
     columns: [
         { type: 'text', label: '名称', prop: 'name', align: "left", show: true },
         { type: 'link', width: 350, label: '链接', prop: 'url', align: "center", show: true },
-        { type: 'text', width: 100, label: '标签', prop: 'tag', align: "left", show: true },
+        { type: 'list', width: 100, label: '标签', prop: 'tag', align: "left", show: true },
         { type: 'text', width: 100, label: '浏览数', prop: 'view', align: "left", show: true },
         { type: 'text', width: 100, label: '点赞数', prop: 'like', align: "left", show: true },
         { type: 'text', width: 100, label: '评论数', prop: 'comment', align: "left", show: true },
         { type: 'text', width: 100, label: '收藏数', prop: 'collect', align: "left", show: true },
-        { type: 'text', width: 100, label: '是否删除', prop: 'is_delete', align: "left", show: true },
-        { type: 'text', width: 100, label: '是否置顶', prop: 'is_top', align: "left", show: true },
-        { type: 'text', width: 100, label: '是否热门', prop: 'is_hot', align: "left", show: true },
-        { type: 'text', width: 100, label: '是否原创', prop: 'is_original', align: "left", show: true },
-        { type: 'text', width: 100, label: '是否推荐', prop: 'is_recommend', align: "left", show: true },
+        { type: 'bool', width: 100, label: '是否删除', prop: 'is_delete', align: "center", show: true },
+        { type: 'bool', width: 100, label: '是否置顶', prop: 'is_top', align: "center", show: true },
+        { type: 'bool', width: 100, label: '是否热门', prop: 'is_hot', align: "center", show: true },
+        { type: 'bool', width: 100, label: '是否原创', prop: 'is_original', align: "center", show: true },
+        { type: 'bool', width: 100, label: '是否推荐', prop: 'is_recommend', align: "center", show: true },
         { type: 'jfile', width: 150, label: '文件', prop: 'file', align: "center", show: true },
         { type: 'text', width: 160, label: '创建时间', prop: 'create_time', align: "center", show: true, sortable: true },
     ],

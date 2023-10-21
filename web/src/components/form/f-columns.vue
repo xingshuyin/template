@@ -40,12 +40,30 @@ store().get_userinfo().then((res) => {
                 </el-tag>
             </template>
         </el-table-column>
-        <!-- 多选 -->
+        <!-- 字典列表 -->
+        <el-table-column v-else-if="i.type == 'list_dict' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
+            :sortable="i.sortable" :width="i.width">
+            <template #default="scope">
+                <el-tag effect="dark" v-for="v in scope.row[i.prop]">
+                    {{ i.option[v][i?.key ? i?.key : 'name'] }}
+                </el-tag>
+            </template>
+        </el-table-column>
+        <!-- 列表 -->
         <el-table-column v-else-if="i.type == 'list' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
             :sortable="i.sortable" :width="i.width">
             <template #default="scope">
                 <el-tag effect="dark" v-for="v in scope.row[i.prop]">
-                    {{ i.option[v].name }}
+                    {{ v }}
+                </el-tag>
+            </template>
+        </el-table-column>
+        <!-- bool -->
+        <el-table-column v-else-if="i.type == 'bool' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
+            :sortable="i.sortable" :width="i.width">
+            <template #default="scope">
+                <el-tag effect="dark">
+                    {{ scope.row[i.prop] ? '是' : '否' }}
                 </el-tag>
             </template>
         </el-table-column>

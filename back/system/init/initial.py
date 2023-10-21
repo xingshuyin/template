@@ -14,8 +14,10 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'root.settings'  # 设置项目的配置�
 django.setup()  # 加载项目配置
 # TODO:初始化数据
 from system.models import *
-from system.views.data import Data
-from system.urls import urlpatterns
+# from system.views.data import Data
+# import system.views.data as data_
+# 循环引用, 可以另一个引用了被循环0引用的, 比如 system.views.data 已经被 system.urls 引用, 而本文件已经引用了system.urls 就可以从 system.urls 引用system.views.data 而不是直接引用他
+from system.urls import urlpatterns, data_
 from django.urls import get_resolver, resolve
 # resolver = get_resolver()
 # patterns = resolver.url_patterns
@@ -25,14 +27,14 @@ def init_user():
     l = [
         {
             'id': 1,
-            'name': '管理员',
+            # 'name': '管理员',
             'username': 'admin',
             'password': 'admin',
             'is_super': True
         },
         {
             'id': 2,
-            'name': '用户',
+            # 'name': '用户',
             'username': 'user',
             'password': 'user',
             'is_super': False
@@ -245,7 +247,7 @@ def init_interface():
         else:
             names = METHOD_NAMES
 
-        if pattern.callback.cls == Data:
+        if pattern.callback.cls == data_.Data:
             for i in pattern.callback.actions.keys():
                 method_num = METHOD_NUMS[i]
                 model_name_ = 'data'
@@ -315,11 +317,11 @@ def init_spider():
 
 def init():
 
-    # init_user()
-    # init_menu()
+    init_user()
+    init_menu()
     init_interface()
-    # init_role()
-    # init_area()
+    init_role()
+    init_area()
     # init_spider()
 
 

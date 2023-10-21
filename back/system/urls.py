@@ -1,4 +1,4 @@
-from django.urls import path, get_resolver
+# from django.urls import path, get_resolver
 from .views.views_model import view_list
 from rest_framework.routers import SimpleRouter, Route, DynamicRoute
 import system.views.data as data_
