@@ -1,48 +1,54 @@
 <template>
-  <view class="content">
-    <image class="logo" src="/static/logo.png"></image>
-    <view class="text-area">
-      <text class="title">{{ title }}</text>
-    </view>
+  <view style="height: var(--status-bar-height);position: fixed;top: 0;background-color: antiquewhite;width: 100vw;">
+    <!-- 这里是状态栏 -->
   </view>
+  <view style="height: var(--status-bar-height);">
+    <!-- 这里是状态栏 -->
+  </view>
+  <articleL ref="articleLRef" :data="attrs.data"></articleL>
 </template>
-
-<script>
-export default {
-  data() {
-    return {
-      title: 'Hello',
-    }
+<script setup>
+import articleL from '../../components/list/articleL'
+import r from '../../utils/request'
+import rest from '../../utils/rest'
+import { onMounted, reactive, ref } from 'vue'
+import { onLoad, onReady, onShow, onHide, onUnload, onPullDownRefresh, onReachBottom, onPageScroll, onShareAppMessage } from '@dcloudio/uni-app';
+const articleLRef = ref();
+const attrs = reactive({
+  url: 'article',
+  form: {
+    page: 1,
+    limit: 10,
   },
-  onLoad() {},
-  methods: {},
+  end: false,
+  data: [],
+  loading: false,
+});
+
+const get_data = (replace) => {
+  attrs.loading = true
+  if (replace) attrs.form.page = 1;
+  rest.list(attrs.url, attrs.form, null, null, (res) => {
+    attrs.loading = false
+    if (replace) { attrs.data = res.data.data; articleLRef.value.check(0) }
+    else {
+      if (res.data.data.length === 0) { attrs.end = true }
+      else {
+        let l = attrs.data.length
+        attrs.data.push(...res.data.data); attrs.form.page++; articleLRef.value.check(l)
+      }
+    }
+  })
 }
+
+onMounted(() => {
+  get_data()
+})
+onReachBottom(() => {
+  get_data()
+})
+onPullDownRefresh(() => {
+  get_data(true)
+})
 </script>
-
-<style>
-.content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.logo {
-  height: 200rpx;
-  width: 200rpx;
-  margin-top: 200rpx;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 50rpx;
-}
-
-.text-area {
-  display: flex;
-  justify-content: center;
-}
-
-.title {
-  font-size: 36rpx;
-  color: #8f8f94;
-}
-</style>
+<style scoped lang='scss'></style>

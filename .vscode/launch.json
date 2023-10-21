@@ -9,7 +9,7 @@
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/back/manage.py",
-      "args": ["runserver", "8002"],
+      "args": ["runserver", "8000"],
       "django": true,
       "justMyCode": true
     },
@@ -72,6 +72,20 @@
       "justMyCode": true,
       "args": ["crawl", "spider"],
       "cwd": "${workspaceFolder}/spider"
+    },
+    {
+      "command": "npm run dev:mp-weixin",
+      "name": "dev:mp-weixin",
+      "request": "launch",
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}/uni"
+    },
+    {
+      "command": "npm run build:mp-weixin",
+      "name": "build:mp-weixin",
+      "request": "launch",
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}/uni"
     }
   ]
 }

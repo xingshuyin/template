@@ -389,6 +389,8 @@ class enterprise(base_model):
 class article(base_model):
     name = models.CharField(max_length=200, verbose_name="名称", db_comment='名称')
     source = models.CharField(max_length=200, verbose_name="来源", db_comment='来源', null=True)
+    source_root = models.CharField(max_length=200, verbose_name="基础来源", db_comment='基础来源', null=True)
+    source_sub = models.CharField(max_length=200, verbose_name="子版块", db_comment='子版块', null=True)
     tag = models.JSONField(default=list, verbose_name="标签", db_comment='标签', null=True)
     content = models.TextField(verbose_name="内容", db_comment='内容')
     file = models.JSONField(default=list, db_comment="文件", verbose_name='文件', null=True)

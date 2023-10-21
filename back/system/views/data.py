@@ -117,8 +117,6 @@ class Data(ViewSet):
     def GetAllMenu(self, request: Request):
         interfaces = MyQuerySet(interface)
         menus = list(MyQuerySet(menu).values())
-        # for i in menus:
-        #     i['interfaces'] = list(interfaces.filter(menu__id=i['id']).values())
         return Response(menus, status=200)
 
     # 获取角色权限 及接口权限
@@ -215,9 +213,7 @@ class Data(ViewSet):
             path = f.file.path
             im = Image.open(path)
             im.save(zip_path, quality=7)  # quality 是压缩比率, 值越小图片越小
-        # r = open(zip_path, "rb")
         return FileResponse(open(zip_path, "rb"))
-        # return HttpResponse(r.read(), content_type='image/jpg')
 
     # TODO:临时文件下载
     @action(['get'], url_path='temp', url_name='临时文件下载', detail=True, permission_classes=[])
@@ -237,8 +233,6 @@ class Data(ViewSet):
     def init_permision(self, request: Request):
 
         for pattern in urls.urlpatterns:
-            # print(pattern.callback.cls.model_name)
-            # match = resolve(pattern.pattern)
             if "(?P<pk>[^/.]+)" in str(pattern.pattern):
                 names = METHOD_NAMES_DETAIL
             else:
@@ -269,13 +263,6 @@ class Data(ViewSet):
                               pattern.callback.actions[i], pattern.pattern, model_name, method_num)
                         interface.objects.update_or_create(defaults={'name': model_name + '-' + method_name, 'key': model_name_ + '-' + pattern.callback.actions[i], 'method': method_num, 'path': pattern.pattern, 'model': model_name_, 'model_name': model_name},
                                                            name=model_name + '-' + method_name, key=model_name_ + '-' + pattern.callback.actions[i], method=method_num, path=pattern.pattern, model=model_name_)
-
-        # menus = menu.objects.all()
-        # for m in menus:
-        #     n = m._meta.object_name
-        #     for i in [['add', '添加', 1, "/" + m.name + "/"], ['delete', '删除', 3, "/" + m.name + "/{id}/"], ['put', '修改', 2, "/" + m.name + "/{id}/"], ['list', '查询', 0, "/" + m.name + "/"]]:
-        #         interface.objects.update_or_create(defaults={'name': m.label + '_' + i[1], 'key': m.name + '_' + i[0], 'method': i[2]},
-        #                                             name=m.label + '_' + i[1], key=m.name + '_' + i[0], method=i[2], path=i[3], menu=m)
         return Response({'detail': '接口初始化成功'}, status=200)
 
     # 注册
@@ -312,10 +299,9 @@ class Data(ViewSet):
 
     # -----------------------------文章相关----------------------------
 
-    @action(['get'], url_path='follow', detail=False, url_name='关注', permission_classes=[])
+    @action(['get'], url_path='follow', detail=False, url_name='follow', permission_classes=[])
     def follow(self, request: Request):
         user = request.user
-
         type_ = request.GET.get('type')
         followed = request.GET.get('followed')
         print(followed, type(followed))
@@ -323,10 +309,12 @@ class Data(ViewSet):
         if type_ == 'user':
             if followed == 'false':
                 user.user_info.follow_user.add(id)
+                followed = 'true'
             elif followed == 'true':
-                user.follow_user.remove(id)
+                user.user_info.follow_user.remove(id)
+                followed = 'false'
 
-        return Response({'data': 'success'}, 200)
+        return Response({'data': followed}, 200)
 
     @action(['get'], url_path='view', detail=False, url_name='查看', permission_classes=[])
     def view(self, request: Request):
@@ -343,15 +331,23 @@ class Data(ViewSet):
         user = request.user
         type_ = request.GET.get('type')
         liked = request.GET.get('liked')
+        print('canshu', type_, liked)
         id = request.GET.get('id')
         if type_ == 'article':
+            article_ = article.objects.get(id=id)
             if liked == 'false':
                 user.user_info.article_like.add(id)
+                liked = 'true'
+                article_.like += 1
             elif liked == 'true':
                 user.user_info.article_like.remove(id)
-            return Response({'data': 'success'}, 200)
+                liked = 'false'
+                article_.like -= 1
+            article_.save()
+            print('jieguo', liked)
+            return Response({'data': liked}, 200)
         else:
-            return Response({'data': 'like faild'}, 200)
+            return Response({'data': 'error'}, 200)
 
     @action(['get'], url_path='collect', detail=False, url_name='收藏', permission_classes=[])
     def collect(self, request: Request):
@@ -360,13 +356,19 @@ class Data(ViewSet):
         collected = request.GET.get('collected')
         id = request.GET.get('id')
         if type_ == 'article':
+            article_ = article.objects.get(id=id)
             if collected == 'false':
                 user.user_info.article_collect.add(id)
+                collected = 'true'
+                article_.collect += 1
             elif collected == 'true':
                 user.user_info.article_collect.remove(id)
-            return Response({'data': 'success'}, 200)
+                collected = 'false'
+                article_.collect -= 1
+            article_.save()
+            return Response({'data': collected}, 200)
         else:
-            return Response({'data': 'collect faild'}, 200)
+            return Response({'data': collected}, 200)
 
     @action(['get'], url_path='article_comment', url_name='获取文章评论', detail=False, permission_classes=[], authentication_classes=[])
     def article_comment(self, request: Request):  # 评论列表
@@ -390,7 +392,7 @@ class Data(ViewSet):
         return Response({'data': r, 'total': total})
 
     @action(['get'], url_path='comment', url_name='评论', detail=False, permission_classes=[])
-    def comment(self, request: Request):  # 评论
+    def comment(self, request: Request):
         user = request.user
         filter_dict = request.GET.dict()
         if 'reply_id' in filter_dict.keys():
@@ -408,5 +410,9 @@ class Data(ViewSet):
         media_type = request.GET.get('media_type')
         media_id = request.GET.get('media_id')
         if media_type == 'article':
-            article_comment.objects.create(user_id=user.user_info.id, article_id=media_id, **filter_dict)
-        return Response({})
+            media = article.objects.get(id=media_id)
+            article_comment.objects.create(user_id=user.id, article_id=media_id, **filter_dict)
+            media.comment += 1
+            print(media.comment)
+            media.save()
+        return Response({'article_id': media_id, **filter_dict})

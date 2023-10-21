@@ -9,7 +9,7 @@ attrs.columns = [
 <script setup>
 //TODO:动态列
 const props = defineProps(['modelValue']); // defineProps的参数, 可以直接使用
-//const emits = defineEmits(['update:modelValue']); // emits 触发父组件函数
+const emits = defineEmits(['update:modelValue']); // emits 触发父组件函数
 
 
 </script>
@@ -80,8 +80,5 @@ const props = defineProps(['modelValue']); // defineProps的参数, 可以直接
             <f-jimage v-model="attrs.add_form.image" :limit="10" :size="3" />
         </el-form-item> -->
     </el-form>
-
 </template>
-<style scoped lang='scss'>
-
-</style>
+<style scoped lang='scss'></style>

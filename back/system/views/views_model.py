@@ -273,7 +273,7 @@ def list_common(self, request: HttpRequest, *args):
         for k, v in temp_dict.items():
             if v == '' or v == 'null' or v == 'undefined':  # 删除无用过滤字段
                 del filter_dict[k]
-        for i in ['page', 'limit', 'values[]', 'defer[]']:
+        for i in ['page', 'limit', 'values[]', 'defer[]', 'extra[]']:
             if i in filter_dict.keys():
                 del filter_dict[i]
         queryset, filter_dict = special_filter(request, queryset, filter_dict)
