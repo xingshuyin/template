@@ -46,15 +46,15 @@ export default ({ mode }) => {
       proxy: {
         //TODO:跨域设置
         "/api": {
-          target: "http://127.0.0.1:8002/",
+          target: "http://127.0.0.1:8000/",
           changeOrigin: true,
-          rewrite: path => path.replace(/\/api/, ""),
+          rewrite: (path) => path.replace(/\/api/, ""),
         },
         "/media": {
           //TODO:图片路径转发
-          target: "http://127.0.0.1:8002/",
+          target: "http://127.0.0.1:8000/",
           changeOrigin: true,
-          rewrite: path => path,
+          rewrite: (path) => path,
         },
       },
       open: "http://localhost:5173/", //dev后打开链接
@@ -84,7 +84,21 @@ export default ({ mode }) => {
             //TODO:自动导入图标-自动注册图标组件
             //使用方法 //<i-ep-edit />       ep就是elementplus的图标组的名字   edit为图标名称   只是好像不能与动态组件一块用
             //图标组网站  https://icones.netlify.app/collection/ep
-            enabledCollections: ["ion", "ph", "material-symbols", "ep", "mdi", "iconoir", "ic", "uil", "teenyicons", "ooui", "carbon", "fa6-solid", "ri"],
+            enabledCollections: [
+              "ion",
+              "ph",
+              "material-symbols",
+              "ep",
+              "mdi",
+              "iconoir",
+              "ic",
+              "uil",
+              "teenyicons",
+              "ooui",
+              "carbon",
+              "fa6-solid",
+              "ri",
+            ],
           }),
           //TODO:自动导入-自动导入element-ui方法
           ElementPlusResolver(),
