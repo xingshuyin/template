@@ -29,7 +29,7 @@ store().get_userinfo().then((res) => {
     <template v-for="i in attrs.columns">
         <!-- 普通文本 -->
         <el-table-column v-if="i.type == 'text' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
-            :sortable="i.sortable" :width="i.width">
+            :sortable="i.sortable" :width="i.width" :show-overflow-tooltip="i?.overflow">
         </el-table-column>
         <!-- 单选用标签 -->
         <el-table-column v-else-if="i.type == 'select' && i.show" :align="i.align" :label="i.label" :prop="i.prop"

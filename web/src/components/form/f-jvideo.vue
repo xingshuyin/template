@@ -90,10 +90,9 @@ watch(() => { return props.modelValue }, () => {
 })
 </script>
 <template>
-    <el-upload class="image-upload" v-model:file-list="attrs.file_list" :limit="limit" drag action="/api/data/upload/"
+    <el-upload class="video-upload" v-model:file-list="attrs.file_list" :limit="limit" drag action="/api/data/upload/"
         @on-progress="upload_file_" :on-remove="remove" :before-remove="before_remove" :on-success="sucess"
-        :before-upload="before_upload" accept="image/*" :headers="attrs.headers" :on-exceed="exceed"
-        list-type="picture-card">
+        :before-upload="before_upload" accept="video/*" :headers="attrs.headers" :on-exceed="exceed">
         <el-icon class="el-icon--upload"><upload-filled /></el-icon>
         <div class="el-upload__text">
             拖拽或点击上传
@@ -106,15 +105,9 @@ watch(() => { return props.modelValue }, () => {
     </el-upload>
 </template>
 <style scoped lang='scss'>
-.image-upload {
-    :deep(.el-upload) {
+.video-upload {
+    :deep(.el-upload-dragger) {
         --el-upload-dragger-padding-horizontal: 10px;
-        --el-upload-picture-card-size: 130px;
-        border: 0;
-
-        .el-upload__text {
-            white-space: nowrap;
-        }
     }
 }
 </style>

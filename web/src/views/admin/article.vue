@@ -43,18 +43,24 @@
 
     <el-dialog v-model="attrs.adding" class="add_form" :title="attrs.submit_type == 'add' ? '新增' : '编辑'" width="80%"
         :modal="false" fullscreen append-to-body>
-        <el-form :model="attrs.add_form" label-width="80px" :rules="rules" ref="form_dom">
+        <el-form :model="attrs.add_form" label-width="80px" :rules="rules" ref="form_dom" label-position="left"
+            require-asterisk-position="right">
             <el-form-item label="名称" prop="name">
                 <el-input v-model="attrs.add_form.name" />
             </el-form-item>
+            <el-form-item label="类型" prop="type">
+                <el-select v-model="attrs.add_form.type" filterable default-first-option :reserve-keyword="false"
+                    placeholder="类型">
+                    <el-option v-for="value, key in article_type" :key="key" :label="value" :value="key" />
+                </el-select>
+            </el-form-item>
             <el-form-item label="标签" prop="tag">
-                <!-- <el-input v-model="attrs.add_form.tag" /> -->
                 <el-select v-model="attrs.add_form.tag" multiple filterable allow-create default-first-option
                     :reserve-keyword="false" placeholder="添加标签">
                     <!-- <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" /> -->
                 </el-select>
             </el-form-item>
-            <el-form-item label="浏览数" prop="view">
+            <!-- <el-form-item label="浏览数" prop="view">
                 <el-input v-model="attrs.add_form.view" />
             </el-form-item>
             <el-form-item label="点赞数" prop="like">
@@ -65,25 +71,54 @@
             </el-form-item>
             <el-form-item label="收藏数" prop="collect">
                 <el-input v-model="attrs.add_form.collect" />
-            </el-form-item>
-            <el-form-item label="是否删除" prop="is_delete">
-                <el-switch v-model="attrs.add_form.is_delete" />
-            </el-form-item>
-            <el-form-item label="是否置顶" prop="is_top">
-                <el-switch v-model="attrs.add_form.is_top" />
-            </el-form-item>
-            <el-form-item label="是否热门" prop="is_hot">
-                <el-switch v-model="attrs.add_form.is_hot" />
-            </el-form-item>
-            <el-form-item label="是否原创" prop="is_original">
-                <el-switch v-model="attrs.add_form.is_original" />
-            </el-form-item>
-            <el-form-item label="是否推荐" prop="is_recommend">
-                <el-switch v-model="attrs.add_form.is_recommend" />
-            </el-form-item>
-            <el-form-item label="文件" prop="file">
-                <f-jfile v-model="attrs.add_form.file" :limit="10" :size="3" />
-            </el-form-item>
+            </el-form-item> -->
+            <el-row :gutter="30">
+                <el-col :span="2">
+                    <el-form-item label="是否删除" prop="is_delete">
+                        <el-switch v-model="attrs.add_form.is_delete" />
+                    </el-form-item>
+                </el-col>
+                <el-col :span="2">
+                    <el-form-item label="是否置顶" prop="is_top">
+                        <el-switch v-model="attrs.add_form.is_top" />
+                    </el-form-item>
+                </el-col>
+                <el-col :span="2">
+                    <el-form-item label="是否热门" prop="is_hot">
+                        <el-switch v-model="attrs.add_form.is_hot" />
+                    </el-form-item>
+                </el-col>
+                <el-col :span="2">
+                    <el-form-item label="是否原创" prop="is_original">
+                        <el-switch v-model="attrs.add_form.is_original" />
+                    </el-form-item>
+                </el-col>
+                <el-col :span="2">
+                    <el-form-item label="是否推荐" prop="is_recommend">
+                        <el-switch v-model="attrs.add_form.is_recommend" />
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row :gutter="36">
+                <el-col :span="4">
+                    <el-form-item label="文件" prop="file">
+                        <f-jfile v-model="attrs.add_form.file" :limit="10" :size="3" accept="" />
+                    </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                    <el-form-item label="图片" prop="image">
+                        <f-jimage v-model="attrs.add_form.image" :limit="10" :size="3" />
+                    </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                    <el-form-item label="视频" prop="video">
+                        <f-jvideo v-model="attrs.add_form.video" :limit="10" :size="30" />
+                    </el-form-item>
+                </el-col>
+                <el-col :span="4"></el-col>
+                <el-col :span="4"></el-col>
+                <el-col :span="4"></el-col>
+            </el-row>
             <el-form-item label="链接" prop="link">
                 <el-input v-model="attrs.add_form.link" />
             </el-form-item>
@@ -106,6 +141,7 @@
 
 <script setup>
 import { get_data_, select_, mult_delete_, sort_, submit_, export_data_ } from '../../hooks/table_common'
+import { article_type } from '../../utils/data';
 import r from '../../utils/request';
 import store from '../../store';
 store().get_userinfo().then((res) => {
@@ -116,21 +152,28 @@ store().get_userinfo().then((res) => {
         attrs.can_create = true
     }
 })
+
+
+
 const attrs = reactive({
     columns: [
-        { type: 'text', label: '名称', prop: 'name', align: "left", show: true },
-        { type: 'link', width: 350, label: '链接', prop: 'url', align: "center", show: true },
-        { type: 'list', width: 100, label: '标签', prop: 'tag', align: "left", show: true },
-        { type: 'text', width: 100, label: '浏览数', prop: 'view', align: "left", show: true },
-        { type: 'text', width: 100, label: '点赞数', prop: 'like', align: "left", show: true },
-        { type: 'text', width: 100, label: '评论数', prop: 'comment', align: "left", show: true },
-        { type: 'text', width: 100, label: '收藏数', prop: 'collect', align: "left", show: true },
-        { type: 'bool', width: 100, label: '是否删除', prop: 'is_delete', align: "center", show: true },
-        { type: 'bool', width: 100, label: '是否置顶', prop: 'is_top', align: "center", show: true },
-        { type: 'bool', width: 100, label: '是否热门', prop: 'is_hot', align: "center", show: true },
-        { type: 'bool', width: 100, label: '是否原创', prop: 'is_original', align: "center", show: true },
-        { type: 'bool', width: 100, label: '是否推荐', prop: 'is_recommend', align: "center", show: true },
+        { type: 'text', width: 100, label: '名称', prop: 'name', align: "left", show: true, overflow: true },
+        { type: 'list', width: 100, label: '标签', prop: 'tag', align: "center", show: true },
+        { type: 'select', width: 100, label: '类型', prop: 'type', align: "center", show: true, option: article_type },
         { type: 'jfile', width: 150, label: '文件', prop: 'file', align: "center", show: true },
+        { type: 'jfile', width: 150, label: '图片', prop: 'image', align: "center", show: true },
+        { type: 'jfile', width: 150, label: '视频', prop: 'video', align: "center", show: true },
+
+        { type: 'bool', width: 80, label: '是否删除', prop: 'is_delete', align: "center", show: true },
+        { type: 'bool', width: 80, label: '是否置顶', prop: 'is_top', align: "center", show: true },
+        { type: 'bool', width: 80, label: '是否热门', prop: 'is_hot', align: "center", show: true },
+        { type: 'bool', width: 80, label: '是否原创', prop: 'is_original', align: "center", show: true },
+        { type: 'bool', width: 80, label: '是否推荐', prop: 'is_recommend', align: "center", show: true },
+        { type: 'link', width: 150, label: '链接', prop: 'url', align: "center", show: true },
+        { type: 'text', width: 70, label: '浏览数', prop: 'view', align: "center", show: true },
+        { type: 'text', width: 70, label: '点赞数', prop: 'like', align: "center", show: true },
+        { type: 'text', width: 70, label: '评论数', prop: 'comment', align: "center", show: true },
+        { type: 'text', width: 70, label: '收藏数', prop: 'collect', align: "center", show: true },
         { type: 'text', width: 160, label: '创建时间', prop: 'create_time', align: "center", show: true, sortable: true },
     ],
     base_url: 'article',
@@ -160,36 +203,30 @@ const rules = reactive({  //https://element-plus.gitee.io/zh-CN/component/form.h
     name: [
         { required: true, message: '请填写名称', trigger: 'blur' },
     ],
-    code: [
-        { required: true, message: '请填写编码', trigger: 'blur' },
+    content: [
+        { required: true, message: '请填写内容', trigger: 'blur' },
     ],
 })
 const validate = () => {
     form_dom.value.validate((valid, fields) => {
         if (valid) {
-            submit_(attrs.base_url, attrs.add_form, attrs.submit_type, submit_success); attrs.adding = false
+            submit_(attrs.base_url, attrs.add_form, attrs.submit_type, submit_success);
         }
     })
 }
 const submit_success = (res) => {
-    if (attrs.submit_type == 'add') {
-        attrs.data.shift(res.data)
-        attrs.add_form = {};
-    }
+    console.log(res);
 
-    get_data()
-}
-const get_data = async () => {
-    attrs.areas_tree = await store().get_areas_tree();
-    get_data_(`/${attrs.base_url}/`, { create_start: special_form.range[0], create_end: special_form.range[1], ...form }, attrs)
-}
-get_data()
-watch([form, special_form], () => {
-    if (special_form.range == null) {
-        special_form.range = [undefined, undefined]
+    if (res.status < 400) {
+        attrs.adding = false
+        if (attrs.submit_type == 'add') {
+            attrs.data.shift(res.data)
+            attrs.add_form = {};
+        }
+        get_data()
     }
-    get_data()
-})
+}
+
 const upload_image = (event, insertImage, files) => {
     console.log(files)
     r().post('/data/upload/', { file: files[0] }, {
@@ -207,6 +244,19 @@ const upload_image = (event, insertImage, files) => {
         });
     })
 }
+
+
+const get_data = async () => {
+    attrs.areas_tree = await store().get_areas_tree();
+    get_data_(`/${attrs.base_url}/`, { create_start: special_form.range[0], create_end: special_form.range[1], ...form }, attrs)
+}
+get_data()
+watch([form, special_form], () => {
+    if (special_form.range == null) {
+        special_form.range = [undefined, undefined]
+    }
+    get_data()
+})
 </script>
 
 <style scoped lang="scss">

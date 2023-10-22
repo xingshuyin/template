@@ -13,7 +13,7 @@ import { reactive } from 'vue';
 import { get_token } from '../../utils/request'
 import { upload_file_, remove_file_, remove_jfile_ } from '../../hooks/table_common'
 //const router = useRouter() //全局路由对象
-const props = defineProps(['modelValue', 'limit', 'size']); // limit数量限制   size大小限制(mb)
+const props = defineProps(['modelValue', 'limit', 'size', 'accept']); // limit数量限制   size大小限制(mb)
 //  <Uimg v-model="attrs.add_form.door_img" :limit="1" :size="3" :file-list="attrs.add_form.door_img ? [{ url: attrs.add_form.door_img }] : []">
 //  </Uimg>
 //  :file-list为文件列表,需要传入由{name:'img',  value: 'url'}  组成的的列表, name可以不传
@@ -91,10 +91,24 @@ watch(() => { return props.modelValue }, () => {
 })
 </script>
 <template>
-    <el-upload v-model:file-list="attrs.file_list" :limit="limit" action="/api/data/upload/" @on-progress="upload_file_"
-        :on-remove="remove" :before-remove="before_remove" :on-success="sucess" :before-upload="before_upload"
-        :headers="attrs.headers" :on-exceed="exceed">
-        <el-button type="primary">选择文件</el-button>
+    <el-upload class="file-upload" v-model:file-list="attrs.file_list" :limit="limit" drag action="/api/data/upload/"
+        @on-progress="upload_file_" :on-remove="remove" :before-remove="before_remove" :on-success="sucess"
+        :before-upload="before_upload" :accept="accept" :headers="attrs.headers" :on-exceed="exceed">
+        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+        <div class="el-upload__text">
+            拖拽或点击上传
+        </div>
+        <template #tip>
+            <div class="el-upload__tip">
+                文件大小不能超过 {{ props.size }} mb
+            </div>
+        </template>
     </el-upload>
 </template>
-<style scoped lang='scss'></style>
+<style scoped lang='scss'>
+.file-upload {
+    :deep(.el-upload-dragger) {
+        --el-upload-dragger-padding-horizontal: 10px;
+    }
+}
+</style>
