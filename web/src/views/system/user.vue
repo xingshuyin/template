@@ -9,7 +9,7 @@
                 @click="mult_delete_(`/${attrs.base_url}/mult_destroy/`, attrs.selects, get_data)"
                 v-if="attrs.selects.length > 0">批量删除
             </el-button>
-            <el-button v-if="attrs.can_create" icon="Plus" circle
+            <el-button type="primary" v-if="attrs.can_create" icon="Plus" circle
                 @click="attrs.adding = true; attrs.add_form = {}; attrs.submit_type = 'add'; attrs.submit_type = 'add'" />
             <f-columns-edit v-if="attrs.columns" v-model="attrs.columns" :base_url="attrs.base_url"></f-columns-edit>
         </div>

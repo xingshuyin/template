@@ -61,3 +61,5 @@ export const spider_type = {
   1: "分页爬虫",
   2: "json分页爬虫",
 };
+
+export const article_type = { 1: "图片", 2: "视频", 3: "文本" };

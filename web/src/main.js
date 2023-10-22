@@ -1,32 +1,40 @@
 import { createApp } from "vue";
+import App from "./App.vue";
 import "./style.scss";
-import "./element.scss";
 import "./initial.css";
 import "./assets/css/quill.snow.css";
 // import "uno.css"; // npm i -D @unocss/vite (无预设安装)   还需要在vite.config.ts中配置  具体看->  https://github.com/unocss/unocss/tree/main/packages/vite
-import "animate.css";
-import "element-plus/dist/index.css"; //导入element样式文件
 import r from "./utils/request";
+import "animate.css";
+
+// --------------web端进度条--------------
+import "nprogress/nprogress.css"; //TODO:web-进度条
+import NProgress from "nprogress"; // npm install --save nprogress
 
 // import BaiduMap from "vue-baidu-map-3x"; //npm install vue-baidu-map-3x --save
 
+// ------------element - plus---------------
+import "./element.scss";
+import "element-plus/dist/index.css"; //导入element样式文件
 import * as ElementPlusIconsVue from "@element-plus/icons-vue"; //引入所有element图标
 
+// ----------------pinia状态管理----------------
 import { createPinia } from "pinia"; //引入pinia   npm install pinia
-import store from "./store/index";
 const pinia = createPinia();
+import store from "./store/index";
 
-import App from "./App.vue";
-import vue3videoPlay from "vue3-video-play"; // 引入组件  npm i vue3-video-play --save
+// ------------router路由管理---------------
+import route from "./route"; //引入路由组件
+const views = import.meta.glob("./views/*/*.vue"); //TODO:动态路由-引入所有菜单路径,然后才能动态引入
+
+// ---------------视频播放-------------------
+import vue3videoPlay from "vue3-video-play"; // 引入组件  npm i vue3-video-play --save     https://xdlumia.github.io/guide/install.html
 import "vue3-video-play/dist/style.css"; // 引入css    npm i vue3-video-play --save
 
-const views = import.meta.glob("./views/*/*.vue"); //TODO:动态路由-引入所有菜单路径,然后才能动态引入
-import route from "./route"; //引入路由组件
-
+// -------------markdown编辑器---------------
 import VMdEditor from "@kangc/v-md-editor"; //pnpm i @kangc/v-md-editor@next -S
 import "@kangc/v-md-editor/lib/style/base-editor.css";
 import vuepressTheme from "@kangc/v-md-editor/lib/theme/vuepress.js";
-
 import VMdPreview from "@kangc/v-md-editor/lib/preview";
 import "@kangc/v-md-editor/lib/style/preview.css";
 import githubTheme from "@kangc/v-md-editor/lib/theme/github.js";
@@ -40,6 +48,8 @@ VMdEditor.use(vuepressTheme, {
 VMdPreview.use(githubTheme, {
   Hljs: hljs,
 });
+
+//-------------------组件注册-------------------
 
 const app = createApp(App);
 app.use(route); //使用路由组件
@@ -59,7 +69,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 const RoutesTree = (data, parent) => {
   //TODO:生成树状结构
   let d = [];
-  data.forEach(item => {
+  data.forEach((item) => {
     if (item.parent == parent && item.disable == 0) {
       d.push({
         id: item.id,
@@ -80,7 +90,7 @@ const RoutesTree = (data, parent) => {
 };
 
 const set_menu = () => {
-  store().menu.forEach(element => {
+  store().menu.forEach((element) => {
     route.addRoute("layout", element);
   });
   store().hasmenu = true;
@@ -89,7 +99,7 @@ const set_menu = () => {
 const get_menu = (to, next) => {
   r()
     .get("/data/GetMenu/", { params: { disable: false } })
-    .then(res => {
+    .then((res) => {
       if (res) {
         let routestree = RoutesTree(res.data, null);
         // routestree.forEach(element => {
@@ -108,13 +118,14 @@ const get_menu = (to, next) => {
 };
 const whiteList = ["/login"]; //前置守卫白名单
 route.beforeEach((to, from, next) => {
+  NProgress.start();
   console.log("进入", to.path);
   if (to.meta.title != undefined) window.document.title = to.meta.title;
   //TODO:router-前置守卫
   if (localStorage.getItem("token") && localStorage.getItem("refresh")) {
     store()
       .get_userinfo()
-      .then(res => {
+      .then((res) => {
         if (!res) {
           localStorage.clear();
           next("/login");
@@ -147,5 +158,6 @@ route.beforeEach((to, from, next) => {
 });
 route.afterEach((to, from, next) => {
   // TODO:router-后置守卫
+  NProgress.done();
 });
 //------------------------router结束---------------------------

@@ -388,15 +388,18 @@ class enterprise(base_model):
 
 class article(base_model):
     name = models.CharField(max_length=200, verbose_name="名称", db_comment='名称')
+    user = models.ForeignKey(user_info, on_delete=models.DO_NOTHING, db_comment='作者', verbose_name='作者')
     source = models.CharField(max_length=200, verbose_name="来源", db_comment='来源', null=True)
     source_root = models.CharField(max_length=200, verbose_name="基础来源", db_comment='基础来源', null=True)
     source_sub = models.CharField(max_length=200, verbose_name="子版块", db_comment='子版块', null=True)
     tag = models.JSONField(default=list, verbose_name="标签", db_comment='标签', null=True)
     content = models.TextField(verbose_name="内容", db_comment='内容')
     file = models.JSONField(default=list, db_comment="文件", verbose_name='文件', null=True)
+    image = models.JSONField(default=list, db_comment="图片", verbose_name='图片', null=True)
+    video = models.JSONField(default=list, db_comment="视频", verbose_name='视频', null=True)
     url = models.CharField(max_length=100, db_comment='文章链接', verbose_name='文章链接', null=True, blank=True)
     url_hash = models.CharField(max_length=255, unique=True, db_index=True, null=True, blank=True)
-    type = models.IntegerField(default=1, choices=((1, '发布'), (2, '抓取')), db_comment='文章类型(1 发布, 2 抓取)')
+    type = models.IntegerField(default=1, choices=((1, '图片'), (2, '视频'), (3, '文字')), db_comment='文章类型(1 图片, 2 视频, 3文字)')
 
     view = models.IntegerField(db_comment="浏览数", default=0)
     like = models.IntegerField(db_comment="点赞数", default=0)

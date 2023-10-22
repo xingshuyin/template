@@ -1,18 +1,38 @@
 <template>
     <div class="article" @click.self="hdie_comment" @scroll="handleScroll">
-        <v-md-preview v-if="attrs.item" :text="attrs.item.content">
+        <div class="title">
+            {{ attrs.item.name }}
+        </div>
 
+        <v-md-preview v-if="attrs.item" :text="attrs.item.content">
         </v-md-preview>
 
-        <el-button v-if="attrs.liked" @click="like">取消点赞</el-button>
-        <el-button v-else @click="like">点赞</el-button>
-
-        <el-button v-if="attrs.collected" @click="collect">取消收藏</el-button>
-        <el-button v-else @click="collect">收藏</el-button>
-        <!-- <t-comment :callback="comment"></t-comment> -->
+        <div class="actions" v-if="attrs.item">
+            <!-- <ph:eye-fill></ph:eye-fill> -->
+            <el-row :gutter="20">
+                <el-col :span="6">
+                    <ph:eye-duotone></ph:eye-duotone>
+                    <span class="action-num">{{ attrs.item.view }}</span>
+                </el-col>
+                <el-col :span="6" @click="like">
+                    <ph:thumbs-up-fill v-if="attrs.liked"></ph:thumbs-up-fill>
+                    <ph:thumbs-up-duotone v-else></ph:thumbs-up-duotone>
+                    <span class="action-num">{{ attrs.item.like }}</span>
+                </el-col>
+                <el-col :span="6" @click="collect">
+                    <ph:star-fill v-if="attrs.collected"></ph:star-fill>
+                    <ph:star-duotone v-else></ph:star-duotone>
+                    <span class="action-num">{{ attrs.item.collect }}</span>
+                </el-col>
+                <el-col :span="6">
+                    <ph:share-network-duotone></ph:share-network-duotone>
+                    <span class="action-num">{{ attrs.item.view }}</span>
+                </el-col>
+            </el-row>
+        </div>
         <t-comments :data="attrs.comments" :callback="get_comment_" :media_id="route.params.id"
-            :media_type="attrs.base_url"></t-comments>
-
+            :media_type="attrs.base_url">
+        </t-comments>
     </div>
 </template>
 <script setup>
@@ -49,11 +69,11 @@ const handleScroll = (e) => {
             get_comment_()
         }
     }
-
 }
 onBeforeMount(() => {
     if (store().is_login) {
         store().get_userinfo(true).then((info) => {
+            r().get("/data/view/", { params: { type: 'article', id: route.params.id } })
             let temp = false;
             for (let i = 0; i < info.article_like.length; i++) {
                 const element = info.article_like[i];
@@ -65,7 +85,6 @@ onBeforeMount(() => {
                 }
             }
             attrs.liked = temp
-
             temp = false;
             for (let i = 0; i < info.article_collect.length; i++) {
                 const element = info.article_collect[i];
@@ -90,7 +109,6 @@ const get_comment_ = async (replace) => {
     attrs.comment_page ? 1 : (attrs.comment_page = 1);
     attrs.comment_limit ? 1 : (attrs.comment_limit = 10);
     attrs.comment_total ? 1 : (attrs.comment_total = 0);
-
     await r().get('/data/article_comment/', { params: { page: attrs.comment_page, limit: attrs.comment_limit, id: route.params.id } }).then(res => {
         if (res.data.data.length > 0) {
             if (replace) {
@@ -106,43 +124,37 @@ const get_comment_ = async (replace) => {
     });
 };
 
-
-
-
-const like = () => {
-    r().get('/data/like/', { params: { type: 'article', id: route.params.id, liked: attrs.liked } }).then(() => {
-        store().get_userinfo(true).then((info) => {
-            console.log(info);
-            let temp = false;
-            for (let i = 0; i < info.article_like.length; i++) {
-                const element = info.article_like[i];
-                if (element == route.params.id) {
-                    temp = true
-                    break
-                } else {
-                    temp = false
-                }
-            }
-            attrs.liked = temp
-        })
+const like = (id) => {
+    id = route.params.id
+    r().get('/data/like/', { params: { type: 'article', id: id, liked: attrs.liked } }).then((res) => {
+        let temp = false;
+        console.log(res);
+        if (res.data.data == 'true') {
+            store().userinfo.article_like.push(id)
+            temp = true
+        } else {
+            store().userinfo.article_like.splice(store().userinfo.article_like.indexOf(id), 1)
+            temp = false
+        }
+        if (temp) { attrs.item.like += 1 } else { attrs.item.like -= 1 }
+        attrs.liked = temp
     })
 }
 
-const collect = () => {
-    r().get('/data/collect/', { params: { type: 'article', id: route.params.id, collected: attrs.collected } }).then(() => {
-        store().get_userinfo(true).then((info) => {
-            let temp = false;
-            for (let i = 0; i < info.article_collect.length; i++) {
-                const element = info.article_collect[i];
-                if (element == route.params.id) {
-                    temp = true
-                    break
-                } else {
-                    temp = false
-                }
-            }
-            attrs.collected = temp
-        })
+const collect = (id) => {
+    id = route.params.id
+    r().get('/data/collect/', { params: { type: 'article', id: id, collected: attrs.collected } }).then((res) => {
+        let temp = false;
+
+        if (res.data.data == 'true') {
+            store().userinfo.article_like.push(id)
+            temp = true
+        } else {
+            store().userinfo.article_collect.splice(store().userinfo.article_collect.indexOf(id), 1)
+            temp = false
+        }
+        if (temp) { attrs.item.collect += 1 } else { attrs.item.collect -= 1 }
+        attrs.collected = temp
     })
 }
 
@@ -153,11 +165,32 @@ const collect = () => {
 <style scoped lang='scss'>
 .article {
     background-color: aliceblue;
-    width: 50%;
+    width: 1000px;
     height: 100%;
     overflow: auto;
     margin: auto;
     padding: 20px;
     box-sizing: border-box;
+
+    .title {
+        font-size: 30px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .actions {
+        margin: 20px auto;
+        width: 400px;
+        font-size: 19px;
+        color: rgb(41, 44, 236);
+
+        :deep(.el-col) {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+    }
 }
 </style>

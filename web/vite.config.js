@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
-
+import viteCompression from "vite-plugin-compression"; // npm i vite-plugin-compression -D   压缩
 //TODO:自动导入-图标
 import Icons from "unplugin-icons/vite"; // npm i -D unplugin-icons              npm i -D @iconify/json
 import IconsResolver from "unplugin-icons/resolver";
@@ -60,6 +60,7 @@ export default ({ mode }) => {
       open: "http://localhost:5173/", //dev后打开链接
     },
     plugins: [
+      viteCompression(),
       vue(),
       // Unocss(UnocssConfig), //TODO:unocss-安装unocss
       AutoImport({

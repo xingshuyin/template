@@ -23,7 +23,7 @@ func Logging(ctx *gin.Context) {
 	// fmt.Println("Logging", ctx.Request.URL)
 }
 
-func Permission(ctx *gin.Context) {
+func Permis sion(ctx *gin.Context) {
 	token := ctx.Request.Header.Get("token") //TODO:获取请求头
 	if token_data, msg := ParseToken(token); msg == "" && token != "" {
 		fmt.Println("token", token, token_data)
