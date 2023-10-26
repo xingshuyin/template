@@ -31,7 +31,7 @@ store().get_userinfo().then((res) => {
         <el-table-column v-if="i.type == 'text' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
             :sortable="i.sortable" :width="i.width" :show-overflow-tooltip="i?.overflow">
         </el-table-column>
-        <!-- 单选用标签 -->
+        <!-- 单选用标签(单个值/一个属性)  option-> dict    n-->
         <el-table-column v-else-if="i.type == 'select' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
             :sortable="i.sortable" :width="i.width">
             <template #default="scope">
@@ -40,7 +40,16 @@ store().get_userinfo().then((res) => {
                 </el-tag>
             </template>
         </el-table-column>
-        <!-- 字典列表 -->
+        <!-- 字典套字典(单个值/每个值有多个属性)   option-> dict_dict  -->
+        <el-table-column v-else-if="i.type == 'dict_dict' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
+            :sortable="i.sortable" :width="i.width">
+            <template #default="scope">
+                <el-tag effect="dark">
+                    {{ i.option[scope.row[i.prop]][i?.key ? i?.key : 'name'] }}
+                </el-tag>
+            </template>
+        </el-table-column>
+        <!-- 字典列表(值为不可读列表)    option-> list_dict -->
         <el-table-column v-else-if="i.type == 'list_dict' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
             :sortable="i.sortable" :width="i.width">
             <template #default="scope">
@@ -49,7 +58,7 @@ store().get_userinfo().then((res) => {
                 </el-tag>
             </template>
         </el-table-column>
-        <!-- 列表 -->
+        <!-- 列表(值为可读列表) -->
         <el-table-column v-else-if="i.type == 'list' && i.show" :align="i.align" :label="i.label" :prop="i.prop"
             :sortable="i.sortable" :width="i.width">
             <template #default="scope">

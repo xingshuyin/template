@@ -1,12 +1,17 @@
 <template>
-    <div class="article" @click.self="hdie_comment" @scroll="handleScroll">
+    <div class="article" v-if="attrs.item" @scroll="handleScroll">
         <div class="title">
             {{ attrs.item.name }}
         </div>
 
-        <v-md-preview v-if="attrs.item" :text="attrs.item.content">
+        <v-md-preview :text="attrs.item.content">
         </v-md-preview>
-
+        <div class="right-video" v-if="attrs.item.type == 2">
+            <t-video v-for="v in attrs.item.video" :data="v"></t-video>
+        </div>
+        <div class="right-image" v-else-if="attrs.item.type == 1">
+            <t-imagewall :data="attrs.item.image"></t-imagewall>
+        </div>
         <div class="actions" v-if="attrs.item">
             <!-- <ph:eye-fill></ph:eye-fill> -->
             <el-row :gutter="20">
@@ -33,6 +38,9 @@
         <t-comments :data="attrs.comments" :callback="get_comment_" :media_id="route.params.id"
             :media_type="attrs.base_url">
         </t-comments>
+
+        <chat v-if="attrs.info && attrs.item" :group="attrs.item.id" :user_info="attrs.info"></chat>
+
     </div>
 </template>
 <script setup>
@@ -40,6 +48,7 @@ import { useRoute, useRouter } from 'vue-router';
 import rest from '../../utils/rest';
 import r from '../../utils/request';
 import { onBeforeMount } from 'vue';
+import chat from '../../components/chat/chat.vue'
 const router = useRouter()
 const route = useRoute()
 import store from '../../store';
@@ -50,9 +59,9 @@ const attrs = reactive({
     liked: false,
     collected: false,
     comment_end: false,
+    messages: []
 })
 
-rest.item(attrs.base_url, route.params.id, attrs)
 const handleScroll = (e) => {
     if (attrs.comment_end == false) {
         // console.log('sssssssss', e);
@@ -73,6 +82,10 @@ const handleScroll = (e) => {
 onBeforeMount(() => {
     if (store().is_login) {
         store().get_userinfo(true).then((info) => {
+            attrs.info = info
+            rest.item(attrs.base_url, route.params.id, attrs, null, (res) => {
+
+            })
             r().get("/data/view/", { params: { type: 'article', id: route.params.id } })
             let temp = false;
             for (let i = 0; i < info.article_like.length; i++) {
@@ -182,7 +195,7 @@ const collect = (id) => {
         margin: 20px auto;
         width: 400px;
         font-size: 19px;
-        color: rgb(41, 44, 236);
+        color: rgba(41, 44, 236, 0.801);
 
         :deep(.el-col) {
             display: flex;

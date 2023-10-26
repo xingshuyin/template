@@ -32,7 +32,7 @@
 
     <el-dialog v-model="attrs.adding" class="add_form" :title="attrs.submit_type == 'add' ? '新增' : '编辑'" width="50%"
         :modal="false">
-        <el-form :model="attrs.add_form" label-width="120px">
+        <el-form :model="attrs.add_form" label-width="120px" :rules="rules">
             <el-form-item label="父级菜单">
                 <el-cascader :options="attrs.data" v-model="attrs.add_form.parent"
                     :props="{ checkStrictly: true, value: 'id', label: 'label' }" checkStrictly clearable
@@ -75,8 +75,7 @@
         <template #footer>
             <span class="dialog-footer">
                 <el-button @click="attrs.adding = false">取消</el-button>
-                <el-button type="primary"
-                    @click="submit_(attrs.base_url, attrs.add_form, attrs.submit_type, get_data); attrs.adding = false">
+                <el-button type="primary" @click="validate">
                     提交
                 </el-button>
             </span>
@@ -97,6 +96,7 @@ store().get_userinfo().then((res) => {
         attrs.can_create = true
     }
 })
+const form_dom = ref()
 const views = import.meta.glob("/src/views/**/**.vue");
 const components = []
 Object.keys(views).forEach(i => {
@@ -139,6 +139,11 @@ const form = reactive({
     limit: 100,
     sort: 'sort',
 })
+const rules = reactive({
+    name: [
+        { required: true, message: '路由名称', trigger: 'blur' },
+    ],
+})
 watch([form, special_form], () => {
     if (special_form.range == null) {
         special_form.range = [undefined, undefined]
@@ -150,7 +155,20 @@ const get_data = () => {
 }
 get_data()
 
-
+const validate = () => {
+    form_dom.value.validate((valid, fields) => {
+        if (valid) {
+            submit_(attrs.base_url, attrs.add_form, attrs.submit_type, get_data);
+            attrs.adding = false
+        } else {
+            ElMessage({
+                showClose: true,
+                message: Object.values(fields)[0][0]['message'],
+                center: true,
+            });
+        }
+    })
+}
 //动态列--------------------------
 
 </script>

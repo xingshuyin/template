@@ -6,11 +6,16 @@ const router = createRouter({
   //TODO:router-history记录历史方式
   history: createWebHashHistory(),
   routes: [
-    { path: "/login", name: "login", component: () => import("../views/login/index.vue"), meta: { title: import.meta.env.title, animate: "animate__fadeIn" } },
+    {
+      path: "/login",
+      name: "login",
+      component: () => import("../views/login/index.vue"),
+      meta: { title: import.meta.env.title, animate: "animate__fadeIn" },
+    },
     {
       path: "/admin",
       name: "layout",
-      // redirect: "index",
+      redirect: "/admin/article",
       component: () => import("../layout/index.vue"),
       meta: { title: import.meta.env.title, animate: "animate__fadeIn" },
       children: [
@@ -37,7 +42,6 @@ const router = createRouter({
       meta: { title: "文章", animate: "animate__fadeIn" },
       children: [],
     },
-
   ],
 });
 export default router;

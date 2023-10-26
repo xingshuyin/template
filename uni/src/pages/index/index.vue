@@ -1,11 +1,12 @@
 <template>
-  <view style="height: var(--status-bar-height);position: fixed;top: 0;background-color: antiquewhite;width: 100vw;">
+  <view
+    style="height: var(--status-bar-height);position: fixed;top: 0;z-index: 1; background-color: antiquewhite;width: 100vw;">
     <!-- 这里是状态栏 -->
   </view>
-  <view style="height: var(--status-bar-height);">
+  <view style="height: var(--status-bar-height);z-index: 1;">
     <!-- 这里是状态栏 -->
   </view>
-  <articleL ref="articleLRef" :data="attrs.data"></articleL>
+  <articleL ref="articleLRef" :data="attrs.data" username="user__name" icon="user__icon"></articleL>
 </template>
 <script setup>
 import articleL from '../../components/list/articleL'
@@ -19,11 +20,15 @@ const attrs = reactive({
   form: {
     page: 1,
     limit: 10,
+    sort: '-create_time',
+    'extra[]': ['user__name', 'user__icon'],
   },
   end: false,
   data: [],
   loading: false,
 });
+
+
 
 const get_data = (replace) => {
   attrs.loading = true

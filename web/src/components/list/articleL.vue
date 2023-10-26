@@ -13,31 +13,31 @@
             </div>
             <div class="right-video" v-if="i[type] == 2">
                 <t-video v-for="v in i[video]" :data="v"></t-video>
-                <!-- <vue3VideoPlay @scroll="scroll_video($event)" v-for="v in i[video]"  v-bind="video_option(v.url)" /> -->
             </div>
             <div class="right-image" v-else-if="i[type] == 1">
                 <t-imagewall :data="i[image]"></t-imagewall>
             </div>
             <div class="right-action">
-                <div> <el-icon>
+                <div class="action"><el-icon>
                         <View />
-                    </el-icon>{{ i[view] }}
+                    </el-icon>
+                    <div class="action-icon">{{ i[view] }}</div>
                 </div>
-                <div>
+                <div class="action">
                     <ph:thumbs-up-bold></ph:thumbs-up-bold>
-                    {{ i[like] }}
+                    <div class="action-icon">{{ i[like] }}</div>
                 </div>
-                <div>
+                <div class="action">
                     <el-icon>
                         <ChatLineSquare />
                     </el-icon>
-                    {{ i[comment] }}
+                    <div class="action-icon">{{ i[comment] }}</div>
                 </div>
-                <div>
+                <div class="action">
                     <el-icon>
                         <Star />
                     </el-icon>
-                    {{ i[collect] }}
+                    <div class="action-icon">{{ i[collect] }}</div>
                 </div>
             </div>
         </div>
@@ -63,61 +63,6 @@ const props = defineProps({
     collect: { default: 'collect' },
     create_time: { default: 'create_time' }
 }); //子向父传数据
-
-
-<<<<<<< HEAD
-// const video_option = (src) => {
-//     let o = {
-//         width: '100%', //播放器高度
-//         height: '304px', //播放器高度
-//         color: "#fff", //主题色
-//         title: '', //视频名称
-//         src: src, //视频源
-//         muted: false, //静音
-//         webFullScreen: false,
-//         speedRate: ["0.75", "1.0", "1.25", "1.5", "2.0"], //播放倍速
-//         autoPlay: false, //自动播放
-//         loop: false, //循环播放
-//         mirror: false, //镜像画面
-//         ligthOff: false,  //关灯模式
-//         volume: 0.3, //默认音量大小
-//         control: true, //是否显示控制
-//         preload: 'meta',
-//         controlBtns: ['audioTrack', 'quality', 'speedRate', 'volume', 'setting', 'pip', 'pageFullScreen', 'fullScreen'] //显示所有按钮,
-//     }
-//     return o
-// }
-
-// const scroll_video = (e) => {
-//     console.log(e);
-// }
-=======
-const video_option = (src) => {
-    let o = {
-        width: '100%', //播放器高度
-        height: '304px', //播放器高度
-        color: "#fff", //主题色
-        title: '', //视频名称
-        src: src, //视频源
-        muted: false, //静音
-        webFullScreen: false,
-        speedRate: ["0.75", "1.0", "1.25", "1.5", "2.0"], //播放倍速
-        autoPlay: false, //自动播放
-        loop: false, //循环播放
-        mirror: false, //镜像画面
-        ligthOff: false,  //关灯模式
-        volume: 0.3, //默认音量大小
-        control: true, //是否显示控制
-        preload: 'meta',
-        controlBtns: ['audioTrack', 'quality', 'speedRate', 'volume', 'setting', 'pip', 'pageFullScreen', 'fullScreen'] //显示所有按钮,
-    }
-    return o
-}
-
-const scroll_video = (e) => {
-    console.log(e);
-}
->>>>>>> 98d4cb59f5f6710a390d4c30e806e2e2f76039d5
 </script>
 <style scoped lang='scss'>
 .article {
@@ -178,20 +123,10 @@ const scroll_video = (e) => {
 
         .right-video {
             width: 100%;
-
-            .video {
-                width: 200px;
-                height: 200px;
-            }
         }
 
         .right-image {
             width: 100%;
-
-            .image {
-                width: 200px;
-                height: 200px;
-            }
         }
 
         .right-action {
@@ -206,12 +141,13 @@ const scroll_video = (e) => {
             font-weight: 400;
             color: grey;
 
-            div {
+            .action {
                 flex: 1;
                 display: flex;
                 flex-direction: row;
                 align-items: center;
                 justify-content: center;
+                gap: 5px;
             }
         }
     }

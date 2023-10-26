@@ -130,6 +130,12 @@ const validate = () => {
     form_dom.value.validate((valid, fields) => {
         if (valid) {
             submit_(attrs.base_url, attrs.add_form, attrs.submit_type, submit_success); attrs.adding = false
+        } else {
+            ElMessage({
+                showClose: true,
+                message: Object.values(fields)[0][0]['message'],
+                center: true,
+            });
         }
     })
 }

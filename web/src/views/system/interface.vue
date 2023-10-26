@@ -121,7 +121,9 @@ const form = reactive({
     limit: 100,
 })
 const rules = reactive({
-
+    name: [
+        { required: true, message: '请填写接口名称', trigger: 'blur' },
+    ],
 })
 watch([form, special_form], () => {
     if (special_form.range == null) {
@@ -139,6 +141,12 @@ const validate = () => {
         if (valid) {
             submit_(attrs.base_url, attrs.add_form, attrs.submit_type, get_data);
             attrs.adding = false
+        } else {
+            ElMessage({
+                showClose: true,
+                message: Object.values(fields)[0][0]['message'],
+                center: true,
+            });
         }
     })
 }

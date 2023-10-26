@@ -42,10 +42,9 @@
 import { format } from 'timeago.js/lib';
 import { navigate } from '../../utils/data';
 import store from '../../store';
-import { base_url } from '../../utils/request';
 import tImagewall from '../../components/tools/t-imagewall'
 import tVideo from '../../components/tools/t-video'
-import { reactive, getCurrentInstance } from 'vue';
+import { reactive } from 'vue';
 const props = defineProps({
     data: {},
     id: { default: 'id' },
@@ -63,7 +62,7 @@ const props = defineProps({
     collect: { default: 'collect' },
     create_time: { default: 'create_time' }
 }); //子向父传数据
-const instance = getCurrentInstance()
+
 const attrs = reactive({
     info: {}
 });
@@ -79,6 +78,8 @@ const check = (start) => {
     } else {
         console.log('未登录');
     }
+
+
 }
 
 
@@ -158,6 +159,7 @@ defineExpose({ check })
     // box-sizing: border-box;
     // margin: 16px;
     background-color: white;
+    margin-top: 500px;
 
     .article-left {
         width: 104rpx;

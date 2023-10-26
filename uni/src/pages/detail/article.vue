@@ -21,10 +21,16 @@
                     {{ attrs?.item[props.source] }} {{ attrs?.item[props.create_time].slice(0, 10) }}
                 </view>
             </view>
+            <div class="right-video" v-if="attrs?.item?.type == 2">
+                <t-video v-for="v, index in attrs?.item?.video" :data="v" :key="index"></t-video>
+            </div>
+            <div class="right-image" v-else-if="attrs?.item?.type == 1">
+                <t-imagewall :data="attrs?.item?.image"></t-imagewall>
+            </div>
             <!-- <rich-text v-if="!!attrs.item" :nodes="attrs.item.content"></rich-text> -->
-            <view v-html="attrs?.item[props.content]"></view>
+            <view class="article-body" v-html="attrs?.item[props.content]"></view>
             <u-gap height="20"></u-gap>
-            <view class="read-source" @click="navigate(`/pages/detail/webview?url${attrs?.item[props.url]}`)">阅读原文</view>
+            <view class="read-source" @click="navigate(`/pages/detail/webview?url=${attrs?.item[props.url]}`)">阅读原文</view>
             <view class="article-comment">
                 <text style="font-size: large;font-weight: 800;">评论</text>
                 <CommentTree :data="attrs.comments"></CommentTree>
@@ -79,6 +85,8 @@
     </view>
 </template>
 <script setup>
+import tVideo from '../../components/tools/t-video.vue';
+import tImagewall from '../../components/tools/t-imagewall.vue';
 //const props = defineProps(['modelValue']); // defineProps的参数, 可以直接使用
 //const emits = defineEmits(['update:modelValue']); // emits 触发父组件函数
 import {
@@ -540,8 +548,10 @@ const draw_poster = (x, y, title, text, author, time, canvas_id) => {
     padding: 20rpx;
 
     &-title {
-        font-size: 40rpx;
+        font-size: 30rpx;
+        font-weight: 700;
         width: 100%;
+        line-height: 2rem;
         text-align: center;
     }
 
@@ -555,12 +565,7 @@ const draw_poster = (x, y, title, text, author, time, canvas_id) => {
     }
 
     &-body {
-        padding: 20rpx;
-        font-size: 30rpx !important;
-
-        image {
-            width: 100vw !important;
-        }
+        line-height: 2rem;
     }
 
     .article-comment {

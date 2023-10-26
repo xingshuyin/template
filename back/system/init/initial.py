@@ -12,7 +12,6 @@ print(p)
 sys.path.append(p)  # 将项目路径添加到系统搜寻路径当中
 os.environ['DJANGO_SETTINGS_MODULE'] = 'root.settings'  # 设置项目的配置文件
 django.setup()  # 加载项目配置
-# TODO:初始化数据
 from system.models import *
 # from system.views.data import Data
 # import system.views.data as data_

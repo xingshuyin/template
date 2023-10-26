@@ -3,9 +3,16 @@
         <div class="article-list">
             <articleL :data="attrs.data" username="user__name" icon="user__icon"></articleL>
         </div>
-        <el-button icon="Plus" circle @click="attrs.adding = true; attrs.submit_type = 'add'"
-            style="position: fixed; right: 20px;bottom: 20px;" />
-        <el-dialog v-model="attrs.adding" class="add_form" :title="attrs.submit_type == 'add' ? '新增' : '编辑'" width="80%"
+        <el-backtop :right="20" :bottom="20" target=".index" />
+        <div class="submit">
+            <el-button class="submit-btn" type="primary" icon="Plus" circle
+                @click="attrs.adding = true; attrs.submit_type = 'add'" style=" width: 36px;height: 36px;" />
+            <div class="submit-text" @click="attrs.adding = true; attrs.submit_type = 'add'">
+                发布
+            </div>
+        </div>
+
+        <el-dialog v-model="attrs.adding" class="add_form" :title="attrs.submit_type == 'add' ? '发布' : '编辑'" width="80%"
             :modal="false" fullscreen append-to-body>
             <el-form :model="attrs.add_form" label-width="80px" :rules="rules" ref="form_dom" label-position="left"
                 require-asterisk-position="right">
@@ -77,7 +84,6 @@
                     <v-md-editor v-model="attrs.add_form.content" height="550px" :disabled-menus="[]"
                         @upload-image="upload_image"></v-md-editor>
                 </el-form-item>
-
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
@@ -102,7 +108,7 @@ import { submit_ } from '../../hooks/table_common';
 import store from '../../store';
 const router = useRouter()
 const attrs = reactive({
-    filter: {
+    form: {
         page: 1,
         limit: 100,
         sort: '-create_time',
@@ -116,7 +122,7 @@ onMounted(() => {
 })
 
 const get_data = () => {
-    rest.list('article', { ...attrs.filter }, attrs, 'data', null)
+    rest.list('article', { ...attrs.form }, attrs, 'data', null)
 }
 
 const form_dom = ref()
@@ -129,15 +135,17 @@ const rules = reactive({  //https://element-plus.gitee.io/zh-CN/component/form.h
     ],
 })
 const validate = () => {
-    console.log('啊水水水水水水');
     form_dom.value.validate((valid, fields) => {
         if (valid) {
             store().get_userinfo().then((info) => {
-                console.log('info----------------', info);
                 submit_('article', { user: info.id, ...attrs.add_form }, attrs.submit_type, submit_success);
             })
         } else {
-            console.log(fields);
+            ElMessage({
+                showClose: true,
+                message: Object.values(fields)[0][0]['message'],
+                center: true,
+            });
         }
     })
 }
@@ -183,6 +191,48 @@ const upload_image = (event, insertImage, files) => {
     .article-list {
         width: 640px;
         margin: auto;
+    }
+
+    .submit {
+        position: fixed;
+        left: 20px;
+        bottom: 20px;
+        width: 36px;
+        height: 36px;
+        border-radius: 36px;
+
+        transition-duration: 150ms;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .submit-text {
+        display: none;
+        font-size: 18px;
+        color: rgb(204, 202, 202);
+        white-space: nowrap;
+        margin-right: 5px;
+    }
+
+    .submit-btn:hover+.submit-text {
+        display: block;
+    }
+
+    .submit:hover {
+        width: 80px;
+        background-color: rgb(177, 110, 110);
+    }
+
+    .submit:hover>.submit-text {
+        display: block;
+    }
+
+    // TODO:css-悬浮子修改父
+    .submit:has(.submit-btn:hover) {
+        width: 80px;
+        background-color: rgb(177, 110, 110);
     }
 }
 </style>

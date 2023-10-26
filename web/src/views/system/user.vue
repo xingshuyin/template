@@ -30,9 +30,9 @@
     <el-dialog v-model="attrs.adding" class="add_form" :title="attrs.submit_type == 'add' ? '新增' : '编辑'" width="50%"
         :modal="false">
         <el-form :model="attrs.add_form" label-width="120px" :rules="rules" ref="form_dom">
-            <el-form-item label="名称" prop="name">
+            <!-- <el-form-item label="名称" prop="name">
                 <el-input v-model="attrs.add_form.name" />
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item label="账号" prop="username">
                 <el-input v-model="attrs.add_form.username" />
             </el-form-item>
@@ -85,9 +85,8 @@ store().get_userinfo().then((res) => {
 const form_dom = ref()
 const attrs = reactive({
     columns: [
-        { prop: 'name', type: 'text', label: '名称', size: 'small', align: "left", show: true },
         { prop: 'username', type: 'text', label: '账号', size: 'small', align: "center", show: true },
-        { prop: 'role', type: 'list', label: '角色', option: {}, show: true },
+        { prop: 'role', type: 'list_dict', label: '角色', option: {}, show: true },
         { prop: 'dept_name', type: 'text', width: 150, label: '部门', size: 'small', align: "center", show: true },
         { prop: 'type', type: 'select', label: '用户类型', option: { 1: '前端用户', 2: '后台用户' }, show: true },
         { prop: 'is_super', type: 'select', width: 150, label: '是否超级用户', size: 'small', align: "center", show: true, option: { false: '否', true: '是' } },
@@ -117,7 +116,7 @@ const form = reactive({
 })
 const rules = reactive({
     username: [
-        { required: true, message: '请填写角色名称', trigger: 'blur' },
+        { required: true, message: '请填写账号', trigger: 'blur' },
     ],
 })
 watch([form, special_form], () => {
@@ -135,6 +134,12 @@ const validate = () => {
         if (valid) {
             submit_(attrs.base_url, attrs.add_form, attrs.submit_type, get_data);
             attrs.adding = false
+        } else {
+            ElMessage({
+                showClose: true,
+                message: Object.values(fields)[0][0]['message'],
+                center: true,
+            });
         }
     })
 }
@@ -151,7 +156,7 @@ const edit = (scope) => {
 get_all_role_(attrs)
 get_all_dept_tree_(attrs)
 get_all_role_dict_().then((res) => {
-    attrs.columns[2].option = res //确保索引对
+    attrs.columns[1].option = res //确保索引对
 })
 </script>
 

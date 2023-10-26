@@ -19,7 +19,7 @@ playwright install-deps
 import os
 from pathlib import Path
 from datetime import timedelta
-
+import platform
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -30,7 +30,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-fngi9gvv&v-^)=9^y55iie)julzti2t4^*7bcsd0tru24jttp&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if platform.system() == 'Windows':
+    DEBUG = True
+else:
+    DEBUG = False
 AUTH_USER_MODEL = "system.user"
 ALLOWED_HOSTS = ['*']
 
@@ -38,6 +41,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     "daphne",
+    'websocket',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -178,7 +182,7 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
-ASGI_APPLICATION = "root.asgi.application"  # asgi应用位置,可用于channels的get_default_application获取app位置
+ASGI_APPLICATION = "websocket.asgi.application"  # asgi应用位置,可用于channels的get_default_application获取app位置
 
 # CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:8080", "http://127.0.0.1:5173"]
 # CHANNEL_LAYERS = {  # channels通道,用于不通实例之间的通信
@@ -193,5 +197,11 @@ ASGI_APPLICATION = "root.asgi.application"  # asgi应用位置,可用于channels
 CHANNEL_LAYERS = {  # 本地开发调试使用
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
+    },
+    "redis": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
     }
 }

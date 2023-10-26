@@ -33,7 +33,7 @@
 
     <el-dialog v-model="attrs.adding" class="add_form" :title="attrs.submit_type == 'add' ? '新增' : '编辑'" width="50%"
         :modal="false">
-        <el-form :model="attrs.add_form" label-width="120px">
+        <el-form :model="attrs.add_form" label-width="120px" ref="form_dom" :rules="rules">
             <el-form-item label="父级部门" prop="parent">
                 <el-cascader v-model="attrs.add_form.parent" :options="attrs.data" clearable
                     :props="{ emitPath: false, checkStrictly: true, value: 'id', label: 'name', }" />
@@ -56,8 +56,7 @@
         <template #footer>
             <span class="dialog-footer">
                 <el-button @click="attrs.adding = false">取消</el-button>
-                <el-button type="primary"
-                    @click="submit_(attrs.base_url, attrs.add_form, attrs.submit_type, get_data); attrs.adding = false">
+                <el-button type="primary" @click="validate">
                     提交
                 </el-button>
             </span>
@@ -78,6 +77,7 @@ store().get_userinfo().then((res) => {
         attrs.can_create = true
     }
 })
+const form_dom = ref()
 const attrs = reactive({
     columns: [
         { prop: 'name', type: 'text', label: '部门名称', size: 'small', align: "left", show: true },
@@ -105,6 +105,11 @@ const form = reactive({
     page: 1,
     limit: 100,
 })
+const rules = reactive({
+    name: [
+        { required: true, message: '请填写部门名称', trigger: 'blur' },
+    ],
+})
 watch([form, special_form], () => {
     if (special_form.range == null) {
         special_form.range = [undefined, undefined]
@@ -118,6 +123,23 @@ get_data()
 rest.list("dept", { page: 1, limit: 99999 }, null, null, res => {
     attrs.dept_tree = Tree(res.data.data, "id", "parent");
 });
+
+
+const validate = () => {
+    form_dom.value.validate((valid, fields) => {
+        if (valid) {
+            submit_(attrs.base_url, attrs.add_form, attrs.submit_type, get_data);
+            attrs.adding = false
+        } else {
+            ElMessage({
+                showClose: true,
+                message: Object.values(fields)[0][0]['message'],
+                center: true,
+            });
+        }
+    })
+}
+
 </script>
 
 <style scoped lang="scss">

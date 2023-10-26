@@ -176,6 +176,12 @@ const validate = () => {
         if (valid) {
             submit_(attrs.base_url, attrs.add_form, attrs.submit_type, get_data);
             attrs.adding = false
+        } else {
+            ElMessage({
+                showClose: true,
+                message: Object.values(fields)[0][0]['message'],
+                center: true,
+            });
         }
     })
 }

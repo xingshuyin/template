@@ -30,7 +30,8 @@ const props = defineProps(['data']); // defineProps的参数, 可以直接使用
             <view class="replys" v-if="i?.replys?.length">
                 <view class="reply" v-for="r in i.replys" :key="r.id">
                     <view class="reply-left">
-                        <u-image class="reply-left-avatar" width='30px' height="30px" :src="base_url + '/' + r.user_icon"
+                        <u-image class="reply-left-avatar" width='30px' height="30px"
+                            :src="i.user_icon.includes('http') ? i.user_icon : base_url + '/' + i.user_icon"
                             shape="circle"></u-image>
                     </view>
                     <view class="reply-right">
