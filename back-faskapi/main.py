@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request, Response
 from models_tortoise import user
 from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
-import login_cookie
+import login_cookie_jwt
 import models_tortoise
 from tortoise.models import ModelMeta
 

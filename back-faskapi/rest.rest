@@ -10,7 +10,7 @@ content-type: application/json
  
 ###
 GET http://127.0.0.1:8080/user?username=22222&page=1&limit=1 HTTP/1.1
-
+# User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36 Edg/118.0.2088.76
 
 ### 获取token
 POST http://127.0.0.1:8080/token/ HTTP/1.1

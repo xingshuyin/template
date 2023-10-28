@@ -4,12 +4,15 @@ from pydantic import BaseModel
 from typing import Optional, Annotated
 from main import app
 import jwt
-from fastapi import Request, Response, Header, Cookie
+from fastapi import Request, Response, Header, Cookie, HTTPException
 SECRET_KEY = 'asddddddddddddddddddddd'
 from models_tortoise import user
 from datetime import datetime as datetime_
 from datetime import timedelta
-from starlette.exceptions import HTTPException
+# from starlette.exceptions import HTTPException
+
+
+single_login = True
 
 
 class Login(BaseModel):
@@ -36,11 +39,13 @@ async def parse_token(request: Request, response: Response):
     """
     token = request.cookies.get("token")
     refresh = request.cookies.get("refresh")
-    client = await get_client(request)
     token_data = jwt.decode(token, SECRET_KEY, algorithms=['HS256'], options={'verify_exp': False})
     refresh_data = jwt.decode(refresh, SECRET_KEY, algorithms=['HS256'], options={'verify_exp': False})
-    if token_data['client'] != client:
-        raise HTTPException(status_code=401, detail='令牌无效')
+    if single_login:
+        client = await get_client(request, token_data['user'])
+        if token_data['client'] != client:
+            return Response(status_code=401, content="客户端不匹配")
+        # return HTTPException(status_code=401, detail='令牌无效')/
     time_now = datetime_.now().timestamp()
     if float(token_data['exp']) > time_now:
         return response
@@ -49,7 +54,8 @@ async def parse_token(request: Request, response: Response):
         response.set_cookie(key='token', value=token, httponly=True)
         response.set_cookie(key='refresh', value=refresh, httponly=True)
     else:
-        raise HTTPException(status_code=401, detail='令牌过期')
+        # return HTTPException(status_code=401, detail='令牌过期')
+        return Response(status_code=401, content="令牌过期")
     return response
 
 
@@ -58,7 +64,7 @@ async def make_token(request: Request, user_id):
     生成token
     """
     time_now = datetime_.now()
-    client = await get_client(request)
+    client = await get_client(request, user_id)
     token = jwt.encode({
         'user': user_id,
         'exp': datetime_.timestamp(time_now + timedelta(seconds=5)),
@@ -81,11 +87,11 @@ async def encode_password(password: str):
     return hashlib.sha256(password.encode()).hexdigest()
 
 
-async def get_client(request: Request) -> str:
+async def get_client(request: Request, user_id=None) -> str:
     """
     获取客户端标识
     """
-    return hashlib.md5((request.client.host + request.headers.get('user-agent')).encode()).hexdigest()
+    return hashlib.md5((str(user_id) + request.client.host + request.headers.get('user-agent')).encode()).hexdigest()
 
 
 @app.post("/token/", status_code=200)
