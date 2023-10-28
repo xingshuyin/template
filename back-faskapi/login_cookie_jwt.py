@@ -9,7 +9,7 @@ SECRET_KEY = 'asddddddddddddddddddddd'
 from models_tortoise import user
 from datetime import datetime as datetime_
 from datetime import timedelta
-# from starlette.exceptions import HTTPException
+from fastapi.responses import JSONResponse
 
 
 single_login = True
@@ -44,8 +44,7 @@ async def parse_token(request: Request, response: Response):
     if single_login:
         client = await get_client(request, token_data['user'])
         if token_data['client'] != client:
-            return Response(status_code=401, content="客户端不匹配")
-        # return HTTPException(status_code=401, detail='令牌无效')/
+            return JSONResponse(status_code=401, content={'detail': '令牌无效'})
     time_now = datetime_.now().timestamp()
     if float(token_data['exp']) > time_now:
         return response
@@ -54,8 +53,7 @@ async def parse_token(request: Request, response: Response):
         response.set_cookie(key='token', value=token, httponly=True)
         response.set_cookie(key='refresh', value=refresh, httponly=True)
     else:
-        # return HTTPException(status_code=401, detail='令牌过期')
-        return Response(status_code=401, content="令牌过期")
+        return JSONResponse(status_code=401, content={'detail': '令牌过期'})
     return response
 
 
