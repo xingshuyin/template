@@ -41,7 +41,6 @@ async def parse_token(request: Request, response: Response):
     refresh_data = jwt.decode(refresh, SECRET_KEY, algorithms=['HS256'], options={'verify_exp': False})
     if token_data['client'] != client:
         raise HTTPException(status_code=401, detail='令牌无效')
-
     time_now = datetime_.now().timestamp()
     if float(token_data['exp']) > time_now:
         return response
@@ -100,9 +99,7 @@ async def token(request: Request, data: Login, response: Response):
         return {'detail': '账号或密码错误'}
     user_obj = user_obj[0]
     if (user_obj.password == await encode_password(data.password)):
-
         token, refresh = await make_token(request, user_obj.id)
-
         response.set_cookie(key='token', value=token, httponly=True)
         response.set_cookie(key='refresh', value=refresh, httponly=True)
         return {'detail': '登录成功'}
