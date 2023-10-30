@@ -3,13 +3,12 @@ POST http://127.0.0.1:8080/create_user HTTP/1.1
 content-type: application/json
 
 {
-    "username": "22222",
-    "password": "Wed",
+    "username": "2",
+    "password": "2",
     "captcha":""
 }  
- 
 ###
-GET http://127.0.0.1:8080/user?username=22222&page=1&limit=1 HTTP/1.1
+GET http://127.0.0.1:8080/user_info?page=1&limit=10&create_time__gt=2023-10-30 13:02:30&user__username=user1 HTTP/1.1
 # User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36 Edg/118.0.2088.76
 
 ### 获取token

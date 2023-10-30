@@ -5,12 +5,31 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 from pydantic import ConfigDict, Field, computed_field, create_model
 from pydantic._internal._decorators import PydanticDescriptorProxy
 from tortoise.contrib.pydantic.creator import PydanticMeta, _br_it, _cleandoc, _pydantic_recursion_protector
-from tortoise.contrib.pydantic.base import PydanticModel
+from tortoise.contrib.pydantic.base import PydanticModel, _get_fetch_fields
 from tortoise.contrib.pydantic.utils import get_annotations
 from tortoise.fields import JSONField, relational
 if TYPE_CHECKING:  # pragma: nocoverage
     from tortoise.models import Model
-_MODEL_INDEX: Dict[str, Type[PydanticModel]] = {}
+    from tortoise.queryset import QuerySet
+from pydantic import BaseModel
+
+
+class MyPydanticModel(PydanticModel):
+    @classmethod
+    async def from_queryset_nofetch(cls, queryset: "QuerySet") -> "List[PydanticModel]":
+        """
+        Returns a serializable pydantic model instance that contains a list of models,
+        from the provided queryset.
+
+        This will prefetch all the relations automatically.
+
+        :param queryset: a queryset on the model this PydanticModel is based on.
+        """
+        # fetch_fields = _get_fetch_fields(cls, cls.model_config["orig_model"])  # type: ignore
+        return [cls.model_validate(e) for e in queryset]
+
+
+_MODEL_INDEX: Dict[str, Type[MyPydanticModel]] = {}
 
 
 def pydantic_model_creator(
@@ -27,7 +46,7 @@ def pydantic_model_creator(
     exclude_readonly: bool = False,
     meta_override: Optional[Type] = None,
     model_config: Optional[ConfigDict] = None,
-) -> Type[PydanticModel]:
+) -> Type[MyPydanticModel]:
     """
     Function to build `Pydantic Model <https://pydantic-docs.helpmanual.io/usage/models/>`__ off Tortoise Model.
 
@@ -121,7 +140,7 @@ def pydantic_model_creator(
 
     annotations = get_annotations(cls)
 
-    pconfig = PydanticModel.model_config.copy()
+    pconfig = MyPydanticModel.model_config.copy()
     if default_config:
         pconfig.update(default_config)
     if model_config:
@@ -205,7 +224,7 @@ def pydantic_model_creator(
         field_type = fdesc["field_type"]
         field_default = fdesc.get("default")
 
-        def get_submodel(_model: "Type[Model]") -> Optional[Type[PydanticModel]]:
+        def get_submodel(_model: "Type[Model]") -> Optional[Type[MyPydanticModel]]:
             """Get Pydantic model for the submodel"""
             nonlocal exclude, _name, has_submodel
 
@@ -323,7 +342,7 @@ def pydantic_model_creator(
     properties["model_config"] = pconfig
     model = create_model(
         _name,
-        __base__=PydanticModel,
+        __base__=MyPydanticModel,
         **properties,
     )
     # Copy the Model docstring over
@@ -333,8 +352,3 @@ def pydantic_model_creator(
     # Store model reference so we can de-dup it later on if needed.
     _MODEL_INDEX[_name] = model
     return model
-
-
-if __name__ == "__main__":
-    a = 'sssss'
-    print("{} \\{\\}". format(a))

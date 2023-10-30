@@ -1,39 +1,54 @@
 from tortoise import fields, models as models_tortoise
 from tool import pydantic_model_creator
-from typing import Any
+import copy
 from fastapi import FastAPI, Response
 from pydantic import BaseModel
-from typing import List
 from starlette.exceptions import HTTPException
 from typing import TypeVar
 from fastapi import Request
 from tortoise.queryset import (
-    BulkCreateQuery,
-    BulkUpdateQuery,
-    ExistsQuery,
-    Q,
     F,
     QuerySet,
-    QuerySetSingle,
-    RawSQLQuery,
 )
-from starlette.datastructures import URL, Address, FormData, Headers, QueryParams, State
+import login_cookie_jwt
+from tortoise.contrib.pydantic.base import PydanticModel
 
 
 class Status(BaseModel):
     detail: str
 
 
+from tortoise import fields
+from datetime import datetime
+
+
+class DatetimeField(fields.DatetimeField):
+    # 重写to_db_value方法，将Python的datetime对象转换为字符串
+    def to_db_value(self, value: datetime, instance) -> str:
+        # 使用strftime方法来格式化时间字符串
+        if hasattr(instance, "_saved_in_db") and (
+            self.auto_now
+            or (self.auto_now_add and getattr(instance, self.model_field_name) is None)
+        ):
+            value = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            setattr(instance, self.model_field_name, value)
+        return value
+    # 重写to_python_value方法，将字符串转换为Python的datetime对象
+
+    def to_python_value(self, value: str) -> datetime:
+        return value
+
+
 class Model(models_tortoise.Model):
     id = fields.IntField(pk=True)
-    create_time = fields.DatetimeField(auto_now_add=True, description='创建时间', null=True)
-    update_time = fields.DatetimeField(auto_now=True, description='更新时间', null=True)
+    create_time = DatetimeField(auto_now_add=True, description='创建时间', null=True)
+    update_time = DatetimeField(auto_now=True, description='更新时间', null=True)
     dept_belong = fields.IntField(description='所属部门id', null=True)
     creator = fields.IntField(description='创建人id', null=True)
     # public_model = False  # 是否公开, 公开数据list查询不受部门限制, 但受角色的接口
 
     @classmethod
-    def pydantic(cls):
+    def pydantic(cls) -> PydanticModel:
         if not hasattr(cls, "_pydantic_model"):
             cls._pydantic_model = pydantic_model_creator(cls, name=cls.Meta.table)
         return cls._pydantic_model
@@ -67,16 +82,35 @@ class Model(models_tortoise.Model):
 
     @classmethod
     async def list_obj(cls, request: Request, response: Response):
-        q = request.query_params._dict
+        q = copy.deepcopy(request.query_params._dict)
         if q.get("page") and q.get("limit"):
             page = int(q.get("page"))
             limit = int(q.get("limit"))
             queryset = cls.all()
-            for i in ['page', 'limit', 'values[]', 'defer[]', 'extra[]']:
+            model = queryset.model
+            for i in ['page', 'limit', 'values[]', 'defer[]', 'extra[]', 'order', 'sort']:
                 if i in q.keys():
                     del q[i]
-            queryset, q = await cls.filter(request, queryset, q)
-            return await cls.pydantic().from_queryset(queryset.offset((page - 1) * limit).limit(limit))
+            queryset, q, fields = await cls.filter_fields(request, queryset, q)
+            queryset = queryset.offset((page - 1) * limit).limit(limit)
+            queryset = await queryset.prefetch_related(*model._meta.m2m_fields)
+            r = []
+            for i in queryset:
+                item = {}
+                for j in model._meta.m2m_fields:  # many to many
+                    item.update({j: [o.pk for o in await getattr(i, j,[])]})
+                for j in model._meta.o2o_fields:  # one to one
+                    print(await getattr(i, j))
+                    item.update({j: (await getattr(i, j)).pk})
+                for j in model._meta.backward_fk_fields:  # many to one
+                    item.update({j: [o.pk for o in await getattr(i, j,[])]})
+                for j in fields:
+                    item.update({j: getattr(i, j)})
+                r.append(item)
+            # queryset = await queryset.values(*fields)
+            # print(queryset)
+            # queryset = await cls.pydantic().from_queryset(queryset)
+            return r
         else:
             response.status_code = 400
             return {'detal': 'no page or limit'}
@@ -109,26 +143,37 @@ class Model(models_tortoise.Model):
         return queryset
 
     @classmethod
-    async def filter(cls, request: Request, queryset: QuerySet, query: QueryParams):
-        fields = queryset.model._meta.fields
-        print(fields)
-        if 'extra[]' in request.path_params.keys():  # TODO:获取额外字段
-            extra = request.path_params.getlist('extra[]')
+    async def filter_fields(cls, request: Request, queryset: QuerySet, query: dict):
+        fields = queryset.model._meta.db_native_fields + \
+            queryset.model._meta.db_default_fields + queryset.model._meta.db_complex_fields
+        fields = [i[0] for i in fields]
+        if 'extra[]' in request.query_params.keys():  # TODO:获取额外字段
+            extra = request.query_params.getlist('extra[]')
             for i in extra:
                 queryset = queryset.annotate(**{i: F(i)})
                 fields.append(i)
-        if 'values[]' in request.path_params.keys():  # TODO:选择字段
-            values = request.GET.getlist('values[]')
-            for i in values[:]:
+        if 'values[]' in request.query_params.keys():  # TODO:选择字段
+            values = request.query_params.getlist('values[]')
+            for i in values:
                 if i not in fields:
                     values.remove(i)
             fields = values
-        if 'defer[]' in request.path_params.keys():  # TODO:排除字段
-            for i in request.GET.getlist('defer[]'):
+        if 'defer[]' in request.query_params.keys():  # TODO:排除字段
+            for i in request.query_params.getlist('defer[]'):
                 if i in fields:
                     fields.remove(i)
+        if hasattr(queryset.model, 'PydanticMeta'):
+            if hasattr(queryset.model.PydanticMeta, 'exclude'):
+                for i in queryset.model.PydanticMeta.exclude:
+                    fields.remove(i)
+        if 'order' in request.query_params.keys():
+            order = request.query_params.getlist('order')
+            queryset = queryset.order_by(*order)
+        if 'sort' in request.query_params.keys():
+            order = request.query_params.getlist('sort')
+            queryset = queryset.order_by(*order)
         queryset = queryset.filter(**query)
-        return (queryset, query)
+        return queryset, query, fields
 
 
 class user(Model):
@@ -140,7 +185,7 @@ class user(Model):
 
     @classmethod
     async def create_obj(cls, request: Request, obj):
-        return {'detail': 'can create user faild'}
+        return {'detail': 'create user faild'}
 
     class PydanticMeta:
         exclude = ["password"]
@@ -149,19 +194,27 @@ class user(Model):
         table = "user"
         table_description = '用户'
 
+    async def set_password(self, password):
+        self.password = await login_cookie_jwt.encode_password(password)
+        await self.save()
+
+    async def check_password(self, password):
+        p = await login_cookie_jwt.encode_password(password)
+        return p == self.password
+
 
 class user_info(Model):
     icon = fields.CharField(max_length=200, null=True)
     birthday = fields.DateField(max_length=200, null=True)
     signature = fields.CharField(max_length=200, null=True)
-    user = fields.ForeignKeyField('models.user', related_name='user_info', null=True)
+    user = fields.OneToOneField('models.user', related_name='user_info', null=True)
     name = fields.CharField(max_length=200, null=True)
     gender = fields.CharField(max_length=200, null=True)
     email = fields.CharField(max_length=100, null=True)
     phone = fields.CharField(max_length=12, null=True)
-    follow_user = fields.ManyToManyField('models.user', related_name='follow_user', null=True)
-    article_like = fields.ManyToManyField('models.article', related_name='article_like', null=True)
-    article_collect = fields.ManyToManyField('models.article', related_name='article_collect', null=True)
+    follow_user = fields.ManyToManyField('models.user_info', related_name='followed_user', db_constraint=False, null=True)
+    article_like = fields.ManyToManyField('models.article', related_name='article_liked', null=True)
+    article_collect = fields.ManyToManyField('models.article', related_name='article_collected', null=True)
 
     class Meta:
         table = "user_info"
@@ -185,7 +238,7 @@ class role(Model):
     name = fields.CharField(max_length=20, unique=True)
     key = fields.CharField(max_length=20, unique=True)
     permission = fields.IntField(default=0)
-    interface = fields.ManyToManyField('models.interface')
+    interface = fields.ManyToManyField('models.interface', related_name='role', null=True)
 
     class Meta:
         table = "role"

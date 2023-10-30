@@ -2,7 +2,6 @@
 
 import uvicorn
 from fastapi import FastAPI, Request, Response
-from models_tortoise import user
 from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
 import login_cookie_jwt
@@ -27,10 +26,24 @@ for k, v in models_tortoise.__dict__.items():  # 注册所有路由
 
 register_tortoise(
     app,
-    db_url="sqlite://sqtortoisel.sql",
-    modules={"models": ["models_tortoise"]},
+    # db_url="sqlite://tortoise.sql",
+    # modules={"models": ["models_tortoise"]},
     generate_schemas=True,
     add_exception_handlers=True,
+    config={
+        'db_url': "sqlite://tortoise.sql",
+        'connections': {
+            'default': "sqlite://tortoise.sql",
+        },
+        'apps': {
+            'models': {
+                'models': ['models_tortoise'],
+                'default_connection': 'default',
+            }
+        },
+        'use_tz': True,
+        'timezone': 'Asia/Shanghai',
+    }
 )
 
 
