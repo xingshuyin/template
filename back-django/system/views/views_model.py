@@ -197,26 +197,26 @@ def special_filter(request: HttpRequest, queryset: QuerySet, filter_dict):
     if or_filter != None:
         queryset = queryset.filter(or_filter)
     if 'sort' in filter_dict.keys():
-        queryset = queryset.order_by(filter_dict['sort'])
+        queryset = queryset.order_by(*request.GET.getlist('sort'))
         del filter_dict['sort']
     if 'order' in filter_dict.keys():
-        queryset = queryset.order_by(filter_dict['order'])
+        queryset = queryset.order_by(*request.GET.getlist('order'))
         del filter_dict['order']
-    if 'parent_name' in filter_dict.keys():
-        queryset = queryset.filter(parent__name=filter_dict['parent_name'])
-        del filter_dict['parent_name']
-    if 'create_start' in filter_dict.keys():
-        queryset = queryset.filter(
-            create_time__gte=filter_dict['create_start'])
-        del filter_dict['create_start']
-    if 'create_end' in filter_dict.keys():
-        queryset = queryset.filter(create_time__lte=filter_dict['create_end'])
-        del filter_dict['create_end']
+    # if 'parent_name' in filter_dict.keys():
+    #     queryset = queryset.filter(parent__name=filter_dict['parent_name'])
+    #     del filter_dict['parent_name']
+    # if 'create_start' in filter_dict.keys():
+    #     queryset = queryset.filter(
+    #         create_time__gte=filter_dict['create_start'])
+    #     del filter_dict['create_start']
+    # if 'create_end' in filter_dict.keys():
+    #     queryset = queryset.filter(create_time__lte=filter_dict['create_end'])
+    #     del filter_dict['create_end']
 
-    for i in ['name', 'project', 'city', 'county', 'legal_person', 'leader', 'industry']:  # 所有字符串包含类型的过滤
-        if i in filter_dict.keys():
-            queryset = queryset.filter(**{i + '__contains': filter_dict[i]})
-            del filter_dict[i]
+    # for i in ['name', 'project', 'city', 'county', 'legal_person', 'leader', 'industry']:  # 所有字符串包含类型的过滤
+    #     if i in filter_dict.keys():
+    #         queryset = queryset.filter(**{i + '__contains': filter_dict[i]})
+    #         del filter_dict[i]
     return queryset, filter_dict
 
 

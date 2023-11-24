@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 
-pip install Django pymysql daphne  django-cors-headers drf-yasg djangorestframework-simplejwt openpyxl scrapy scrapy-splash scrapy-playwright requests user_agents pandas channels coreapi django-ratelimit uvicorn captcha graphic-verification-code
-
+pip install Django pymysql daphne  django-cors-headers drf-yasg djangorestframework-simplejwt openpyxl scrapy scrapy-splash  requests user_agents pandas channels coreapi django-ratelimit uvicorn captcha graphic-verification-code
+pip install minio
+pip install scrapy-playwright
 playwright install   安装playwright浏览器 linux
 playwright install chromium  只安装chromium默认chromium
 playwright install-deps   

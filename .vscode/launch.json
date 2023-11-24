@@ -8,7 +8,7 @@
       "name": "Django",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/back/manage.py",
+      "program": "${workspaceFolder}/back-django/manage.py",
       "args": ["runserver", "8000"],
       "django": true,
       "justMyCode": true
@@ -17,7 +17,7 @@
       "name": "makemigrations",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/back/manage.py",
+      "program": "${workspaceFolder}/back-django/manage.py",
       "args": ["makemigrations"],
       "django": true,
       "justMyCode": true
@@ -26,7 +26,7 @@
       "name": "migrate",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/back/manage.py",
+      "program": "${workspaceFolder}/back-django/manage.py",
       "args": ["migrate"],
       "django": true,
       "justMyCode": true
@@ -36,7 +36,7 @@
       "name": "collectstatic",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/back/manage.py",
+      "program": "${workspaceFolder}/back-django/manage.py",
       "args": ["collectstatic"],
       "django": true,
       "justMyCode": true

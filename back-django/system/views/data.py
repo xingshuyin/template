@@ -30,6 +30,7 @@ from random import randint
 from ..utils import METHOD_NAMES, METHOD_NAMES_DETAIL, METHOD_NUMS, ratelimit
 import system.urls as urls
 from django.db import transaction
+from minio import Minio
 
 
 def ranges():
@@ -79,6 +80,9 @@ def get_dept_permission(request, dept_id, permission):
         return request.data['custom_dept']
 
 
+client = Minio("121.195.222.198:9000", access_key="xingshuyin", secret_key="Zdjsrztx9#", secure=False)
+
+
 class Data(ViewSet):
     model_name = "数据"
     # 文件上传接口
@@ -93,6 +97,22 @@ class Data(ViewSet):
             return Response({'id': f.id, 'name': f.name, 'url': f.file.url})
         print(form)
         return Response({'detail': '格式验证失败', 'data': form.data}, 400)
+
+    @action(['post'], url_path='upload', url_name='文件上传', detail=False, permission_classes=[LoginPermisssion])
+    def upload_encrypt(self, request: Request):  # TODO:文件上传-上传接口
+        print(request.FILES['file'].name)  # 上传文件以file为key值
+        form = EncryptFileForm({'name': request.FILES['file'].name}, request.FILES)
+        if form.is_valid():
+            f = form.save()
+            return Response({'id': f.id, 'name': f.name})
+        print(form)
+        return Response({'detail': '格式验证失败', 'data': form.data}, 400)
+
+    @action(['post'], url_path='download', url_name='文件下载', detail=False, permission_classes=[LoginPermisssion])
+    def download_encrypt(self, request: Request):  # TODO:文件上传-上传接口
+        f = request.GET.get('file')
+        url = client.presigned_get_object("default", f)
+        return Response({'detail': 'success', 'file': url}, 200)
 
     # # 文件删除接口(已使用文件表删除)
     # @action(['post'], url_path='remove', url_name='remove', detail=False, permission_classes=[])
@@ -269,7 +289,7 @@ class Data(ViewSet):
     @action(['post'], url_path='signin', url_name='注册', detail=False, permission_classes=[], authentication_classes=[])
     def signin(self, request: Request):
         captcha = request.data.get("captcha")
-        if captcha and captcha.lower() == cache.get('captcha-' + request.META.get('REMOTE_ADDR')).lower():
+        if captcha and captcha.lower() == cache.get(hashlib.md5(('captcha-' + request.META.get('REMOTE_ADDR')).encode()).hexdigest()).lower():
             username = request.data.get("username")
             password = request.data.get("password")
             user_ = user.objects.filter(username=username).first()
@@ -291,6 +311,8 @@ class Data(ViewSet):
     @action(['get'], url_path='captcha', url_name='生成验证码', detail=False, permission_classes=[], authentication_classes=[])
     def captcha(self, request: Request):
         s, v = gvcode.generate()
+        key = hashlib.md5(('captcha-' + request.META.get('REMOTE_ADDR')).encode()).hexdigest()
+        cache.set(key, v, 60)
         output_buffer = BytesIO()
         s.save(output_buffer, format='JPEG')
         byte_data = output_buffer.getvalue()

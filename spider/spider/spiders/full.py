@@ -9,17 +9,8 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy_splash import SplashRequest
 from scrapy_splash.response import SplashTextResponse
+from fake_useragent import UserAgent
 
-image_rule = {
-    'name': 'taotuhome_dietutu',
-    'start_urls': 'https://taotuhome.com',  # 开始页(逗号分隔)
-    'allowed_domains': 'taotuhome.com',
-    'get_page': '//body',  # 分页链接提取区域xpath(必填)
-    'get_item': '//body',  # 内容链接提取区域xpath(必填)
-    'get_img': '//div[@class="single-content"]//img/@src',
-    're_page': 'https://taotuhome.com/category/.*?',  # 分页链接正则(必填)
-    're_item': 'https://taotuhome.com/\d+.html.*',  # 内容链接正则(必填)
-}
 
 
 job_rule = {
@@ -28,20 +19,12 @@ job_rule = {
     'allowed_domains': 'hebust.edu.cn',
     'get_page': '//body',  # 分页链接提取区域xpath(必填)
     'get_item': '//body',  # 内容链接提取区域xpath(必填)
+    'get_img': '//div[@class="single-content"]//img/@src', # 有了get_img就是纯图片抓取 contentrule无效
     'contentrule': {
-        # 'img': {'xpath':'//div[@class="single-content"]//img/@src', 're': ''},
+        # 'img': {'xpath':'//div[@class="single-content"]//img/@src', 're': ''}, # 获取文章的图片链接
         '标题': {'xpath': '//div[@class="title-message"]//h5/text()', 're': ""},
-        '文章': {'xpath': '//div[@class="info"]//text()', 're': ""},
-        '单位': {'xpath': '//div[@class="title-message"]//a/text()', 're': ""},
-        '单位性质': {'xpath': '//div[@class="details-list"]/ul[1]/li[1]/span//text()', 're': ""},
-        '单位行业': {'xpath': '//div[@class="details-list"]/ul[2]/li[1]/span//text()', 're': ""},
-        '单位规模': {'xpath': '//div[@class="details-list"]/ul[3]/li[1]/span//text()', 're': ""},
-        '宣讲时间': {'xpath': '//div[@class="details-list"]/ul[2]/li[1]/span//text()', 're': ""},
-        '举办地址': {'xpath': '//div[@class="details-list"]/ul[2]/li[2]/span//text()', 're': ""},
-        '宣讲学校': {'xpath': '//div[@class="details-list"]/ul[2]/li[3]/span//text()', 're': ""},
-        '宣讲类别': {'xpath': '//div[@class="details-list"]/ul[2]/li[4]/span//text()', 're': ""},
-        '简历投递邮箱': {'xpath': '//div[@class="details-list"]/ul[2]/li[5]/span//text()', 're': ""},
-        '招聘部门电话': {'xpath': '//div[@class="details-list"]/ul[2]/li[6]/span//text()', 're': ""},
+        '文章源码': {'xpath': '//div[@class="info"]//text()', 're': ""},
+        '文章内容': {'xpath': '//div[@class="info"]//*[name()!="script" and name()!="style"]/text()', 're': ""}, # 去掉scrpit/style标签
     },
     're_page': '.*?teachin/index.*',  # 分页链接正则(必填)
     're_item': '.*?teachin/view/id/\d+',  # 内容链接正则(必填)
@@ -50,8 +33,8 @@ args = {'wait': 2, 'lua_source': script}
 args_shot = {'wait': 0.5, 'lua_source': script_shot}
 
 output = r"/mnt/d/python/template/spider"
-
-
+ua = UserAgent()
+req = 'playwright'
 def get_all(response, xpath):
     try:
         return ''.join(response.xpath(xpath).getall())
@@ -86,12 +69,16 @@ class FullSpider(CrawlSpider):
     def start_requests(self):
         print('start_urls', self.start_urls)
         for url in self.start_urls:
-            # yield SplashRequest(url,
-            #                     endpoint='execute',
-            #                     args=args,
-            #                     dont_filter=True)
-            yield scrapy.Request(url, meta={"playwright": True}, dont_filter=True)
-
+            if req =='splash':
+                yield SplashRequest(url,
+                                    endpoint='execute',
+                                    args=args,
+                                    dont_filter=True)
+            elif req== 'playwright':
+                yield scrapy.Request(url, headers={"User-agent": ua.random}, meta={"playwright": True}, dont_filter=True)
+            else:
+                yield scrapy.Request(url, headers={"User-agent": ua.random}, dont_filter=True)
+                
     def process_page(self, request, response):
         # request.priority = 1  # 设置请求权重
         return request
@@ -121,16 +108,19 @@ class FullSpider(CrawlSpider):
 
     def _build_request(self, rule_index, link):
         print(link.url)
-        return scrapy.Request(link.url, callback=self._callback, errback=self._errback, meta=dict(rule=rule_index, link_text=link.text, playwright=True), dont_filter=True)
-        # return SplashRequest(
-        #     url=link.url,
-        #     callback=self._callback,
-        #     errback=self._errback,
-        #     meta=dict(rule=rule_index, link_text=link.text),
-        #     endpoint='execute',
-        #     args=args,
-        #     dont_filter=True)
-
+        if req =='splash':
+            return SplashRequest(
+                url=link.url,
+                callback=self._callback,
+                errback=self._errback,
+                meta=dict(rule=rule_index, link_text=link.text),
+                endpoint='execute',
+                args=args,
+                dont_filter=True)
+        elif req== 'playwright':
+            return scrapy.Request(link.url, headers={"User-agent": ua.random}, callback=self._callback, errback=self._errback, meta=dict(rule=rule_index, link_text=link.text, playwright=True), dont_filter=True)
+        else:
+            return scrapy.Request(link.url, headers={"User-agent": ua.random}, callback=self._callback, errback=self._errback, meta=dict(rule=rule_index, link_text=link.text), dont_filter=True)
     def parse_item(self, response):
         if 'get_img' in self.rule.keys():
             imgs = response.xpath(self.rule['get_img']).getall()

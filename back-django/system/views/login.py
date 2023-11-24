@@ -109,7 +109,7 @@ class MyTokenObtainSerializer(TokenObtainSerializer):
         request.user = self.user
         if 'captcha' in attrs.keys():
             if cache.get('captcha-' + request.META.get('REMOTE_ADDR')):
-                if attrs['captcha'] and attrs['captcha'].lower() != cache.get('captcha-' + request.META.get('REMOTE_ADDR')).lower():
+                if attrs['captcha'] and attrs['captcha'].lower() != cache.get(hashlib.md5(('captcha-' + request.META.get('REMOTE_ADDR')).encode()).hexdigest()).lower():
                     raise exceptions.AuthenticationFailed('验证码错误')
             else:
                 raise exceptions.AuthenticationFailed('验证码已失效')

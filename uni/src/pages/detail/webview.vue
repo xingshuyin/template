@@ -3,9 +3,10 @@
         <!-- #ifdef MP-WEIXIN -->
         <u-navbar back-text="返回"></u-navbar>
         <!-- #endif -->
-        <web-view :src="'https://blog.csdn.net/allway2/article/details/116568687'" :fullscreen="false" :webview-styles="{
+        <web-view :src="attrs.url" :fullscreen="false" :webview-styles="{
             width: '100%',
-            height: '100%',
+            height: '710',
+            top: '70'
         }"></web-view>
     </view>
 </template>
@@ -16,7 +17,11 @@ const attrs = reactive({
     url: null
 });
 onLoad((option) => {
-    attrs.url = option.url;
+    if (option.url != null) {
+        attrs.url = option.url;
+    } else {
+        attrs.url = 'https://www.baidu.com';
+    }
 })
 </script>
 <style scoped lang='scss'></style>

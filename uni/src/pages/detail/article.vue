@@ -5,20 +5,15 @@
             <!-- 这里是状态栏 -->
         </view>
         <u-navbar back-text="返回" :title="attrs?.item?.name"></u-navbar>
-        <!-- #endif -->
-        <!-- #ifdef MP-WEIXIN -->
-        <u-navbar back-text="返回" :title="attrs?.item?.name"></u-navbar>
-        <!-- #endif -->
-
         <view class="article" v-if="attrs.item != null">
             <view>
                 <text class="article-title">
-                    {{ attrs?.item[props.name] }}
+                    {{ attrs?.item[name] }}
                 </text>
             </view>
             <view class="article-detail">
                 <view class="article-user_name">
-                    {{ attrs?.item[props.source] }} {{ attrs?.item[props.create_time].slice(0, 10) }}
+                    {{ attrs?.item[source] }} {{ attrs?.item[create_time].slice(0, 10) }}
                 </view>
             </view>
             <div class="right-video" v-if="attrs?.item?.type == 2">
@@ -28,9 +23,9 @@
                 <t-imagewall :data="attrs?.item?.image"></t-imagewall>
             </div>
             <!-- <rich-text v-if="!!attrs.item" :nodes="attrs.item.content"></rich-text> -->
-            <view class="article-body" v-html="attrs?.item[props.content]"></view>
+            <view class="article-body" v-html="attrs?.item[content]"></view>
             <u-gap height="20"></u-gap>
-            <view class="read-source" @click="navigate(`/pages/detail/webview?url=${attrs?.item[props.url]}`)">阅读原文</view>
+            <view class="read-source" @click="navigate(`/pages/detail/webview?url=${attrs?.item[url]}`)">阅读原文</view>
             <view class="article-comment">
                 <text style="font-size: large;font-weight: 800;">评论</text>
                 <CommentTree :data="attrs.comments"></CommentTree>
@@ -39,11 +34,11 @@
         <view class="buttons" v-if="attrs.item != null">
             <u-icon class="buttons-comment" name="eye" color="black" size="38">
             </u-icon>
-            {{ attrs?.item[props.view] }}
+            {{ attrs?.item[view] }}
             <u-icon class="buttons-comment" name="chat" color="black" size="47"
                 @click="attrs.comment_root = true; attrs.comment_show = true;">
             </u-icon>
-            {{ attrs?.item[props.comment] }}
+            {{ attrs?.item[comment] }}
             <u-icon class="buttons-comment" v-if="store().is_login && attrs.liked" name="thumb-up-fill" color="black"
                 size="47" @click="like()">
             </u-icon>
@@ -52,7 +47,7 @@
             </u-icon>
             <u-icon class="buttons-comment" v-else name="thumb-up" color="black" size="47" @click="like()">
             </u-icon>
-            {{ attrs?.item[props.like] }}
+            {{ attrs?.item[like] }}
             <u-icon class="buttons-comment" v-if="store().is_login && attrs.collected" name="star-fill" color="black"
                 size="47" @click="collect()">
             </u-icon>
@@ -61,12 +56,76 @@
             </u-icon>
             <u-icon class="buttons-comment" v-else name="star" color="black" size="47" @click="collect()">
             </u-icon>
-            {{ attrs?.item[props.collect] }}
+            {{ attrs?.item[collect] }}
             <u-icon class="buttons-comment" name="share" color="black" size="47" @click="share.open()">
             </u-icon>
         </view>
-        <canvas ref="poster" canvas-id="poster" class="poster" />
-        <canvas ref="qrcode" canvas-id="qrcode" class="qrcode" />
+        <!-- #endif -->
+
+
+
+        <!-- #ifdef MP-WEIXIN -->
+        <u-navbar back-text="返回" :title="attrs?.item?.name"></u-navbar>
+        <view class="article" v-if="attrs.item != null">
+            <view>
+                <text class="article-title">
+                    {{ attrs?.item.name }}
+                </text>
+            </view>
+            <view class="article-detail">
+                <view class="article-user_name">
+                    {{ attrs?.item.source }} {{ attrs?.item.create_time.slice(0, 10) }}
+                </view>
+            </view>
+            <div class="right-video" v-if="attrs?.item?.type == 2">
+                <t-video v-for="v, index in attrs?.item?.video" :data="v" :key="index"></t-video>
+            </div>
+            <div class="right-image" v-else-if="attrs?.item?.type == 1">
+                <t-imagewall :data="attrs?.item?.image"></t-imagewall>
+            </div>
+            <!-- <rich-text v-if="!!attrs.item" :nodes="attrs.item.content"></rich-text> -->
+            <view class="article-body" v-html="attrs?.item.content"></view>
+            <u-gap height="20"></u-gap>
+            <view class="read-source" @click="navigate(`/pages/detail/webview?url=${attrs?.item.url}`)">阅读原文</view>
+            <view class="article-comment">
+                <text style="font-size: large;font-weight: 800;">评论</text>
+                <CommentTree :data="attrs.comments"></CommentTree>
+            </view>
+        </view>
+        <view class="buttons" v-if="attrs.item != null">
+            <u-icon class="buttons-comment" name="eye" color="black" size="38">
+            </u-icon>
+            {{ attrs?.item.view }}
+            <u-icon class="buttons-comment" name="chat" color="black" size="47"
+                @click="attrs.comment_root = true; attrs.comment_show = true;">
+            </u-icon>
+            {{ attrs?.item.comment }}
+            <u-icon class="buttons-comment" v-if="store().is_login && attrs.liked" name="thumb-up-fill" color="black"
+                size="47" @click="like()">
+            </u-icon>
+            <u-icon class="buttons-comment" v-else-if="store().is_login && !attrs.liked" name="thumb-up" color="black"
+                size="47" @click="like()">
+            </u-icon>
+            <u-icon class="buttons-comment" v-else name="thumb-up" color="black" size="47" @click="like()">
+            </u-icon>
+            {{ attrs?.item.like }}
+            <u-icon class="buttons-comment" v-if="store().is_login && attrs.collected" name="star-fill" color="black"
+                size="47" @click="collect()">
+            </u-icon>
+            <u-icon class="buttons-comment" v-else-if="store().is_login && !attrs.collected" name="star" color="black"
+                size="47" @click="collect()">
+            </u-icon>
+            <u-icon class="buttons-comment" v-else name="star" color="black" size="47" @click="collect()">
+            </u-icon>
+            {{ attrs?.item.collect }}
+            <u-icon class="buttons-comment" name="share" color="black" size="47" @click="share.open()">
+            </u-icon>
+        </view>
+        <!-- #endif -->
+
+
+        <!-- <canvas ref="poster" canvas-id="poster" class="poster" />
+        <canvas ref="qrcode" canvas-id="qrcode" class="qrcode" /> -->
         <u-popup v-model="attrs.comment_show" mode="bottom" border-radius="24">
             <view class="comment">
                 <view class="comment-body">
@@ -77,11 +136,9 @@
                 </view>
             </view>
         </u-popup>
-        <u-mask :show="attrs.img_view" @click="attrs.img_view = false">
+        <!-- <u-mask :show="attrs.img_view" @click="attrs.img_view = false">
             <u-image width="100%" height="100%" :src="attrs.img_view_url" mode="aspectFit"></u-image>
-        </u-mask>
-        <FatFatMeng-PopupShare ref="share" :SharelistConfing="SharelistConfing" @changeShare="changeShareTap">
-        </FatFatMeng-PopupShare>
+        </u-mask> -->
     </view>
 </template>
 <script setup>
@@ -183,9 +240,17 @@ onLoad((option) => {
     attrs.comment.media_id = attrs.article_id
     attrs.comment.media_type = "article"
     rest.get('article', option.id, attrs, null, (res) => {
-        attrs.item.content = attrs.item.content.replace(/<img(.*?)(sytle="(.*?)")?(.*?)>/g, '<img$1 width="320" $4 style="width:100%">');
-        attrs.item.content = attrs.item.content.replace(/<img(.*?)(sytle="(.*?)")?(.*?)>/g, '<img$1 width="320" $4 style="width:100%">');
+        // #ifdef MP-WEIXIN
+        attrs.item.content = attrs.item.content.replace(/<img(.*?)(sytle="(.*?)")?(.*?)>/g, '<img$1  $4  style="max-width:90vw">');
+        attrs.item.content = attrs.item.content.replace(/<img(.*?)(sytle="(.*?)")?(.*?)>/g, '<img$1  $4  style="max-width:90vw">');
+        attrs.item.content = attrs.item.content.replace(/<table(.*?)(sytle="(.*?)")?(.*?)>/g, '<table$1 width="320" $4 style="max-width:90vw;$3">');
+        // #endif
+
+        // #ifdef APP-PLUS
+        attrs.item.content = attrs.item.content.replace(/<img(.*?)(sytle="(.*?)")?(.*?)>/g, '<img$1 width="300" height="auto" $4 style="width:100%">');
+        attrs.item.content = attrs.item.content.replace(/<img(.*?)(sytle="(.*?)")?(.*?)>/g, '<img$1 width="300" height="auto" $4 style="width:100%">');
         attrs.item.content = attrs.item.content.replace(/<table(.*?)(sytle="(.*?)")?(.*?)>/g, '<table$1 width="320" $4 style="width:100%;$3">');
+        // #endif
     })
     get_comment_()
     view()

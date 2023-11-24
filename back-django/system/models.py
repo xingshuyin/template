@@ -7,6 +7,7 @@ from typing import Any, Dict, Tuple
 import uuid
 from attr import fields
 from django.apps import apps
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db.models.fields import DateTimeField
@@ -15,11 +16,13 @@ from itertools import chain
 from django.forms import ModelForm
 import datetime
 import time
-from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import FileSystemStorage, Storage
 from root.settings import BASE_DIR
 from django.utils._os import safe_join
 from django.utils.encoding import filepath_to_uri
 from urllib.parse import urljoin
+from minio import Minio
+from io import BytesIO
 
 
 class base_model(models.Model):
@@ -107,12 +110,117 @@ class storage(FileSystemStorage):
             pass
 
 
-fs = storage()
+def make_single_file_name(instance, filename):
+    return f"_{str(time.time())+'_'+filename}"
 
+
+class minio_storage(Storage):
+
+    def __init__(self, bucket_name='media', endpoint='121.195.222.198:9000', access_key='xingshuyin', secret_key='Zdjsrztx9#', secure=False):
+        self.bucket_name = bucket_name
+        self.endpoint = endpoint.strip('/').replace('https://', '').replace('http://', '')
+        self.access_key = access_key
+        self.secret_key = secret_key
+        self.secure = secure
+        self.client = Minio(self.endpoint,
+                            access_key=self.access_key,
+                            secret_key=self.secret_key,
+                            secure=self.secure)
+
+    def _save(self, name, content):
+        ext = name.split('.')[-1]
+        if ext in ['jpg', 'png', 'jpeg']:
+            content_type = 'image/' + ext
+        elif ext in ['mp4', 'avi', 'mov']:
+            content_type = 'video/' + ext
+        elif ext in ['mp3', 'wav', 'ogg']:
+            content_type = 'audio/' + ext
+        elif ext in ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']:
+            content_type = 'application/' + ext
+        else:
+            content_type = 'application/octet-stream'
+        r = self.client.put_object(self.bucket_name, name, content.file, content.size, content_type=content_type)
+        # print(r.etag, r.last_modified, r.location, r.object_name, r.version_id)
+        return f"http{'s' if self.secure else ''}://{self.endpoint}/{self.bucket_name}/{r.object_name}"
+
+    def url(self, name):
+        return name
+        return f"http{'s' if self.secure else ''}://{self.endpoint}/{self.bucket_name}/{name}"
+        # url = self.client.presigned_get_object(self.bucket_name, name)
+        # print('get url ----------------', url)
+        # return url
+
+    def delete(self, name):
+        self.client.remove_object(self.bucket_name, name)
+
+    def exists(self, name):
+        # print('------------', name)
+        try:
+            r = self.client.stat_object(self.bucket_name, name)
+            return True
+        except:
+            return False
+# [{"id": 20, "uid": 1698753084411, "url": "http://121.195.222.198:9000/media/_1698753084.1682642_head_bg.png", "name": "head_bg.png", "status": "success"}]
+
+
+class minio_encrypt_storage(Storage):
+
+    def __init__(self, bucket_name='smart-edu', endpoint='121.195.222.198:9000', access_key='xingshuyin', secret_key='Zdjsrztx9#', secure=False):
+        self.bucket_name = bucket_name
+        self.endpoint = endpoint.strip('/').replace('https://', '').replace('http://', '')
+        self.access_key = access_key
+        self.secret_key = secret_key
+        self.secure = secure
+
+        self.client = Minio(self.endpoint,
+                            access_key=self.access_key,
+                            secret_key=self.secret_key,
+                            secure=self.secure)
+        found = self.client.bucket_exists(self.bucket_name)
+        if not found:
+            self.client.make_bucket(self.bucket_name)  # 创建bucket
+
+    def _save(self, name, content):
+        ext = name.split('.')[-1]
+        if ext in ['jpg', 'png', 'jpeg']:
+            content_type = 'image/' + ext
+        elif ext in ['mp4', 'avi', 'mov']:
+            content_type = 'video/' + ext
+        elif ext in ['mp3', 'wav', 'ogg']:
+            content_type = 'audio/' + ext
+        elif ext in ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']:
+            content_type = 'application/' + ext
+        else:
+            content_type = 'application/octet-stream'
+        r = self.client.put_object(self.bucket_name, name, content.file, content.size, content_type=content_type)
+        # print(r.etag, r.last_modified, r.location, r.object_name, r.version_id)
+        return r.object_name
+
+    def url(self, name):
+        url = self.client.presigned_get_object(self.bucket_name, name, expires=datetime.timedelta(days=1))
+        # print('get url ----------------', url)
+        return url
+
+    def delete(self, name):
+        self.client.remove_object(self.bucket_name, name)
+
+    def exists(self, name):
+        # print('------------', name)
+        try:
+            r = self.client.stat_object(self.bucket_name, name)
+            return True
+        except:
+            return False
+
+
+fs = minio_storage()
+fs_encrypt = minio_encrypt_storage()
 
 # TODO:文件上传-模型/表单
+
+
 class file(base_model):
-    file = models.FileField(upload_to=make_file_name, max_length=200, storage=fs)
+    file = models.FileField(upload_to=make_single_file_name, max_length=200, storage=fs)
     name = models.CharField(max_length=100)
 
     def delete(self, using: Any = ..., keep_parents: bool = ...) -> Tuple[int, Dict[str, int]]:
@@ -126,10 +234,32 @@ class file(base_model):
         db_table_comment = verbose_name
 
 
+class encrypt_file(base_model):
+    file = models.FileField(upload_to=make_single_file_name, max_length=200, storage=fs_encrypt)
+    name = models.CharField(max_length=100)
+
+    def delete(self, using: Any = ..., keep_parents: bool = ...) -> Tuple[int, Dict[str, int]]:
+        print('file delete', self.file)
+        self.file.delete()
+        return super().delete()
+
+    class Meta:
+        db_table = "encrypt_file"
+        verbose_name = "文件"
+        db_table_comment = verbose_name
+
+
 class FileForm(ModelForm):
 
     class Meta:
         model = file
+        fields = '__all__'
+
+
+class EncryptFileForm(ModelForm):
+
+    class Meta:
+        model = encrypt_file
         fields = '__all__'
 
 
